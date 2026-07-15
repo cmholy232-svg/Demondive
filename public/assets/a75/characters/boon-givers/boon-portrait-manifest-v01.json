@@ -1,0 +1,306 @@
+{
+  "version": 1,
+  "sourceLock": "DemonDive A5 roster sheets",
+  "portraits": [
+    {
+      "id": "pyrra",
+      "sheet": "early",
+      "crop": [
+        0,
+        0,
+        167,
+        495
+      ],
+      "source": "source-assets/a75/characters/boon-givers/CHR_PYRRA_Portrait_v01_source.png",
+      "runtime": "public/assets/a75/characters/boon-givers/chr-pyrra-portrait-v01.png",
+      "status": "integrated-correction-pending",
+      "humanApproved": false,
+      "sha256": "cecd9c7af4335048c8087de5cc2bbc90af51ae277bb4dee688f04cbb662e2214"
+    },
+    {
+      "id": "maris",
+      "sheet": "early",
+      "crop": [
+        167,
+        0,
+        355,
+        495
+      ],
+      "source": "source-assets/a75/characters/boon-givers/CHR_MARIS_Portrait_v01_source.png",
+      "runtime": "public/assets/a75/characters/boon-givers/chr-maris-portrait-v01.png",
+      "status": "integrated-correction-pending",
+      "humanApproved": false,
+      "sha256": "79939ee2586e9874f1620f820042cfe326b9dc85ffb1e569387af8627adebe48"
+    },
+    {
+      "id": "gaia",
+      "sheet": "early",
+      "crop": [
+        355,
+        0,
+        565,
+        495
+      ],
+      "source": "source-assets/a75/characters/boon-givers/CHR_GAIA_Portrait_v01_source.png",
+      "runtime": "public/assets/a75/characters/boon-givers/chr-gaia-portrait-v01.png",
+      "status": "integrated-correction-pending",
+      "humanApproved": false,
+      "sha256": "28eb746199706ec27f9b27800960cdd12502c0a5aa53872f292c0926f4ba549d"
+    },
+    {
+      "id": "zephyra",
+      "sheet": "early",
+      "crop": [
+        565,
+        0,
+        745,
+        495
+      ],
+      "source": "source-assets/a75/characters/boon-givers/CHR_ZEPHYRA_Portrait_v01_source.png",
+      "runtime": "public/assets/a75/characters/boon-givers/chr-zephyra-portrait-v01.png",
+      "status": "integrated-correction-pending",
+      "humanApproved": false,
+      "sha256": "9ef104b6c6dd9a085e5e9d5692640130042adaf6097419c617596c1833bfd77c"
+    },
+    {
+      "id": "flora",
+      "sheet": "early",
+      "crop": [
+        745,
+        0,
+        892,
+        495
+      ],
+      "source": "source-assets/a75/characters/boon-givers/CHR_FLORA_Portrait_v01_source.png",
+      "runtime": "public/assets/a75/characters/boon-givers/chr-flora-portrait-v01.png",
+      "status": "integrated-correction-pending",
+      "humanApproved": false,
+      "sha256": "c3c340b378697dfafee806c5d04bd2f7e19acd79df3b4402af7eedff3c35f182"
+    },
+    {
+      "id": "voltara",
+      "sheet": "early",
+      "crop": [
+        892,
+        0,
+        1038,
+        495
+      ],
+      "source": "source-assets/a75/characters/boon-givers/CHR_VOLTARA_Portrait_v01_source.png",
+      "runtime": "public/assets/a75/characters/boon-givers/chr-voltara-portrait-v01.png",
+      "status": "integrated-correction-pending",
+      "humanApproved": false,
+      "sha256": "48a265874fd95b89900f7b25b0ffefd307437b79a862420c747582bc9a263e80"
+    },
+    {
+      "id": "crya",
+      "sheet": "early",
+      "crop": [
+        1060,
+        0,
+        1175,
+        495
+      ],
+      "source": "source-assets/a75/characters/boon-givers/CHR_CRYA_Portrait_v01_source.png",
+      "runtime": "public/assets/a75/characters/boon-givers/chr-crya-portrait-v01.png",
+      "status": "integrated-correction-pending",
+      "humanApproved": false,
+      "sha256": "29d5c8d423295dc253e30dca12db73091d622adbe34f764454da74a00360ef24"
+    },
+    {
+      "id": "luna",
+      "sheet": "early",
+      "crop": [
+        1175,
+        0,
+        1315,
+        495
+      ],
+      "source": "source-assets/a75/characters/boon-givers/CHR_LUNA_Portrait_v01_source.png",
+      "runtime": "public/assets/a75/characters/boon-givers/chr-luna-portrait-v01.png",
+      "status": "integrated-correction-pending",
+      "humanApproved": false,
+      "sha256": "04ffc4899bb83664828c415824f46363064ab1d0b1dff92b09bbe37488efc59e"
+    },
+    {
+      "id": "solara",
+      "sheet": "early",
+      "crop": [
+        1315,
+        0,
+        1470,
+        495
+      ],
+      "source": "source-assets/a75/characters/boon-givers/CHR_SOLARA_Portrait_v01_source.png",
+      "runtime": "public/assets/a75/characters/boon-givers/chr-solara-portrait-v01.png",
+      "status": "integrated-correction-pending",
+      "humanApproved": false,
+      "sha256": "6950b19c7572e2dce0ec019d8b2114d3566c0cb816260e953033af06657307cf"
+    },
+    {
+      "id": "belladonna",
+      "sheet": "early",
+      "crop": [
+        1470,
+        0,
+        1672,
+        495
+      ],
+      "source": "source-assets/a75/characters/boon-givers/CHR_BELLADONNA_Portrait_v01_source.png",
+      "runtime": "public/assets/a75/characters/boon-givers/chr-belladonna-portrait-v01.png",
+      "status": "integrated-correction-pending",
+      "humanApproved": false,
+      "sha256": "9de59594a8b803fab6c2820a63db00cc92ea8cdf524e605174defd1ba025bce9"
+    },
+    {
+      "id": "nerissa",
+      "sheet": "late",
+      "crop": [
+        0,
+        0,
+        169,
+        525
+      ],
+      "source": "source-assets/a75/characters/boon-givers/CHR_NERISSA_Portrait_v01_source.png",
+      "runtime": "public/assets/a75/characters/boon-givers/chr-nerissa-portrait-v01.png",
+      "status": "integrated-correction-pending",
+      "humanApproved": false,
+      "sha256": "051ea432e03bc49faf478cdaf930310e3afdc6db87ff149a6616b9d44e9f129b"
+    },
+    {
+      "id": "roxyne",
+      "sheet": "late",
+      "crop": [
+        169,
+        0,
+        315,
+        525
+      ],
+      "source": "source-assets/a75/characters/boon-givers/CHR_ROXYNE_Portrait_v01_source.png",
+      "runtime": "public/assets/a75/characters/boon-givers/chr-roxyne-portrait-v01.png",
+      "status": "integrated-correction-pending",
+      "humanApproved": false,
+      "sha256": "3cce556e3c679b84574a647f02790bbc70dd10a0b949e573999e9561ddca303d"
+    },
+    {
+      "id": "calyptra",
+      "sheet": "late",
+      "crop": [
+        365,
+        0,
+        460,
+        525
+      ],
+      "source": "source-assets/a75/characters/boon-givers/CHR_CALYPTRA_Portrait_v01_source.png",
+      "runtime": "public/assets/a75/characters/boon-givers/chr-calyptra-portrait-v01.png",
+      "status": "integrated-correction-pending",
+      "humanApproved": false,
+      "sha256": "3b93f2c698bfec9e22649e08c670e85be220bc61d4bf961f74519daa0b5d607e"
+    },
+    {
+      "id": "isolde",
+      "sheet": "late",
+      "crop": [
+        460,
+        0,
+        610,
+        525
+      ],
+      "source": "source-assets/a75/characters/boon-givers/CHR_ISOLDE_Portrait_v01_source.png",
+      "runtime": "public/assets/a75/characters/boon-givers/chr-isolde-portrait-v01.png",
+      "status": "integrated-correction-pending",
+      "humanApproved": false,
+      "sha256": "9d2cb0747b4391bc7b9de2a1940e5465f40f2e93a74098d98bc50ece7cef16c2"
+    },
+    {
+      "id": "somnia",
+      "sheet": "late",
+      "crop": [
+        650,
+        0,
+        760,
+        525
+      ],
+      "source": "source-assets/a75/characters/boon-givers/CHR_SOMNIA_Portrait_v01_source.png",
+      "runtime": "public/assets/a75/characters/boon-givers/chr-somnia-portrait-v01.png",
+      "status": "integrated-correction-pending",
+      "humanApproved": false,
+      "sha256": "5e462fae6fa59f9e3b0ba578e0d91f6ff8439102652c806e73e9a52f0bd68538"
+    },
+    {
+      "id": "vespera",
+      "sheet": "late",
+      "crop": [
+        815,
+        0,
+        910,
+        525
+      ],
+      "source": "source-assets/a75/characters/boon-givers/CHR_VESPERA_Portrait_v01_source.png",
+      "runtime": "public/assets/a75/characters/boon-givers/chr-vespera-portrait-v01.png",
+      "status": "integrated-correction-pending",
+      "humanApproved": false,
+      "sha256": "6bacdd45a380ea89f5fc2042a56e72c9882b75524ad533b51258d0624db61adb"
+    },
+    {
+      "id": "aurelia",
+      "sheet": "late",
+      "crop": [
+        910,
+        0,
+        1057,
+        525
+      ],
+      "source": "source-assets/a75/characters/boon-givers/CHR_AURELIA_Portrait_v01_source.png",
+      "runtime": "public/assets/a75/characters/boon-givers/chr-aurelia-portrait-v01.png",
+      "status": "integrated-correction-pending",
+      "humanApproved": false,
+      "sha256": "a720babe0688e091ffb36b1de7b53a87403cc9234f6224adfe83238c4ca2fff2"
+    },
+    {
+      "id": "noctissa",
+      "sheet": "late",
+      "crop": [
+        1100,
+        0,
+        1200,
+        525
+      ],
+      "source": "source-assets/a75/characters/boon-givers/CHR_NOCTISSA_Portrait_v01_source.png",
+      "runtime": "public/assets/a75/characters/boon-givers/chr-noctissa-portrait-v01.png",
+      "status": "integrated-correction-pending",
+      "humanApproved": false,
+      "sha256": "0a606d7f673dfcd605d82916a3dca6592eea79d4d473b361cc895ee1217318d8"
+    },
+    {
+      "id": "lilith",
+      "sheet": "late",
+      "crop": [
+        1200,
+        0,
+        1350,
+        525
+      ],
+      "source": "source-assets/a75/characters/boon-givers/CHR_LILITH_Portrait_v01_source.png",
+      "runtime": "public/assets/a75/characters/boon-givers/chr-lilith-portrait-v01.png",
+      "status": "integrated-correction-pending",
+      "humanApproved": false,
+      "sha256": "b6862858039e1a901c283025c6e2776c0ab2e8b0b42bfd364249091ec19f860a"
+    },
+    {
+      "id": "seraphine",
+      "sheet": "late",
+      "crop": [
+        1380,
+        0,
+        1536,
+        525
+      ],
+      "source": "source-assets/a75/characters/boon-givers/CHR_SERAPHINE_Portrait_v01_source.png",
+      "runtime": "public/assets/a75/characters/boon-givers/chr-seraphine-portrait-v01.png",
+      "status": "integrated-correction-pending",
+      "humanApproved": false,
+      "sha256": "dfb310b61dbc6897428f90c1997bcd6253c4b8b5f193836596de99ce0dbba401"
+    }
+  ]
+}

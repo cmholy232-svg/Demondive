@@ -1,0 +1,88 @@
+{
+  "schemaVersion": 1,
+  "batchId": "alpha7.5-asset-batch-01",
+  "roadmapPosition": "Alpha 7.5 — Art Direction, Asset Completion, Room Cleanup, Boon Visual Identities, Animation-Source Preparation",
+  "createdUtc": "2026-07-15T00:00:00Z",
+  "sourceBaseline": {
+    "workspace": "DemonDive Alpha 7 Level 3 continuation source",
+    "purpose": "asset-production scaffold only",
+    "authoritativePlayable": "DemonDive Alpha 7.4A verified playable in ChatGPT Library",
+    "authoritativeSourceLibraryId": "libfile_4d5afaaabb6881919f1c2a660e58c2ae",
+    "authoritativeSourceSha256": "fe7dca1034df75ca893635378766d1707b017628f6c0d5f5f7f6ea5c07b9c870",
+    "integrationState": "pending-authoritative-source-materialization",
+    "warning": "Do not replace the Alpha 7.4A source tree with this scaffold. Overlay only the listed Alpha 7.5 assets and mappings after restoring the authoritative source."
+  },
+  "approval": {
+    "humanApproved": false,
+    "status": "integrated-correction-pending",
+    "playableRelease": false
+  },
+  "packages": [
+    {
+      "id": "boon-portraits-v01",
+      "count": 20,
+      "manifest": "public/assets/a75/characters/boon-givers/boon-portrait-manifest-v01.json",
+      "qaSheet": "source-assets/a75/characters/boon-givers/QA_BoonPortraits_ContactSheet_v05.png",
+      "runtimeFormat": "PNG 384x512 transparent",
+      "status": "integrated-correction-pending",
+      "humanApproved": false,
+      "currentUse": "ten missing late-game portrait fallbacks mapped in the scaffold; existing stronger Level 1–3 portraits remain protected",
+      "remainingCorrection": [
+        "normalize bust framing and apparent scale",
+        "paint out roster-sheet crop artifacts",
+        "review Calyptra and other narrow late-roster crops",
+        "human identity and costume-continuity approval"
+      ]
+    },
+    {
+      "id": "level4-9-environment-plates-v01",
+      "count": 6,
+      "manifest": "public/assets/a75/environment/environment-manifest-v01.json",
+      "qaSheet": "source-assets/a75/environment/QA_Environments_ContactSheet_v01.png",
+      "runtimeFormat": "dependency-free SVG, viewBox 0 0 1672 941",
+      "status": "integrated-correction-pending",
+      "humanApproved": false,
+      "currentUse": "biome-specific low-noise background foundations for Levels 4–9",
+      "remainingCorrection": [
+        "final paint-over or controlled stylization to match approved raster biomes",
+        "room-specific middle-ground and prop layers",
+        "gameplay contrast review with enemies, hazards, rewards and high-stack VFX",
+        "human biome-cohesion approval"
+      ]
+    },
+    {
+      "id": "boon-sigils-v01",
+      "count": 20,
+      "manifest": "public/assets/a75/ui/boon-sigils/boon-sigil-manifest-v01.json",
+      "qaSheet": "source-assets/a75/ui/boon-sigils/QA_BoonSigils_ContactSheet_v01.png",
+      "runtimeFormat": "dependency-free SVG, viewBox 0 0 128 128",
+      "status": "integrated-correction-pending",
+      "humanApproved": false,
+      "currentUse": "compact boon identity layer for HUD, reward cards and stack presentation",
+      "remainingCorrection": [
+        "in-game 24px, 32px and mobile-size readability tests",
+        "five-second identity test with representative players",
+        "color-blind differentiation review",
+        "human identity approval"
+      ]
+    }
+  ],
+  "completedInBatch": [
+    "twenty normalized transparent boon portrait sources and runtime files",
+    "six distinct low-density Level 4–9 biome plates",
+    "twenty distinct dependency-free boon sigils",
+    "reproducible build scripts and automated manifest/file validation",
+    "visual QA contact sheets for every package",
+    "non-destructive integration map for the authoritative Alpha 7.4A source"
+  ],
+  "notCompleted": [
+    "authoritative Alpha 7.4A source overlay and playable integration",
+    "final human approval of any asset",
+    "Level 4–9 enemy, mini-boss and boss production packages",
+    "Milo final animation-source package",
+    "final platforms, hazards, props, foregrounds and room cleanup",
+    "boon projectile, impact, status, Special and passive sensory-source packages",
+    "final HUD, menu, tutorial, story, ending, credits and marketing sources",
+    "Alpha 7.5 phase completion"
+  ]
+}

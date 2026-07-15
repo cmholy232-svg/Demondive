@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "batchId": "alpha7.5-asset-batch-03",
+  "roadmapPosition": "Alpha 7.5 — HUD hierarchy, production audit and animation-source gate",
+  "sourceBaseline": {
+    "authoritativePlayable": "DemonDive Alpha 7.4A verified playable record",
+    "authoritativeSourceLibraryId": "libfile_4d5afaaabb6881919f1c2a660e58c2ae",
+    "authoritativeSourceSha256": "fe7dca1034df75ca893635378766d1707b017628f6c0d5f5f7f6ea5c07b9c870",
+    "integrationState": "blocked-by-authoritative-source-materialization",
+    "isolatedWorkspaceRuntime": "older Alpha 7 Level 3 scaffold; build-compatible only"
+  },
+  "approval": {
+    "humanApproved": false,
+    "status": "source-ready-correction-pending",
+    "playableRelease": false
+  },
+  "hud": {
+    "runtimeComponentCount": 7,
+    "sourceLayoutCount": 3,
+    "manifest": "public/assets/a75/ui/hud-hierarchy/hud-hierarchy-manifest-v01.json",
+    "qaSheet": "source-assets/a75/ui/hud-hierarchy/QA_HUDHierarchy_ContactSheet_v01.png",
+    "handoff": "ALPHA7_5_HUD_HIERARCHY_HANDOFF.md"
+  },
+  "productionGates": {
+    "masterAudit": "production/alpha7_5-master-asset-audit.json",
+    "masterAuditReport": "ALPHA7_5_MASTER_ASSET_AUDIT.md",
+    "animationSourceChecklist": "ALPHA7_5_ANIMATION_SOURCE_CHECKLIST.md",
+    "recoveryLedger": "RECOVERY_LIBRARY_MATERIALIZATION_2026-07-15.md"
+  },
+  "validated": [
+    "seven reusable HUD source components",
+    "desktop minimal combat hierarchy",
+    "mobile landscape safe-area and touch-occlusion hierarchy",
+    "full-information pause/loadout hierarchy",
+    "self-contained SVG assembly and rendered QA contact sheet",
+    "20-boon, nine-biome and 18-encounter audit coverage",
+    "Alpha 7.6 animation-source entry checklist",
+    "isolated project TypeScript/Vite build compatibility"
+  ],
+  "notCompleted": [
+    "integration into the authoritative Alpha 7.4A Levels 1–9 runtime",
+    "hands-on combat readability and physical-phone readability approval",
+    "final HUD animation, transitions, SFX and accessibility behavior",
+    "final global XP persistence and runtime placement validation",
+    "final art approval",
+    "playable release"
+  ]
+}

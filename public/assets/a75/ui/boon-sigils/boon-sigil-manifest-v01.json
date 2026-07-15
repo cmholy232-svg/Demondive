@@ -1,0 +1,227 @@
+{
+  "version": 1,
+  "status": "integrated-correction-pending",
+  "humanApproved": false,
+  "sigils": [
+    {
+      "id": "pyrra",
+      "color": "#ff4f76",
+      "accent": "#ffd2a8",
+      "glyph": "✦",
+      "spokes": 3,
+      "source": "source-assets/a75/ui/boon-sigils/SIGIL_PYRRA_v01.svg",
+      "runtime": "public/assets/a75/ui/boon-sigils/sigil-pyrra-v01.svg",
+      "status": "integrated-correction-pending",
+      "humanApproved": false
+    },
+    {
+      "id": "maris",
+      "color": "#19c8e8",
+      "accent": "#b9f6ff",
+      "glyph": "≈",
+      "spokes": 4,
+      "source": "source-assets/a75/ui/boon-sigils/SIGIL_MARIS_v01.svg",
+      "runtime": "public/assets/a75/ui/boon-sigils/sigil-maris-v01.svg",
+      "status": "integrated-correction-pending",
+      "humanApproved": false
+    },
+    {
+      "id": "gaia",
+      "color": "#b77b4a",
+      "accent": "#f1d095",
+      "glyph": "◆",
+      "spokes": 5,
+      "source": "source-assets/a75/ui/boon-sigils/SIGIL_GAIA_v01.svg",
+      "runtime": "public/assets/a75/ui/boon-sigils/sigil-gaia-v01.svg",
+      "status": "integrated-correction-pending",
+      "humanApproved": false
+    },
+    {
+      "id": "zephyra",
+      "color": "#77e8cf",
+      "accent": "#ecfff8",
+      "glyph": "↝",
+      "spokes": 6,
+      "source": "source-assets/a75/ui/boon-sigils/SIGIL_ZEPHYRA_v01.svg",
+      "runtime": "public/assets/a75/ui/boon-sigils/sigil-zephyra-v01.svg",
+      "status": "integrated-correction-pending",
+      "humanApproved": false
+    },
+    {
+      "id": "flora",
+      "color": "#64d879",
+      "accent": "#ff8fbd",
+      "glyph": "✿",
+      "spokes": 7,
+      "source": "source-assets/a75/ui/boon-sigils/SIGIL_FLORA_v01.svg",
+      "runtime": "public/assets/a75/ui/boon-sigils/sigil-flora-v01.svg",
+      "status": "integrated-correction-pending",
+      "humanApproved": false
+    },
+    {
+      "id": "voltara",
+      "color": "#f6df45",
+      "accent": "#fff9bd",
+      "glyph": "ϟ",
+      "spokes": 8,
+      "source": "source-assets/a75/ui/boon-sigils/SIGIL_VOLTARA_v01.svg",
+      "runtime": "public/assets/a75/ui/boon-sigils/sigil-voltara-v01.svg",
+      "status": "integrated-correction-pending",
+      "humanApproved": false
+    },
+    {
+      "id": "crya",
+      "color": "#82baff",
+      "accent": "#e8f5ff",
+      "glyph": "❄",
+      "spokes": 3,
+      "source": "source-assets/a75/ui/boon-sigils/SIGIL_CRYA_v01.svg",
+      "runtime": "public/assets/a75/ui/boon-sigils/sigil-crya-v01.svg",
+      "status": "integrated-correction-pending",
+      "humanApproved": false
+    },
+    {
+      "id": "luna",
+      "color": "#a78bfa",
+      "accent": "#f4e9ff",
+      "glyph": "☾",
+      "spokes": 4,
+      "source": "source-assets/a75/ui/boon-sigils/SIGIL_LUNA_v01.svg",
+      "runtime": "public/assets/a75/ui/boon-sigils/sigil-luna-v01.svg",
+      "status": "integrated-correction-pending",
+      "humanApproved": false
+    },
+    {
+      "id": "solara",
+      "color": "#fff06a",
+      "accent": "#ffffff",
+      "glyph": "☀",
+      "spokes": 5,
+      "source": "source-assets/a75/ui/boon-sigils/SIGIL_SOLARA_v01.svg",
+      "runtime": "public/assets/a75/ui/boon-sigils/sigil-solara-v01.svg",
+      "status": "integrated-correction-pending",
+      "humanApproved": false
+    },
+    {
+      "id": "belladonna",
+      "color": "#ff5ba7",
+      "accent": "#ffe0b2",
+      "glyph": "∞",
+      "spokes": 6,
+      "source": "source-assets/a75/ui/boon-sigils/SIGIL_BELLADONNA_v01.svg",
+      "runtime": "public/assets/a75/ui/boon-sigils/sigil-belladonna-v01.svg",
+      "status": "integrated-correction-pending",
+      "humanApproved": false
+    },
+    {
+      "id": "nerissa",
+      "color": "#36c9ff",
+      "accent": "#ff9be6",
+      "glyph": "♫",
+      "spokes": 7,
+      "source": "source-assets/a75/ui/boon-sigils/SIGIL_NERISSA_v01.svg",
+      "runtime": "public/assets/a75/ui/boon-sigils/sigil-nerissa-v01.svg",
+      "status": "integrated-correction-pending",
+      "humanApproved": false
+    },
+    {
+      "id": "roxyne",
+      "color": "#e35b58",
+      "accent": "#ffc7a5",
+      "glyph": "≻",
+      "spokes": 8,
+      "source": "source-assets/a75/ui/boon-sigils/SIGIL_ROXYNE_v01.svg",
+      "runtime": "public/assets/a75/ui/boon-sigils/sigil-roxyne-v01.svg",
+      "status": "integrated-correction-pending",
+      "humanApproved": false
+    },
+    {
+      "id": "calyptra",
+      "color": "#e97cff",
+      "accent": "#ffe36e",
+      "glyph": "♦",
+      "spokes": 3,
+      "source": "source-assets/a75/ui/boon-sigils/SIGIL_CALYPTRA_v01.svg",
+      "runtime": "public/assets/a75/ui/boon-sigils/sigil-calyptra-v01.svg",
+      "status": "integrated-correction-pending",
+      "humanApproved": false
+    },
+    {
+      "id": "isolde",
+      "color": "#8ee7ff",
+      "accent": "#f5fdff",
+      "glyph": "◇",
+      "spokes": 4,
+      "source": "source-assets/a75/ui/boon-sigils/SIGIL_ISOLDE_v01.svg",
+      "runtime": "public/assets/a75/ui/boon-sigils/sigil-isolde-v01.svg",
+      "status": "integrated-correction-pending",
+      "humanApproved": false
+    },
+    {
+      "id": "somnia",
+      "color": "#bc7cff",
+      "accent": "#ffd8f5",
+      "glyph": "◌",
+      "spokes": 5,
+      "source": "source-assets/a75/ui/boon-sigils/SIGIL_SOMNIA_v01.svg",
+      "runtime": "public/assets/a75/ui/boon-sigils/sigil-somnia-v01.svg",
+      "status": "integrated-correction-pending",
+      "humanApproved": false
+    },
+    {
+      "id": "vespera",
+      "color": "#d7b7ff",
+      "accent": "#ffffff",
+      "glyph": "◈",
+      "spokes": 6,
+      "source": "source-assets/a75/ui/boon-sigils/SIGIL_VESPERA_v01.svg",
+      "runtime": "public/assets/a75/ui/boon-sigils/sigil-vespera-v01.svg",
+      "status": "integrated-correction-pending",
+      "humanApproved": false
+    },
+    {
+      "id": "aurelia",
+      "color": "#f7be3e",
+      "accent": "#fff2a8",
+      "glyph": "¤",
+      "spokes": 7,
+      "source": "source-assets/a75/ui/boon-sigils/SIGIL_AURELIA_v01.svg",
+      "runtime": "public/assets/a75/ui/boon-sigils/sigil-aurelia-v01.svg",
+      "status": "integrated-correction-pending",
+      "humanApproved": false
+    },
+    {
+      "id": "noctissa",
+      "color": "#5c5be8",
+      "accent": "#d9d5ff",
+      "glyph": "◐",
+      "spokes": 8,
+      "source": "source-assets/a75/ui/boon-sigils/SIGIL_NOCTISSA_v01.svg",
+      "runtime": "public/assets/a75/ui/boon-sigils/sigil-noctissa-v01.svg",
+      "status": "integrated-correction-pending",
+      "humanApproved": false
+    },
+    {
+      "id": "lilith",
+      "color": "#b90f4a",
+      "accent": "#ff9aa9",
+      "glyph": "♥",
+      "spokes": 3,
+      "source": "source-assets/a75/ui/boon-sigils/SIGIL_LILITH_v01.svg",
+      "runtime": "public/assets/a75/ui/boon-sigils/sigil-lilith-v01.svg",
+      "status": "integrated-correction-pending",
+      "humanApproved": false
+    },
+    {
+      "id": "seraphine",
+      "color": "#fff19a",
+      "accent": "#ffffff",
+      "glyph": "✧",
+      "spokes": 4,
+      "source": "source-assets/a75/ui/boon-sigils/SIGIL_SERAPHINE_v01.svg",
+      "runtime": "public/assets/a75/ui/boon-sigils/sigil-seraphine-v01.svg",
+      "status": "integrated-correction-pending",
+      "humanApproved": false
+    }
+  ]
+}

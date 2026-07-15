@@ -1,0 +1,615 @@
+{
+  "schemaVersion": 1,
+  "packageId": "alpha7.5-biome-direction-v01",
+  "roadmapPosition": "Alpha 7.5 art direction and room cleanup",
+  "approval": {
+    "status": "source-ready-correction-pending",
+    "humanApproved": false,
+    "playableRelease": false
+  },
+  "shared": {
+    "entityPriority": [
+      "Milo",
+      "enemies",
+      "enemy attacks",
+      "Milo attacks",
+      "hazards",
+      "platform top edges",
+      "rewards",
+      "background decoration"
+    ],
+    "reservedGameplayColors": {
+      "miloArcane": "#8b5cf6",
+      "enemyDanger": "#ff405f",
+      "reward": "#f2c14e",
+      "interactable": "#52d5e6"
+    },
+    "valueRules": {
+      "background": "5–28% value; compressed contrast",
+      "midground": "14–42% value; no edge frequency behind combat",
+      "platformTop": "58–78% value with a continuous top edge",
+      "gameplay": "65–100% local value/contrast",
+      "foreground": "8–30% value; never masks collision or telegraphs"
+    },
+    "densityRules": {
+      "low": "0–2 prop clusters; recovery/entrance",
+      "standard": "2–4 prop clusters; ordinary combat",
+      "high": "4–6 prop clusters; challenge/boss only with protected combat lanes",
+      "rejected": "more than 6 clusters, repeated micro-detail behind actors, or decoration crossing platform/hazard silhouettes"
+    },
+    "mobileRules": [
+      "protect the middle 64% of the screen from high-frequency decoration",
+      "keep essential telegraphs at least 24 px from safe-area edges at 1280×720 reference",
+      "remove one background and one foreground cluster from the desktop standard variant",
+      "never communicate a hazard through color alone"
+    ]
+  },
+  "biomes": [
+    {
+      "level": 1,
+      "id": "neon-maw",
+      "name": "The Neon Maw",
+      "concept": "A ravenous infernal nightclub whose architecture feels like a smiling mouth.",
+      "palette": [
+        "#090611",
+        "#1c0e26",
+        "#3b1745",
+        "#713250",
+        "#ff4f9a",
+        "#56dce8"
+      ],
+      "lighting": "Low frontal club wash; magenta rim from screen-right; cyan reserved for navigation and interactables.",
+      "saturation": "Characters and attacks first; signs second; walls and crowd silhouettes muted.",
+      "shapeLanguage": [
+        "mouth arches",
+        "speaker rectangles",
+        "hooked neon diagonals"
+      ],
+      "architecture": [
+        "sunken dance floors",
+        "bar balconies",
+        "backstage service corridors"
+      ],
+      "materials": [
+        "black lacquer",
+        "worn velvet",
+        "smoked glass",
+        "brass trim"
+      ],
+      "props": [
+        "speaker stacks",
+        "velvet booths",
+        "bar rails",
+        "authored neon emblems"
+      ],
+      "hazards": [
+        "jaw gates",
+        "beat lasers",
+        "hungry floor vents"
+      ],
+      "enemySilhouette": "Compact street-demon shapes; horns and weapons must clear the torso.",
+      "bossSilhouette": "Demon Lords occupy a tall hourglass or monstrous appetite silhouette with unmistakable infernal anatomy.",
+      "accentRule": "Magenta names appetite and hostile spectacle; cyan names routes and safe interaction.",
+      "forbidden": [
+        "generic medieval masonry",
+        "random readable signs",
+        "dense nightclub crowds behind combat",
+        "purple hazards that merge with Milo’s bolt"
+      ],
+      "density": "standard with low-density combat lanes"
+    },
+    {
+      "level": 2,
+      "id": "drowned-court",
+      "name": "The Drowned Court",
+      "concept": "A submerged fan-palace where worship, currents and song become pressure.",
+      "palette": [
+        "#03121b",
+        "#082937",
+        "#0f4c5c",
+        "#2f6f78",
+        "#42e8f5",
+        "#ff79c9"
+      ],
+      "lighting": "Cool caustic top light; silhouettes darken downward; coral rim only on performers.",
+      "saturation": "Cyan currents and coral attacks lead; palace stone and water haze stay desaturated.",
+      "shapeLanguage": [
+        "shell fans",
+        "tall organ pipes",
+        "flowing S-curves"
+      ],
+      "architecture": [
+        "flooded stages",
+        "choir balconies",
+        "shell colonnades"
+      ],
+      "materials": [
+        "wet stone",
+        "pearl shell",
+        "oxidized metal",
+        "translucent water"
+      ],
+      "props": [
+        "broken instruments",
+        "fan banners without text",
+        "shell lamps",
+        "bubble vents"
+      ],
+      "hazards": [
+        "visible current ribbons",
+        "bubble lifts",
+        "song pillars",
+        "pressure jets"
+      ],
+      "enemySilhouette": "Aquatic profiles need open fins, shells or vocal apparatus; never hide feet/hover anchors in foam.",
+      "bossSilhouette": "Nerissa must read as a horned/fin-crested Demon Lord, not an ordinary singer; pillars remain separate targets.",
+      "accentRule": "Cyan is movement/current; coral-pink is adoration magic and enemy danger.",
+      "forbidden": [
+        "opaque foreground water over Milo",
+        "cyan enemy shots without a danger core",
+        "unbounded bubble clutter",
+        "dry palace props placed without water logic"
+      ],
+      "density": "standard, with sparse water particles"
+    },
+    {
+      "level": 3,
+      "id": "thornwild",
+      "name": "The Thornwild",
+      "concept": "A predatory forest built from hunting lanes, traps and living roots.",
+      "palette": [
+        "#090b08",
+        "#1d2615",
+        "#334220",
+        "#61442a",
+        "#a6d43b",
+        "#ef4e43"
+      ],
+      "lighting": "Broken canopy light from upper-left; warm threat glow from snares and eyes.",
+      "saturation": "Foliage remains olive; acid-green growth and red-orange danger carry gameplay meaning.",
+      "shapeLanguage": [
+        "barbed crescents",
+        "root wedges",
+        "vertical spear trunks"
+      ],
+      "architecture": [
+        "root bridges",
+        "hollow trunks",
+        "canopy hunting blinds"
+      ],
+      "materials": [
+        "rough bark",
+        "mud",
+        "bone",
+        "resin"
+      ],
+      "props": [
+        "shed antlers",
+        "hanging seed pods",
+        "claw-mark stones",
+        "fungal lanterns"
+      ],
+      "hazards": [
+        "snare circles with armed state",
+        "thorn lanes",
+        "falling pods",
+        "ambush burrows"
+      ],
+      "enemySilhouette": "Predators lean forward with clear claws, jaws or ranged limbs; foliage never shares their outline.",
+      "bossSilhouette": "Roxyne requires horned demonic regalia plus a wide hunter silhouette and separated weapon arcs.",
+      "accentRule": "Acid green is living/armed growth; red-orange is immediate damage and hunting marks.",
+      "forbidden": [
+        "lush realistic foliage everywhere",
+        "invisible snare boundaries",
+        "foreground vines crossing Milo’s feet",
+        "green enemy attacks without a hot danger center"
+      ],
+      "density": "low-to-standard; protect horizontal escape lanes"
+    },
+    {
+      "level": 4,
+      "id": "thunder-jackpot",
+      "name": "The Thunder Jackpot",
+      "concept": "A demonic casino-storm where every rule change is loudly disclosed and electrically timed.",
+      "palette": [
+        "#090716",
+        "#18112b",
+        "#39205a",
+        "#5a3d78",
+        "#d2a84a",
+        "#52c7dd"
+      ],
+      "lighting": "Hard gold marquee pools from above; cyan lightning backlight; violet walls stay low value.",
+      "saturation": "Gold is reward/chance; cyan is timed electricity; magenta-purple remains structural only.",
+      "shapeLanguage": [
+        "diamonds",
+        "stepped marquees",
+        "lightning slashes"
+      ],
+      "architecture": [
+        "roulette platforms",
+        "slot-machine towers",
+        "pit-boss balconies"
+      ],
+      "materials": [
+        "black glass",
+        "brushed brass",
+        "dark felt",
+        "insulated ceramic"
+      ],
+      "props": [
+        "dice pylons",
+        "chip stacks",
+        "marquee bulbs",
+        "rule-display icon panels"
+      ],
+      "hazards": [
+        "telegraphed electric rails",
+        "roulette sweeps",
+        "bounded jackpot events"
+      ],
+      "enemySilhouette": "Dealers and chance-creatures use angular sleeves, card fans or dice masses with uncluttered hands.",
+      "bossSilhouette": "Calyptra needs crown/horns and a broad casino-empress silhouette; chance devices remain distinct appendages.",
+      "accentRule": "Gold always signals value/opportunity; cyan signals active electricity or countdown.",
+      "forbidden": [
+        "undisclosed random harm",
+        "tiny card-suit wallpaper behind combat",
+        "gold enemy projectiles without red danger edging",
+        "purple lightning matching Milo"
+      ],
+      "density": "standard; high only in jackpot reveal states"
+    },
+    {
+      "level": 5,
+      "id": "frozen-basilica",
+      "name": "The Frozen Basilica",
+      "concept": "A cold cathedral of memory where momentum, delay and fracture are readable before they punish.",
+      "palette": [
+        "#050a18",
+        "#0d1b32",
+        "#173354",
+        "#315978",
+        "#b7d9e8",
+        "#74cce5"
+      ],
+      "lighting": "Cold clerestory shafts from upper-center; delayed attacks gain a warm warning core.",
+      "saturation": "Ice remains pale blue-gray; cyan edges navigation; warm danger accents are rare and decisive.",
+      "shapeLanguage": [
+        "lancet arches",
+        "crystal spears",
+        "concentric halos"
+      ],
+      "architecture": [
+        "nave slides",
+        "frozen chapels",
+        "memory reliquaries"
+      ],
+      "materials": [
+        "blue stone",
+        "frosted glass",
+        "clear ice",
+        "silver"
+      ],
+      "props": [
+        "crystal censers",
+        "frozen votives",
+        "memory reliefs",
+        "fractured bells"
+      ],
+      "hazards": [
+        "ice momentum lanes",
+        "delayed crystal drops",
+        "freezing fields"
+      ],
+      "enemySilhouette": "Use heavy crystal masses or thin devotional profiles; feet and slide direction remain visible.",
+      "bossSilhouette": "Isolde reads as a demonic frozen warden through crown/horns, asymmetrical crystal armor and a dominant ward shape.",
+      "accentRule": "Pale cyan describes safe ice geometry; warm coral cores mark armed delayed threats.",
+      "forbidden": [
+        "white-on-white telegraphs",
+        "full-screen snow particles",
+        "real-world religious text",
+        "mirror-polished floors that hide platform edges"
+      ],
+      "density": "low-to-standard; negative space is part of the cold"
+    },
+    {
+      "level": 6,
+      "id": "forever-motel",
+      "name": "The Forever Motel",
+      "concept": "A looping dream motel that feels familiar at first glance and wrong on the second.",
+      "palette": [
+        "#120b16",
+        "#2a1628",
+        "#4a273d",
+        "#765064",
+        "#d5c1a5",
+        "#9e5276"
+      ],
+      "lighting": "Sickly ceiling pools with long horizontal shadows; impossible doors use a restrained violet rim.",
+      "saturation": "Faded mauve and nicotine beige dominate; active dream loops receive the only bright accent.",
+      "shapeLanguage": [
+        "long horizontals",
+        "repeating door rectangles",
+        "soft warped circles"
+      ],
+      "architecture": [
+        "exterior walkways",
+        "endless corridors",
+        "identical rooms with one wrong detail"
+      ],
+      "materials": [
+        "stained carpet",
+        "painted cinderblock",
+        "aged brass",
+        "clouded mirrors"
+      ],
+      "props": [
+        "room keys",
+        "ice machines",
+        "vacancy icons",
+        "luggage carts"
+      ],
+      "hazards": [
+        "loop doors",
+        "false exits",
+        "sleep fields",
+        "remixed prop traps"
+      ],
+      "enemySilhouette": "Dream guests use recognizable human hotel silhouettes corrupted by one large impossible feature.",
+      "bossSilhouette": "Somnia requires queenly demon horns and trailing sleep geometry that breaks the motel’s rigid rectangles.",
+      "accentRule": "Cream marks ordinary familiarity; violet-pink marks dream interference and false space.",
+      "forbidden": [
+        "unique decoration on every door",
+        "readable procedural room numbers",
+        "dense nostalgic clutter",
+        "teleports without before/after route cues"
+      ],
+      "density": "low; repetition supplies identity without extra objects"
+    },
+    {
+      "level": 7,
+      "id": "thousand-faces",
+      "name": "The City of a Thousand Faces",
+      "concept": "A vertical mirror metropolis where reflections redirect danger and identity fractures into readable copies.",
+      "palette": [
+        "#060817",
+        "#101a32",
+        "#1d3150",
+        "#385a78",
+        "#7ee3ef",
+        "#9b70d8"
+      ],
+      "lighting": "Cool edge light from mirror planes; reflected attacks retain a hot enemy-danger core.",
+      "saturation": "Architecture stays blue-gray; cyan identifies physical mirrors; lavender identifies identity distortion.",
+      "shapeLanguage": [
+        "faceted masks",
+        "diagonal mirror cuts",
+        "tall stacked windows"
+      ],
+      "architecture": [
+        "mirror alleys",
+        "mask plazas",
+        "reflection towers"
+      ],
+      "materials": [
+        "smoked mirror",
+        "dark steel",
+        "blue glass",
+        "porcelain masks"
+      ],
+      "props": [
+        "mask kiosks",
+        "covered mirrors",
+        "shard planters",
+        "reflection beacons"
+      ],
+      "hazards": [
+        "projectile redirects",
+        "copy zones",
+        "shard sweeps"
+      ],
+      "enemySilhouette": "Copies must differ through one readable borrowed attack shape; masks cannot obscure body direction.",
+      "bossSilhouette": "Vespera is a horned Demon Lord framed by a multi-face mantle; false bodies have lower contrast than the true body.",
+      "accentRule": "Cyan is physical reflection geometry; lavender is copied identity; red core remains hostile ownership.",
+      "forbidden": [
+        "full-room mirror noise",
+        "reflections identical in contrast to actors",
+        "unmarked projectile ownership changes",
+        "random faces tiled as wallpaper"
+      ],
+      "density": "standard; mirror count capped per sightline"
+    },
+    {
+      "level": 8,
+      "id": "liliths-throne",
+      "name": "Lilith’s Throne",
+      "concept": "A disciplined infernal capital and royal gauntlet built around blood authority, not generic erotic clutter.",
+      "palette": [
+        "#11070f",
+        "#260c1c",
+        "#461126",
+        "#6f1f3b",
+        "#bb3b5a",
+        "#8e55a8"
+      ],
+      "lighting": "Crimson throne light from deep background; pale rim isolates Milo and enemies from black architecture.",
+      "saturation": "Blood-red belongs to royal power and curses; violet marks court magic; neutral black carries most mass.",
+      "shapeLanguage": [
+        "downward crowns",
+        "bat-wing arches",
+        "blade hearts"
+      ],
+      "architecture": [
+        "processional bridges",
+        "curse courts",
+        "throne terraces"
+      ],
+      "materials": [
+        "black iron",
+        "blood glass",
+        "dark marble",
+        "royal fabric"
+      ],
+      "props": [
+        "sealed censers",
+        "crown pylons",
+        "chain standards",
+        "heart-blade reliefs"
+      ],
+      "hazards": [
+        "stacking curse seals",
+        "royal execution lanes",
+        "daughter crossfire"
+      ],
+      "enemySilhouette": "Court demons use ranked crown/wing shapes; each role owns a distinct weapon arc and stance.",
+      "bossSilhouette": "Lilith must dominate the frame as an unmistakable demon queen through horns, wings, tail/regalia and throne-scale staging.",
+      "accentRule": "Bright blood-red is active royal threat; muted wine is architecture; pale violet is secondary court magic.",
+      "forbidden": [
+        "random lingerie props",
+        "pink-on-pink attack ambiguity",
+        "ornament covering platforms",
+        "Lilith reading as only a glamorous human woman"
+      ],
+      "density": "standard-to-high in ceremonies; combat lanes remain sparse"
+    },
+    {
+      "level": 9,
+      "id": "self-below",
+      "name": "The Self Below",
+      "concept": "A stripped mirror realm where past bosses and Milo’s avoided selves appear against deliberate emptiness.",
+      "palette": [
+        "#07070b",
+        "#111217",
+        "#202127",
+        "#373840",
+        "#8b8790",
+        "#76559a"
+      ],
+      "lighting": "Single neutral key on the active duel; memory fragments fade into low-contrast void.",
+      "saturation": "Near-monochrome world; inherited boss colors appear briefly; Milo purple remains the stable through-line.",
+      "shapeLanguage": [
+        "broken circles",
+        "long void planes",
+        "misaligned Milo silhouettes"
+      ],
+      "architecture": [
+        "memory thresholds",
+        "boss-rush arenas",
+        "final reflection plane"
+      ],
+      "materials": [
+        "matte void stone",
+        "smoked glass",
+        "ash",
+        "fractured light"
+      ],
+      "props": [
+        "discarded lighters",
+        "broken boon sigils",
+        "memory frames",
+        "empty door outlines"
+      ],
+      "hazards": [
+        "base-kit duel lines",
+        "memory echoes",
+        "staged boon-restoration gates"
+      ],
+      "enemySilhouette": "Returning enemies use simplified memory silhouettes; only the active threat reaches full contrast.",
+      "bossSilhouette": "The Hollow mirrors Milo’s scale first, then grows through avoided-self fragments without becoming an unreadable mass.",
+      "accentRule": "Gray establishes truth/emptiness; purple identifies Milo/Arcane continuity; restored boon colors appear one at a time.",
+      "forbidden": [
+        "full-palette spectacle in every room",
+        "dense props",
+        "unannounced boss-rush spawns",
+        "Hollow effects that obscure Milo’s matching silhouette"
+      ],
+      "density": "low by default; spectacle is event-driven"
+    }
+  ],
+  "roomQualityContract": {
+    "version": 1,
+    "status": "source-ready-correction-pending",
+    "humanApproved": false,
+    "sequenceRules": {
+      "campaignLength": "Level 1 is the baseline; Level 2 adds 2–3 rooms; each later level adds 1–3 rooms over the previous level.",
+      "miniBossWindow": "one campaign mini-boss at 45–55% of required rooms",
+      "bossAtEnd": true,
+      "noConsecutiveEmptyRooms": true,
+      "emptyRoomDefinition": "no enemies, hazard challenge, reward decision, wager, narrative beat or traversal test",
+      "branchCooldown": "at least two resolved rooms between branching decisions",
+      "wagerCooldown": "at least three resolved rooms between wager offers unless a biome-authored event overrides it"
+    },
+    "requiredMetadata": [
+      "id",
+      "biome",
+      "roomRole",
+      "intendedMovementMechanic",
+      "difficultyTier",
+      "enemyBudget",
+      "hazardBudget",
+      "densityClass",
+      "traversalType",
+      "recoveryLevel",
+      "compatibleModifiers",
+      "compatibleBiomes",
+      "mobileSuitability",
+      "performanceWeight"
+    ],
+    "budgets": {
+      "enemyBudget": "weighted by role and simultaneous threat, not raw count",
+      "hazardBudget": "0 recovery; 0–2 standard; 1–3 challenge with compatibility exclusions",
+      "performanceWeight": "low/medium/high plus estimated active projectiles, particles, animated props and offscreen actors",
+      "densityClass": [
+        "low",
+        "standard",
+        "high"
+      ],
+      "recoveryLevel": [
+        "none",
+        "partial",
+        "full"
+      ]
+    },
+    "automatedChecks": [
+      "entry and every required exit share a traversable graph",
+      "spawn and reward bounds do not overlap solids, hazards or another atlas cell",
+      "minimum landing width and head clearance meet Milo controller constants",
+      "grounded enemies resolve feet to a valid surface and hoverers declare altitude bands",
+      "enemy plus hazard budget remains within the room tier",
+      "no contradictory modifier/hazard pair is registered",
+      "foreground masks no platform edge, pickup, telegraph or required route",
+      "sequence obeys progression, midpoint mini-boss, final boss and no-consecutive-empty rules",
+      "mobile variant respects safe-area, touch occlusion and performance weight",
+      "seeded generation reproduces the same validated room graph"
+    ],
+    "humanChecks": [
+      "entry intent and first safe landing are understandable within three seconds",
+      "at least one movement-expression route is visible without requiring damage",
+      "ordinary rooms include recovery space after burst pressure",
+      "Milo, enemies, both projectile owners, hazards, platforms and rewards remain separable in motion",
+      "props appear intentionally clustered and physically supported",
+      "background perspective, lighting and material treatment agree",
+      "challenge-room intimidation comes from composition and telegraphs, not clutter",
+      "wavedash routes exist without making ordinary walking/jumping invalid",
+      "high-stack effects remain legible against the room at gameplay scale",
+      "room still reads on a physical-phone-size landscape preview"
+    ],
+    "rejectReasons": [
+      "two empty rooms back-to-back",
+      "mini-boss outside midpoint window",
+      "boss not final",
+      "entry spawn under immediate unavoidable damage",
+      "enemy or prop floating without authored support",
+      "foreground hides combat state",
+      "more than six unrelated prop clusters",
+      "hazard ownership depends on color alone",
+      "platforms appear to belong to the background",
+      "room combines mechanics whose telegraphs occupy the same space/time"
+    ]
+  },
+  "outputs": {
+    "biomeBoard": "source-assets/a75/environment/art-direction/QA_BiomeArtDirection_ContactSheet_v01.svg",
+    "densityBoard": "source-assets/a75/environment/art-direction/QA_RoomDensity_Comparison_v01.svg",
+    "handoff": "ALPHA7_5_BIOME_AND_ROOM_DIRECTION.md"
+  }
+}

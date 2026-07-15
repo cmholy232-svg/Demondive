@@ -1,0 +1,104 @@
+{
+  "schemaVersion": 1,
+  "auditId": "alpha7.5-master-asset-audit-v01",
+  "roadmapPosition": "Alpha 7.5 — Art Production and Integration",
+  "authoritativeRuntimeAuditState": "blocked-until-alpha7.4a-source-restored",
+  "humanApproved": false,
+  "allowedStatuses": [
+    "final-integrated",
+    "final-not-integrated",
+    "needs-correction",
+    "missing",
+    "temporary-acceptable",
+    "rejected",
+    "unknown-until-source-restored"
+  ],
+  "summary": {
+    "boonGivers": 20,
+    "biomes": 9,
+    "campaignEncounters": 18,
+    "miloPackages": 1,
+    "uiFamilies": 12,
+    "storyFamilies": 5
+  },
+  "milo": [
+    {
+      "id": "milo-production-rig",
+      "status": "needs-correction",
+      "humanApproved": false,
+      "available": ["A5 fixed-cell movement atlas", "run atlas", "dash/hurt atlas", "cast atlas", "portrait", "socket and feet-anchor data"],
+      "remaining": ["proportion-lock review", "ordinary-jump source completion", "landing variants", "vertical and diagonal cast consistency", "Special pose coverage", "death and victory source", "mobile-scale silhouette review"]
+    }
+  ],
+  "boonGivers": [
+    "pyrra", "maris", "gaia", "zephyra", "flora", "voltara", "crya", "luna", "solara", "belladonna",
+    "nerissa", "roxyne", "calyptra", "isolde", "somnia", "vespera", "aurelia", "noctissa", "lilith", "seraphine"
+  ],
+  "boonPackageContract": {
+    "ids": ["pyrra", "maris", "gaia", "zephyra", "flora", "voltara", "crya", "luna", "solara", "belladonna", "nerissa", "roxyne", "calyptra", "isolde", "somnia", "vespera", "aurelia", "noctissa", "lilith", "seraphine"],
+    "status": "needs-correction",
+    "humanApproved": false,
+    "availablePerBoon": ["portrait crop", "sigil", "projectile vector", "impact vector", "status vector", "Special vector", "motion direction", "SFX direction", "stack escalation", "high-stack consolidation rule"],
+    "remainingPerBoon": ["final portrait cleanup", "passive indicator where needed", "runtime animation layers", "final SFX", "five-second recognition approval", "high-stack gameplay proof", "small-screen proof"]
+  },
+  "biomes": [
+    {"level":1,"id":"neon-maw","status":"needs-correction","humanApproved":false,"available":"approved raster baseline","remaining":"room-by-room density and separation audit"},
+    {"level":2,"id":"drowned-court","status":"needs-correction","humanApproved":false,"available":"approved raster baseline","remaining":"room-by-room density, current and hazard separation audit"},
+    {"level":3,"id":"thornwild","status":"needs-correction","humanApproved":false,"available":"approved raster baseline","remaining":"room-by-room density, snare and foliage separation audit"},
+    {"level":4,"id":"thunder-jackpot","status":"needs-correction","humanApproved":false,"available":"A75 low-density vector foundation","remaining":"final paint-over, platforms, props, hazards, foregrounds and room variants"},
+    {"level":5,"id":"frozen-basilica","status":"needs-correction","humanApproved":false,"available":"A75 low-density vector foundation","remaining":"final paint-over, platforms, props, hazards, foregrounds and room variants"},
+    {"level":6,"id":"forever-motel","status":"needs-correction","humanApproved":false,"available":"A75 low-density vector foundation","remaining":"final paint-over, doors, props, hazards, foregrounds and room variants"},
+    {"level":7,"id":"thousand-faces","status":"needs-correction","humanApproved":false,"available":"A75 low-density vector foundation","remaining":"final paint-over, mirror surfaces, props, hazards, foregrounds and room variants"},
+    {"level":8,"id":"liliths-throne","status":"needs-correction","humanApproved":false,"available":"A75 Succubus Capital vector foundation","remaining":"final paint-over, royal platforms, props, curse hazards, foregrounds and room variants"},
+    {"level":9,"id":"self-below","status":"needs-correction","humanApproved":false,"available":"A75 low-density vector foundation","remaining":"final paint-over, mirror-realm platforms, boss-rush staging and ending variants"}
+  ],
+  "encounters": [
+    {"level":1,"role":"mini-boss","id":"bottomless-bartender","status":"needs-correction"},
+    {"level":1,"role":"boss","id":"belladonna","status":"needs-correction"},
+    {"level":2,"role":"mini-boss","id":"fan-club","status":"needs-correction"},
+    {"level":2,"role":"boss","id":"nerissa","status":"needs-correction"},
+    {"level":3,"role":"mini-boss","id":"perfect-prey","status":"needs-correction"},
+    {"level":3,"role":"boss","id":"roxyne","status":"needs-correction"},
+    {"level":4,"role":"mini-boss","id":"lady-luckless","status":"unknown-until-source-restored"},
+    {"level":4,"role":"boss","id":"calyptra","status":"unknown-until-source-restored"},
+    {"level":5,"role":"mini-boss","id":"memory-golem","status":"unknown-until-source-restored"},
+    {"level":5,"role":"boss","id":"isolde","status":"unknown-until-source-restored"},
+    {"level":6,"role":"mini-boss","id":"dream-girl","status":"unknown-until-source-restored"},
+    {"level":6,"role":"boss","id":"somnia","status":"unknown-until-source-restored"},
+    {"level":7,"role":"mini-boss","id":"better-milo","status":"unknown-until-source-restored"},
+    {"level":7,"role":"boss","id":"vespera","status":"unknown-until-source-restored"},
+    {"level":8,"role":"mini-boss","id":"liliths-daughters","status":"unknown-until-source-restored"},
+    {"level":8,"role":"boss","id":"lilith","status":"unknown-until-source-restored"},
+    {"level":9,"role":"mini-boss","id":"boss-rush","status":"unknown-until-source-restored"},
+    {"level":9,"role":"boss","id":"the-hollow","status":"unknown-until-source-restored"}
+  ],
+  "uiFamilies": [
+    {"id":"combat-hud","status":"unknown-until-source-restored"},
+    {"id":"boon-choice","status":"needs-correction"},
+    {"id":"loadout-stacks","status":"needs-correction"},
+    {"id":"boss-bars","status":"unknown-until-source-restored"},
+    {"id":"wagers","status":"unknown-until-source-restored"},
+    {"id":"jackpots","status":"unknown-until-source-restored"},
+    {"id":"deep-dive","status":"unknown-until-source-restored"},
+    {"id":"run-summary","status":"unknown-until-source-restored"},
+    {"id":"title-and-main-menu","status":"unknown-until-source-restored"},
+    {"id":"pause-settings-help","status":"unknown-until-source-restored"},
+    {"id":"tutorial-prompts","status":"missing"},
+    {"id":"mobile-safe-layout-source","status":"missing"}
+  ],
+  "storyFamilies": [
+    {"id":"opening","status":"unknown-until-source-restored"},
+    {"id":"inter-level-scenes","status":"missing"},
+    {"id":"lilith-sequence","status":"unknown-until-source-restored"},
+    {"id":"hollow-sequence-and-ending","status":"unknown-until-source-restored"},
+    {"id":"credits","status":"unknown-until-source-restored"}
+  ],
+  "phaseExitBlockers": [
+    "restore or reconstruct the authoritative Levels 1–9 source and reconcile this audit against actual registry paths",
+    "zero unintended missing/rejected runtime assets",
+    "all animation-source checklist requirements available before Alpha 7.6",
+    "all final-integrated claims backed by explicit human approval",
+    "gameplay readability checks for every room family and representative extreme build",
+    "mobile-scale asset and safe-area proof"
+  ]
+}

@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1672" height="941" viewBox="0 0 1672 941">
+  <defs><linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#090716"/><stop offset="1" stop-color="#18112b"/></linearGradient><radialGradient id="haze"><stop stop-color="#52c7dd" stop-opacity=".18"/><stop offset="1" stop-color="#090716" stop-opacity="0"/></radialGradient></defs>
+  <rect width="1672" height="941" fill="url(#sky)"/><ellipse cx="836" cy="430" rx="680" ry="390" fill="url(#haze)"/>
+  
+      <path fill="#16102a" d="M0 610L95 520 180 575 270 410 375 535 470 355 565 505 690 300 790 500 910 330 1010 510 1130 370 1245 545 1370 390 1490 560 1590 455 1672 520V800H0Z"/>
+      <g fill="#281942" stroke="#74589a" stroke-width="6" opacity=".76"><path d="M145 770V320h150v450z"/><path d="M460 770V230h180v540z"/><path d="M1015 770V275h170v495z"/><path d="M1360 770V350h145v420z"/></g>
+      <g fill="none" stroke="#d2a84a" stroke-width="8" opacity=".55"><path d="M0 650h1672"/><path d="M80 700h1510"/><path d="M215 360l38-38 38 38-38 38zM520 300l40-40 40 40-40 40zM1055 340l42-42 42 42-42 42zM1390 410l35-35 35 35-35 35z"/></g>
+      <g stroke="#52c7dd" stroke-width="7" opacity=".45"><path d="M365 500l45-95 28 65 55-130"/><path d="M1190 490l45-120 32 70 60-155"/></g>
+  <path fill="#090716" d="M0 790h1672v151H0z"/><path stroke="#d2a84a" stroke-width="5" opacity=".28" d="M0 790h1672"/>
+  <rect width="1672" height="941" fill="none" stroke="#39205a" stroke-width="18" opacity=".35"/>
+</svg>

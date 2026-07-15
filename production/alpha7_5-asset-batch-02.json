@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "batchId": "alpha7.5-asset-batch-02",
+  "roadmapPosition": "Alpha 7.5 — Boon sensory-source preparation for Alpha 7.6",
+  "sourceBaseline": {
+    "authoritativePlayable": "DemonDive Alpha 7.4A verified playable in ChatGPT Library",
+    "authoritativeSourceLibraryId": "libfile_4d5afaaabb6881919f1c2a660e58c2ae",
+    "authoritativeSourceSha256": "fe7dca1034df75ca893635378766d1707b017628f6c0d5f5f7f6ea5c07b9c870",
+    "integrationState": "pending-authoritative-source-materialization"
+  },
+  "approval": {
+    "humanApproved": false,
+    "status": "source-ready-correction-pending",
+    "playableRelease": false
+  },
+  "package": {
+    "id": "twenty-boon-sensory-sources-v01",
+    "boonCount": 20,
+    "runtimeComponentCount": 80,
+    "manifest": "public/assets/a75/vfx/boon-sensory/boon-sensory-manifest-v01.json",
+    "qaSheet": "source-assets/a75/vfx/boon-sensory/QA_BoonSensory_ContactSheet_v01.png",
+    "componentsPerBoon": ["projectile", "impact", "status", "special"],
+    "directionFieldsPerBoon": ["motion", "impact", "status", "special", "sfx", "stack", "consolidate"],
+    "status": "source-ready-correction-pending",
+    "humanApproved": false
+  },
+  "designStandard": "The dominant boon influence should be recognizable from approximately five seconds of play. At mixed high stacks, one dominant projectile identity owns the core silhouette; secondary boons use attached effects, distinct impacts, status marks and compact stack indicators.",
+  "performanceRule": "High-stack presentation consolidates shared trails, graphs, fans, tethers, echoes and particles instead of removing earned mechanical power.",
+  "notCompleted": [
+    "runtime behavior/VFX implementation in the authoritative Alpha 7.4A source",
+    "animation timing, pooling, simultaneous-effect limits and performance budgets",
+    "final SFX assets and audio mix",
+    "five-second human recognition test",
+    "small-screen and accessibility approval",
+    "final human approval"
+  ]
+}

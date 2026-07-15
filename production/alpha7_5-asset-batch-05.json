@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "batchId": "alpha7.5-asset-batch-05",
+  "roadmapPosition": "Alpha 7.5 — Milo final-art correction and animation-source gate",
+  "sourceBaseline": {
+    "authoritativeSourceLibraryId": "libfile_4d5afaaabb6881919f1c2a660e58c2ae",
+    "authoritativeSourceSha256": "fe7dca1034df75ca893635378766d1707b017628f6c0d5f5f7f6ea5c07b9c870",
+    "integrationState": "blocked-by-authoritative-source-materialization",
+    "evidenceRuntime": "older Alpha 7 Level 3 scaffold"
+  },
+  "approval": {
+    "humanApproved": false,
+    "status": "source-ready-correction-pending",
+    "playableRelease": false
+  },
+  "miloPackage": {
+    "requiredStateCount": 30,
+    "requiredLayerCount": 13,
+    "reportedDefectCount": 5,
+    "manifest": "production/alpha7_5-milo-source-correction.json",
+    "scaleBoard": "source-assets/a75/characters/milo-correction/QA_MiloScaleDriftAndSourceGate_v01.svg",
+    "handoff": "ALPHA7_5_MILO_SOURCE_CORRECTION.md"
+  },
+  "frozenDecisions": [
+    "Milo uses one body scale across all states.",
+    "V02 grounded sources place the visible shoe sole at cell y=458.",
+    "V02 runtime definitions do not use per-frame scale or feet overrides.",
+    "Arcane palm effects and long trails are separate from body artwork.",
+    "Ordinary state transitions permit at most 3% apparent body-scale drift.",
+    "Crouched and airborne poses are compared by body landmarks rather than bounding-box height."
+  ],
+  "notCompleted": [
+    "final redrawn/repacked Milo v02 frames",
+    "final animation layers and masks",
+    "authoritative runtime integration",
+    "A/B state-transition capture over a fixed collider/floor line",
+    "hands-on human approval",
+    "playable release"
+  ]
+}

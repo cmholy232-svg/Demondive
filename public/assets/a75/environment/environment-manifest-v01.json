@@ -1,0 +1,103 @@
+{
+  "version": 1,
+  "status": "integrated-correction-pending",
+  "humanApproved": false,
+  "plates": [
+    {
+      "level": 4,
+      "id": "thunder-jackpot",
+      "palette": [
+        "#090716",
+        "#18112b",
+        "#39205a",
+        "#5a3d78",
+        "#d2a84a",
+        "#52c7dd"
+      ],
+      "source": "source-assets/a75/environment/level4/ENV_THUNDER_JACKPOT_Background_Main_v01.svg",
+      "runtime": "public/assets/a75/environment/level4/env-thunder-jackpot-background-main-v01.svg",
+      "status": "integrated-correction-pending",
+      "humanApproved": false
+    },
+    {
+      "level": 5,
+      "id": "frozen-basilica",
+      "palette": [
+        "#050a18",
+        "#0d1b32",
+        "#173354",
+        "#315978",
+        "#b7d9e8",
+        "#74cce5"
+      ],
+      "source": "source-assets/a75/environment/level5/ENV_FROZEN_BASILICA_Background_Main_v01.svg",
+      "runtime": "public/assets/a75/environment/level5/env-frozen-basilica-background-main-v01.svg",
+      "status": "integrated-correction-pending",
+      "humanApproved": false
+    },
+    {
+      "level": 6,
+      "id": "forever-motel",
+      "palette": [
+        "#120b16",
+        "#2a1628",
+        "#4a273d",
+        "#765064",
+        "#d5c1a5",
+        "#9e5276"
+      ],
+      "source": "source-assets/a75/environment/level6/ENV_FOREVER_MOTEL_Background_Main_v01.svg",
+      "runtime": "public/assets/a75/environment/level6/env-forever-motel-background-main-v01.svg",
+      "status": "integrated-correction-pending",
+      "humanApproved": false
+    },
+    {
+      "level": 7,
+      "id": "thousand-faces",
+      "palette": [
+        "#060817",
+        "#101a32",
+        "#1d3150",
+        "#385a78",
+        "#7ee3ef",
+        "#9b70d8"
+      ],
+      "source": "source-assets/a75/environment/level7/ENV_THOUSAND_FACES_Background_Main_v01.svg",
+      "runtime": "public/assets/a75/environment/level7/env-thousand-faces-background-main-v01.svg",
+      "status": "integrated-correction-pending",
+      "humanApproved": false
+    },
+    {
+      "level": 8,
+      "id": "succubus-capital",
+      "palette": [
+        "#11070f",
+        "#260c1c",
+        "#461126",
+        "#6f1f3b",
+        "#bb3b5a",
+        "#8e55a8"
+      ],
+      "source": "source-assets/a75/environment/level8/ENV_SUCCUBUS_CAPITAL_Background_Main_v01.svg",
+      "runtime": "public/assets/a75/environment/level8/env-succubus-capital-background-main-v01.svg",
+      "status": "integrated-correction-pending",
+      "humanApproved": false
+    },
+    {
+      "level": 9,
+      "id": "self-below",
+      "palette": [
+        "#07070b",
+        "#111217",
+        "#202127",
+        "#373840",
+        "#8b8790",
+        "#76559a"
+      ],
+      "source": "source-assets/a75/environment/level9/ENV_SELF_BELOW_Background_Main_v01.svg",
+      "runtime": "public/assets/a75/environment/level9/env-self-below-background-main-v01.svg",
+      "status": "integrated-correction-pending",
+      "humanApproved": false
+    }
+  ]
+}

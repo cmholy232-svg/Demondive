@@ -1,0 +1,775 @@
+{
+  "schemaVersion": 1,
+  "packageId": "alpha7.5-combat-cast-correction-register-v01",
+  "roadmapPosition": "Alpha 7.5 combat-cast correction and animation-source preparation",
+  "approval": {
+    "status": "source-ready-correction-pending",
+    "humanApproved": false,
+    "playableRelease": false
+  },
+  "sharedScaleRules": {
+    "milo": "one locked gameplay body scale across idle, run, jump, fall, dash, hurt and every cast direction",
+    "standardEnemy": "declared body dimensions and feet/hover band; visual effects never alter collision",
+    "miniboss": "roughly 1.2–1.8× Milo height unless the design deliberately uses a group or horizontal mass",
+    "boss": "roughly 1.8–2.8× Milo height; spectacle may exceed the body through separate non-collision layers"
+  },
+  "encounters": [
+    {
+      "level": 1,
+      "role": "miniboss",
+      "id": "bottomless-bartender",
+      "name": "Bottomless Bartender",
+      "status": "needs-correction",
+      "humanApproved": false,
+      "available": "A5 source/keyed atlas and runtime atlas",
+      "knownDefects": "Reported mini-boss image glitch is not yet tied to a confirmed cell; inspect neutral, throw and summon rows in current runtime.",
+      "silhouetteTarget": "Wide grounded bar-keeper silhouette; shaker hand and bottle/tentacle attacks separate cleanly from torso.",
+      "requiredStates": [
+        "neutral/idle",
+        "locomotion or reposition",
+        "primary attack anticipation/active/recovery",
+        "secondary attack anticipation/active/recovery",
+        "hurt/stagger",
+        "phase or enrage if applicable",
+        "defeat"
+      ],
+      "groundingAndAnchors": "feet center; bar/tentacle ground contacts declared",
+      "requiredSockets": [
+        "throw hand",
+        "bottle origin",
+        "summon origin",
+        "hurt center"
+      ],
+      "mechanicalNotes": [],
+      "sourceGate": [
+        "one stable gameplay scale across every state",
+        "minimum 6% transparent inset in every atlas cell",
+        "no body/effect fragment crosses or borrows from another cell",
+        "feet/hover pivot and collider remain independent of artwork scale",
+        "attack effect layers export separately from the body where they exceed the cell",
+        "left-facing mirror policy is declared",
+        "palette, hit-flash and emissive masks are present"
+      ]
+    },
+    {
+      "level": 1,
+      "role": "boss",
+      "id": "belladonna",
+      "name": "Belladonna",
+      "status": "needs-correction",
+      "humanApproved": false,
+      "available": "A5 source/keyed atlas, runtime atlas and portraits",
+      "knownDefects": "Attack-form clipping report; verify every attack cell, mouth effect and phase silhouette.",
+      "silhouetteTarget": "Tall horned appetite Demon Lord framed by independent maw/tendril shapes; never an ordinary glamorous human silhouette.",
+      "requiredStates": [
+        "entrance",
+        "neutral/idle",
+        "locomotion or reposition",
+        "every attack anticipation/active/recovery",
+        "hurt/stagger",
+        "invulnerable/armor state where applicable",
+        "phase transition",
+        "defeat"
+      ],
+      "groundingAndAnchors": "feet center; gown/tendril floor contacts must not redefine collider",
+      "requiredSockets": [
+        "mouth/vortex origins",
+        "cast hands",
+        "phase center",
+        "hurt center"
+      ],
+      "mechanicalNotes": [],
+      "sourceGate": [
+        "one stable gameplay scale across every state",
+        "minimum 6% transparent inset in every atlas cell",
+        "no body/effect fragment crosses or borrows from another cell",
+        "feet/hover pivot and collider remain independent of artwork scale",
+        "attack effect layers export separately from the body where they exceed the cell",
+        "left-facing mirror policy is declared",
+        "palette, hit-flash and emissive masks are present"
+      ]
+    },
+    {
+      "level": 2,
+      "role": "miniboss",
+      "id": "fan-club",
+      "name": "The Fan Club / Fan Club Champion",
+      "status": "needs-correction",
+      "humanApproved": false,
+      "available": "A6 champion source/keyed atlas and runtime atlas",
+      "knownDefects": "Mini-boss image glitch remains unresolved; group members and champion must not borrow adjacent-cell pixels.",
+      "silhouetteTarget": "One large champion plus clearly subordinate fan silhouettes; heart shields remain separate targets/effects.",
+      "requiredStates": [
+        "neutral/idle",
+        "locomotion or reposition",
+        "primary attack anticipation/active/recovery",
+        "secondary attack anticipation/active/recovery",
+        "hurt/stagger",
+        "phase or enrage if applicable",
+        "defeat"
+      ],
+      "groundingAndAnchors": "champion feet center; fan feet or declared hover pivots",
+      "requiredSockets": [
+        "heart shield",
+        "fan spawn",
+        "champion strike",
+        "hurt center"
+      ],
+      "mechanicalNotes": [],
+      "sourceGate": [
+        "one stable gameplay scale across every state",
+        "minimum 6% transparent inset in every atlas cell",
+        "no body/effect fragment crosses or borrows from another cell",
+        "feet/hover pivot and collider remain independent of artwork scale",
+        "attack effect layers export separately from the body where they exceed the cell",
+        "left-facing mirror policy is declared",
+        "palette, hit-flash and emissive masks are present"
+      ]
+    },
+    {
+      "level": 2,
+      "role": "boss",
+      "id": "nerissa",
+      "name": "Nerissa",
+      "status": "needs-correction",
+      "humanApproved": false,
+      "available": "A6 Demon Lord source/keyed atlas, runtime atlas and portrait",
+      "knownDefects": "Confirm all music-pillar and attack frames remain inside cells; retain visibly demonic anatomy in every phase.",
+      "silhouetteTarget": "Horned/fin-crested Demon Lord with broad siren mantle and tail/wing or aquatic infernal anatomy; not merely a singer in a dress.",
+      "requiredStates": [
+        "entrance",
+        "neutral/idle",
+        "locomotion or reposition",
+        "every attack anticipation/active/recovery",
+        "hurt/stagger",
+        "invulnerable/armor state where applicable",
+        "phase transition",
+        "defeat"
+      ],
+      "groundingAndAnchors": "feet center; hair/fins never change collision height",
+      "requiredSockets": [
+        "voice/cast mouth",
+        "both hands",
+        "pillar summon positions",
+        "phase center",
+        "hurt center"
+      ],
+      "mechanicalNotes": [
+        "Music-pillar state must visibly read invulnerable until every pillar is broken."
+      ],
+      "sourceGate": [
+        "one stable gameplay scale across every state",
+        "minimum 6% transparent inset in every atlas cell",
+        "no body/effect fragment crosses or borrows from another cell",
+        "feet/hover pivot and collider remain independent of artwork scale",
+        "attack effect layers export separately from the body where they exceed the cell",
+        "left-facing mirror policy is declared",
+        "palette, hit-flash and emissive masks are present"
+      ]
+    },
+    {
+      "level": 3,
+      "role": "miniboss",
+      "id": "perfect-prey",
+      "name": "Perfect Prey",
+      "status": "needs-correction",
+      "humanApproved": false,
+      "available": "A7 source/keyed atlas and fixed-cell runtime atlas",
+      "knownDefects": "Fixed-cell export exists; verify ground contact and each antler/attack extremity at gameplay scale.",
+      "silhouetteTarget": "Large infernal stag with a stable hoof line, open antler negative space and an obvious attack-facing head.",
+      "requiredStates": [
+        "neutral/idle",
+        "locomotion or reposition",
+        "primary attack anticipation/active/recovery",
+        "secondary attack anticipation/active/recovery",
+        "hurt/stagger",
+        "phase or enrage if applicable",
+        "defeat"
+      ],
+      "groundingAndAnchors": "hoof baseline center; leaps declare takeoff/landing pivots",
+      "requiredSockets": [
+        "head charge",
+        "antler arc",
+        "ground shock",
+        "hurt center"
+      ],
+      "mechanicalNotes": [
+        "Current AI report says it only retreats; combat behavior is a runtime correction, not an art substitute."
+      ],
+      "sourceGate": [
+        "one stable gameplay scale across every state",
+        "minimum 6% transparent inset in every atlas cell",
+        "no body/effect fragment crosses or borrows from another cell",
+        "feet/hover pivot and collider remain independent of artwork scale",
+        "attack effect layers export separately from the body where they exceed the cell",
+        "left-facing mirror policy is declared",
+        "palette, hit-flash and emissive masks are present"
+      ]
+    },
+    {
+      "level": 3,
+      "role": "boss",
+      "id": "roxyne",
+      "name": "Roxyne",
+      "status": "needs-correction",
+      "humanApproved": false,
+      "available": "A7 Demon Lord source/keyed atlas, fixed-cell runtime atlas and portrait",
+      "knownDefects": "Second-form clipping report; re-audit phase-two bounds despite the fixed-cell export.",
+      "silhouetteTarget": "Horned hunting Demon Lord with wide predatory shoulder/weapon arcs and infernal lower-body details; phase two grows without losing readable anatomy.",
+      "requiredStates": [
+        "entrance",
+        "neutral/idle",
+        "locomotion or reposition",
+        "every attack anticipation/active/recovery",
+        "hurt/stagger",
+        "invulnerable/armor state where applicable",
+        "phase transition",
+        "defeat"
+      ],
+      "groundingAndAnchors": "feet center; lunges keep a registered landing pivot",
+      "requiredSockets": [
+        "claw/weapon tips",
+        "pounce origin",
+        "mark origin",
+        "phase center",
+        "hurt center"
+      ],
+      "mechanicalNotes": [],
+      "sourceGate": [
+        "one stable gameplay scale across every state",
+        "minimum 6% transparent inset in every atlas cell",
+        "no body/effect fragment crosses or borrows from another cell",
+        "feet/hover pivot and collider remain independent of artwork scale",
+        "attack effect layers export separately from the body where they exceed the cell",
+        "left-facing mirror policy is declared",
+        "palette, hit-flash and emissive masks are present"
+      ]
+    },
+    {
+      "level": 4,
+      "role": "miniboss",
+      "id": "lady-luckless",
+      "name": "Lady Luckless",
+      "status": "missing",
+      "humanApproved": false,
+      "available": "No authoritative combat source materialized",
+      "knownDefects": "No source-level defect assessment possible.",
+      "silhouetteTarget": "Asymmetrical unlucky croupier silhouette with broken marquee halo and one oversized failed-chance device.",
+      "requiredStates": [
+        "neutral/idle",
+        "locomotion or reposition",
+        "primary attack anticipation/active/recovery",
+        "secondary attack anticipation/active/recovery",
+        "hurt/stagger",
+        "phase or enrage if applicable",
+        "defeat"
+      ],
+      "groundingAndAnchors": "feet center; device pivots independent",
+      "requiredSockets": [
+        "card/die origin",
+        "electric tell",
+        "device center",
+        "hurt center"
+      ],
+      "mechanicalNotes": [],
+      "sourceGate": [
+        "one stable gameplay scale across every state",
+        "minimum 6% transparent inset in every atlas cell",
+        "no body/effect fragment crosses or borrows from another cell",
+        "feet/hover pivot and collider remain independent of artwork scale",
+        "attack effect layers export separately from the body where they exceed the cell",
+        "left-facing mirror policy is declared",
+        "palette, hit-flash and emissive masks are present"
+      ]
+    },
+    {
+      "level": 4,
+      "role": "boss",
+      "id": "calyptra",
+      "name": "Calyptra",
+      "status": "missing",
+      "humanApproved": false,
+      "available": "Portrait/sigil/sensory direction only; no authoritative combat atlas",
+      "knownDefects": "No combat atlas available in isolated workspace.",
+      "silhouetteTarget": "Crowned horned casino empress with roulette halo and wide chance apparatus; Demon Lord scale and infernal anatomy must survive neutral pose.",
+      "requiredStates": [
+        "entrance",
+        "neutral/idle",
+        "locomotion or reposition",
+        "every attack anticipation/active/recovery",
+        "hurt/stagger",
+        "invulnerable/armor state where applicable",
+        "phase transition",
+        "defeat"
+      ],
+      "groundingAndAnchors": "feet center; halo never changes body scale",
+      "requiredSockets": [
+        "dice/card origins",
+        "roulette center",
+        "jackpot burst",
+        "phase center",
+        "hurt center"
+      ],
+      "mechanicalNotes": [],
+      "sourceGate": [
+        "one stable gameplay scale across every state",
+        "minimum 6% transparent inset in every atlas cell",
+        "no body/effect fragment crosses or borrows from another cell",
+        "feet/hover pivot and collider remain independent of artwork scale",
+        "attack effect layers export separately from the body where they exceed the cell",
+        "left-facing mirror policy is declared",
+        "palette, hit-flash and emissive masks are present"
+      ]
+    },
+    {
+      "level": 5,
+      "role": "miniboss",
+      "id": "memory-golem",
+      "name": "Memory Golem",
+      "status": "missing",
+      "humanApproved": false,
+      "available": "No authoritative combat source materialized",
+      "knownDefects": "No source-level defect assessment possible.",
+      "silhouetteTarget": "Top-heavy crystal/stone memory mass with a small stable base and one readable exposed memory core.",
+      "requiredStates": [
+        "neutral/idle",
+        "locomotion or reposition",
+        "primary attack anticipation/active/recovery",
+        "secondary attack anticipation/active/recovery",
+        "hurt/stagger",
+        "phase or enrage if applicable",
+        "defeat"
+      ],
+      "groundingAndAnchors": "base center; detached stones use authored orbit anchors",
+      "requiredSockets": [
+        "core",
+        "slam origin",
+        "projectile stones",
+        "hurt center"
+      ],
+      "mechanicalNotes": [],
+      "sourceGate": [
+        "one stable gameplay scale across every state",
+        "minimum 6% transparent inset in every atlas cell",
+        "no body/effect fragment crosses or borrows from another cell",
+        "feet/hover pivot and collider remain independent of artwork scale",
+        "attack effect layers export separately from the body where they exceed the cell",
+        "left-facing mirror policy is declared",
+        "palette, hit-flash and emissive masks are present"
+      ]
+    },
+    {
+      "level": 5,
+      "role": "boss",
+      "id": "isolde",
+      "name": "Isolde",
+      "status": "missing",
+      "humanApproved": false,
+      "available": "Portrait/sigil/sensory direction only; no authoritative combat atlas",
+      "knownDefects": "No combat atlas available in isolated workspace.",
+      "silhouetteTarget": "Horned frozen warden with asymmetrical crystal crown, one dominant ward plane and long spear-like ice rhythm.",
+      "requiredStates": [
+        "entrance",
+        "neutral/idle",
+        "locomotion or reposition",
+        "every attack anticipation/active/recovery",
+        "hurt/stagger",
+        "invulnerable/armor state where applicable",
+        "phase transition",
+        "defeat"
+      ],
+      "groundingAndAnchors": "feet center; ice train is decorative, not collision",
+      "requiredSockets": [
+        "crystal echo",
+        "ricochet cast",
+        "ward center",
+        "phase center",
+        "hurt center"
+      ],
+      "mechanicalNotes": [],
+      "sourceGate": [
+        "one stable gameplay scale across every state",
+        "minimum 6% transparent inset in every atlas cell",
+        "no body/effect fragment crosses or borrows from another cell",
+        "feet/hover pivot and collider remain independent of artwork scale",
+        "attack effect layers export separately from the body where they exceed the cell",
+        "left-facing mirror policy is declared",
+        "palette, hit-flash and emissive masks are present"
+      ]
+    },
+    {
+      "level": 6,
+      "role": "miniboss",
+      "id": "dream-girl",
+      "name": "Dream Girl",
+      "status": "missing",
+      "humanApproved": false,
+      "available": "No authoritative combat source materialized",
+      "knownDefects": "No source-level defect assessment possible.",
+      "silhouetteTarget": "Familiar motel-guest silhouette disrupted by one impossible dream feature and a readable decoy double.",
+      "requiredStates": [
+        "neutral/idle",
+        "locomotion or reposition",
+        "primary attack anticipation/active/recovery",
+        "secondary attack anticipation/active/recovery",
+        "hurt/stagger",
+        "phase or enrage if applicable",
+        "defeat"
+      ],
+      "groundingAndAnchors": "feet center; doubles declare separate pivots",
+      "requiredSockets": [
+        "sleep pulse",
+        "decoy origin",
+        "door target",
+        "hurt center"
+      ],
+      "mechanicalNotes": [],
+      "sourceGate": [
+        "one stable gameplay scale across every state",
+        "minimum 6% transparent inset in every atlas cell",
+        "no body/effect fragment crosses or borrows from another cell",
+        "feet/hover pivot and collider remain independent of artwork scale",
+        "attack effect layers export separately from the body where they exceed the cell",
+        "left-facing mirror policy is declared",
+        "palette, hit-flash and emissive masks are present"
+      ]
+    },
+    {
+      "level": 6,
+      "role": "boss",
+      "id": "somnia",
+      "name": "Somnia",
+      "status": "missing",
+      "humanApproved": false,
+      "available": "Portrait/sigil/sensory direction only; no authoritative combat atlas",
+      "knownDefects": "No combat atlas available in isolated workspace.",
+      "silhouetteTarget": "Horned dream queen whose flowing crescent mantle breaks the motel’s rectangles; true body remains higher contrast than decoys.",
+      "requiredStates": [
+        "entrance",
+        "neutral/idle",
+        "locomotion or reposition",
+        "every attack anticipation/active/recovery",
+        "hurt/stagger",
+        "invulnerable/armor state where applicable",
+        "phase transition",
+        "defeat"
+      ],
+      "groundingAndAnchors": "feet center; dream train excluded from collider",
+      "requiredSockets": [
+        "echo cast",
+        "decoy origin",
+        "sleep field",
+        "phase center",
+        "hurt center"
+      ],
+      "mechanicalNotes": [],
+      "sourceGate": [
+        "one stable gameplay scale across every state",
+        "minimum 6% transparent inset in every atlas cell",
+        "no body/effect fragment crosses or borrows from another cell",
+        "feet/hover pivot and collider remain independent of artwork scale",
+        "attack effect layers export separately from the body where they exceed the cell",
+        "left-facing mirror policy is declared",
+        "palette, hit-flash and emissive masks are present"
+      ]
+    },
+    {
+      "level": 7,
+      "role": "miniboss",
+      "id": "better-milo",
+      "name": "Better Milo",
+      "status": "missing",
+      "humanApproved": false,
+      "available": "No authoritative combat source materialized",
+      "knownDefects": "No source-level defect assessment possible.",
+      "silhouetteTarget": "Milo-scale rival with reversed jacket/scarf rhythm and one unmistakable superior-movement accent; never a scale-inflated Milo.",
+      "requiredStates": [
+        "neutral/idle",
+        "locomotion or reposition",
+        "primary attack anticipation/active/recovery",
+        "secondary attack anticipation/active/recovery",
+        "hurt/stagger",
+        "phase or enrage if applicable",
+        "defeat"
+      ],
+      "groundingAndAnchors": "same feet and palm conventions as Milo",
+      "requiredSockets": [
+        "right-palm cast",
+        "dash trail",
+        "landing burst",
+        "hurt center"
+      ],
+      "mechanicalNotes": [],
+      "sourceGate": [
+        "one stable gameplay scale across every state",
+        "minimum 6% transparent inset in every atlas cell",
+        "no body/effect fragment crosses or borrows from another cell",
+        "feet/hover pivot and collider remain independent of artwork scale",
+        "attack effect layers export separately from the body where they exceed the cell",
+        "left-facing mirror policy is declared",
+        "palette, hit-flash and emissive masks are present"
+      ]
+    },
+    {
+      "level": 7,
+      "role": "boss",
+      "id": "vespera",
+      "name": "Vespera",
+      "status": "missing",
+      "humanApproved": false,
+      "available": "Portrait/sigil/sensory direction only; no authoritative combat atlas",
+      "knownDefects": "No combat atlas available in isolated workspace.",
+      "silhouetteTarget": "Horned multi-face Demon Lord framed by mirror mantle; true face/body wins contrast over copies and shards.",
+      "requiredStates": [
+        "entrance",
+        "neutral/idle",
+        "locomotion or reposition",
+        "every attack anticipation/active/recovery",
+        "hurt/stagger",
+        "invulnerable/armor state where applicable",
+        "phase transition",
+        "defeat"
+      ],
+      "groundingAndAnchors": "feet center; mirror mantle excluded from collider",
+      "requiredSockets": [
+        "mirror planes",
+        "shard origins",
+        "true-body center",
+        "phase center",
+        "hurt center"
+      ],
+      "mechanicalNotes": [],
+      "sourceGate": [
+        "one stable gameplay scale across every state",
+        "minimum 6% transparent inset in every atlas cell",
+        "no body/effect fragment crosses or borrows from another cell",
+        "feet/hover pivot and collider remain independent of artwork scale",
+        "attack effect layers export separately from the body where they exceed the cell",
+        "left-facing mirror policy is declared",
+        "palette, hit-flash and emissive masks are present"
+      ]
+    },
+    {
+      "level": 8,
+      "role": "miniboss",
+      "id": "liliths-daughters",
+      "name": "Lilith’s Daughters",
+      "status": "missing",
+      "humanApproved": false,
+      "available": "No authoritative combat source materialized",
+      "knownDefects": "No source-level defect assessment possible.",
+      "silhouetteTarget": "A coordinated trio with different crown/wing/weapon silhouettes and a shared royal family motif.",
+      "requiredStates": [
+        "neutral/idle",
+        "locomotion or reposition",
+        "primary attack anticipation/active/recovery",
+        "secondary attack anticipation/active/recovery",
+        "hurt/stagger",
+        "phase or enrage if applicable",
+        "defeat"
+      ],
+      "groundingAndAnchors": "individual feet centers; formation anchor declared",
+      "requiredSockets": [
+        "three cast origins",
+        "formation center",
+        "crossfire lanes",
+        "hurt centers"
+      ],
+      "mechanicalNotes": [],
+      "sourceGate": [
+        "one stable gameplay scale across every state",
+        "minimum 6% transparent inset in every atlas cell",
+        "no body/effect fragment crosses or borrows from another cell",
+        "feet/hover pivot and collider remain independent of artwork scale",
+        "attack effect layers export separately from the body where they exceed the cell",
+        "left-facing mirror policy is declared",
+        "palette, hit-flash and emissive masks are present"
+      ]
+    },
+    {
+      "level": 8,
+      "role": "boss",
+      "id": "lilith",
+      "name": "Lilith",
+      "status": "missing",
+      "humanApproved": false,
+      "available": "Portrait/sigil/sensory direction only; no authoritative combat atlas",
+      "knownDefects": "No combat atlas available in isolated workspace.",
+      "silhouetteTarget": "Dominant demon queen with horns, wings, tail/regalia and throne-scale framing; authority comes from silhouette and staging, not random detail.",
+      "requiredStates": [
+        "entrance",
+        "neutral/idle",
+        "locomotion or reposition",
+        "every attack anticipation/active/recovery",
+        "hurt/stagger",
+        "invulnerable/armor state where applicable",
+        "phase transition",
+        "defeat"
+      ],
+      "groundingAndAnchors": "feet center plus throne staging anchor; wings excluded from collider",
+      "requiredSockets": [
+        "blood casts",
+        "wing arcs",
+        "throne/curse center",
+        "phase center",
+        "hurt center"
+      ],
+      "mechanicalNotes": [],
+      "sourceGate": [
+        "one stable gameplay scale across every state",
+        "minimum 6% transparent inset in every atlas cell",
+        "no body/effect fragment crosses or borrows from another cell",
+        "feet/hover pivot and collider remain independent of artwork scale",
+        "attack effect layers export separately from the body where they exceed the cell",
+        "left-facing mirror policy is declared",
+        "palette, hit-flash and emissive masks are present"
+      ]
+    },
+    {
+      "level": 9,
+      "role": "miniboss",
+      "id": "boss-rush",
+      "name": "Boss Rush",
+      "status": "missing",
+      "humanApproved": false,
+      "available": "Reuses restored encounter packages; authoritative Level 9 staging unavailable",
+      "knownDefects": "Every reused boss form must pass its own corrected atlas gate before registration.",
+      "silhouetteTarget": "Active memory boss alone reaches full contrast; defeated and upcoming silhouettes remain subdued.",
+      "requiredStates": [
+        "neutral/idle",
+        "locomotion or reposition",
+        "primary attack anticipation/active/recovery",
+        "secondary attack anticipation/active/recovery",
+        "hurt/stagger",
+        "phase or enrage if applicable",
+        "defeat"
+      ],
+      "groundingAndAnchors": "inherit each encounter pivot; arena staging anchor",
+      "requiredSockets": [
+        "inherited attack sockets",
+        "active boss center",
+        "memory transition center",
+        "arena handoff gate"
+      ],
+      "mechanicalNotes": [],
+      "sourceGate": [
+        "one stable gameplay scale across every state",
+        "minimum 6% transparent inset in every atlas cell",
+        "no body/effect fragment crosses or borrows from another cell",
+        "feet/hover pivot and collider remain independent of artwork scale",
+        "attack effect layers export separately from the body where they exceed the cell",
+        "left-facing mirror policy is declared",
+        "palette, hit-flash and emissive masks are present"
+      ]
+    },
+    {
+      "level": 9,
+      "role": "boss",
+      "id": "the-hollow",
+      "name": "The Hollow",
+      "status": "missing",
+      "humanApproved": false,
+      "available": "No authoritative combat source materialized",
+      "knownDefects": "No source-level defect assessment possible.",
+      "silhouetteTarget": "Begins at Milo’s exact scale and proportions, then gains a fragmented avoided-self halo without becoming an unreadable giant mass.",
+      "requiredStates": [
+        "entrance",
+        "neutral/idle",
+        "locomotion or reposition",
+        "every attack anticipation/active/recovery",
+        "hurt/stagger",
+        "invulnerable/armor state where applicable",
+        "phase transition",
+        "defeat"
+      ],
+      "groundingAndAnchors": "same feet/palm anchors as Milo in base-kit phase",
+      "requiredSockets": [
+        "right-palm cast",
+        "dash trail",
+        "fragment halo",
+        "acceptance/phase center",
+        "hurt center"
+      ],
+      "mechanicalNotes": [],
+      "sourceGate": [
+        "one stable gameplay scale across every state",
+        "minimum 6% transparent inset in every atlas cell",
+        "no body/effect fragment crosses or borrows from another cell",
+        "feet/hover pivot and collider remain independent of artwork scale",
+        "attack effect layers export separately from the body where they exceed the cell",
+        "left-facing mirror policy is declared",
+        "palette, hit-flash and emissive masks are present"
+      ]
+    }
+  ],
+  "defectIntake": [
+    {
+      "id": "milo-up-cast-scale",
+      "scope": "Milo",
+      "report": "Upward-shooting Milo is too small and has purple clipping at his feet.",
+      "confidence": "confirmed user report",
+      "artAction": "Re-export upward cast at the locked Milo scale; separate palm VFX; enforce feet inset and pivot.",
+      "runtimeAction": "Verify renderer never applies a state-specific scale."
+    },
+    {
+      "id": "milo-moving-cast-scale",
+      "scope": "Milo",
+      "report": "Moving forward while shooting makes Milo too large.",
+      "confidence": "confirmed user report",
+      "artAction": "Match body bounds to idle/run model sheet.",
+      "runtimeAction": "Remove state-specific sprite scale and preserve collider."
+    },
+    {
+      "id": "milo-grounding",
+      "scope": "Milo",
+      "report": "Milo appears to float above the floor.",
+      "confidence": "confirmed screenshot/report",
+      "artAction": "Lock the visible shoe sole to the common feet baseline.",
+      "runtimeAction": "Use feet anchor rather than transparent image bounds."
+    },
+    {
+      "id": "neon-maw-enemy-atlas",
+      "scope": "Level 1 enemies",
+      "report": "Several enemies float; Blade Siren head is cut off; attack forms clip.",
+      "confidence": "confirmed user report",
+      "artAction": "Repack padded fixed cells from separated sources; preserve head/weapon extents.",
+      "runtimeAction": "Use declared grounded/hover pivots and fixed source rectangles."
+    },
+    {
+      "id": "generic-enemy-altitude",
+      "scope": "Enemies",
+      "report": "At least one enemy is too high above the ground.",
+      "confidence": "confirmed screenshot/report; identity unresolved",
+      "artAction": "Capture exact identity/state before editing; do not shift whole atlases blindly.",
+      "runtimeAction": "Log enemy id/state/pivot and platform surface on debug screenshot."
+    },
+    {
+      "id": "belladonna-attack-clip",
+      "scope": "Belladonna",
+      "report": "Attack form appears clipped.",
+      "confidence": "confirmed user report",
+      "artAction": "Re-audit attack cells, mouth/tendril effects and transparent inset.",
+      "runtimeAction": "Confirm source rectangle and phase scale."
+    },
+    {
+      "id": "roxyne-phase-two-clip",
+      "scope": "Roxyne",
+      "report": "Second form is clipped incorrectly.",
+      "confidence": "confirmed user report",
+      "artAction": "Re-audit phase-two source bounds and effect separation.",
+      "runtimeAction": "Confirm phase texture/source rectangle registration."
+    },
+    {
+      "id": "miniboss-image-glitch",
+      "scope": "Mini-boss unresolved",
+      "report": "A mini-boss image glitches.",
+      "confidence": "confirmed report; encounter/cell unresolved",
+      "artAction": "Require runtime capture with encounter, state, frame and atlas rectangle before destructive source changes.",
+      "runtimeAction": "Add debug overlay/export for asset id, clip, frame, pivot and draw scale."
+    }
+  ],
+  "outputs": {
+    "silhouetteBoard": "source-assets/a75/characters/combat-cast/QA_CombatCast_SilhouetteTargets_v01.svg",
+    "handoff": "ALPHA7_5_COMBAT_CAST_CORRECTION_REGISTER.md"
+  }
+}

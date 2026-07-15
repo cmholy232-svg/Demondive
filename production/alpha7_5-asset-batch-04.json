@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "batchId": "alpha7.5-asset-batch-04",
+  "roadmapPosition": "Alpha 7.5 — biome cohesion, room cleanup and combat-cast correction gate",
+  "sourceBaseline": {
+    "authoritativeSourceLibraryId": "libfile_4d5afaaabb6881919f1c2a660e58c2ae",
+    "authoritativeSourceSha256": "fe7dca1034df75ca893635378766d1707b017628f6c0d5f5f7f6ea5c07b9c870",
+    "integrationState": "blocked-by-authoritative-source-materialization",
+    "isolatedWorkspaceRuntime": "older Alpha 7 Level 3 scaffold; source validation only"
+  },
+  "approval": {
+    "humanApproved": false,
+    "status": "source-ready-correction-pending",
+    "playableRelease": false
+  },
+  "biomeAndRoomPackage": {
+    "biomeCount": 9,
+    "manifest": "production/alpha7_5-biome-art-direction.json",
+    "biomeBoard": "source-assets/a75/environment/art-direction/QA_BiomeArtDirection_ContactSheet_v01.svg",
+    "densityBoard": "source-assets/a75/environment/art-direction/QA_RoomDensity_Comparison_v01.svg",
+    "handoff": "ALPHA7_5_BIOME_AND_ROOM_DIRECTION.md"
+  },
+  "combatCastPackage": {
+    "encounterCount": 18,
+    "reportedDefectCount": 8,
+    "manifest": "production/alpha7_5-combat-cast-correction-register.json",
+    "silhouetteBoard": "source-assets/a75/characters/combat-cast/QA_CombatCast_SilhouetteTargets_v01.svg",
+    "handoff": "ALPHA7_5_COMBAT_CAST_CORRECTION_REGISTER.md"
+  },
+  "frozenDecisions": [
+    "Levels use nine distinct palettes, value structures, shape languages, materials, props, hazards and forbidden lists.",
+    "Level 1 is shortest; Level 2 adds 2–3 rooms; each later level adds 1–3 rooms.",
+    "Mini-boss is once at 45–55%; boss is final; two empty rooms never occur back-to-back.",
+    "Branch choices and wagers use room-separation cooldowns.",
+    "One character scale and declared feet/hover pivot apply across every state.",
+    "All bosses must pass a colorless Demon Lord silhouette test.",
+    "Large effects and appendages separate from collision-body atlas cells."
+  ],
+  "notCompleted": [
+    "room-by-room validation in the Levels 1–9 runtime",
+    "final biome paint-over, platform, prop, hazard and foreground packages",
+    "final Level 4–9 combat atlases and animation layers",
+    "runtime correction of reported crop, scale, grounding and behavior defects",
+    "human gameplay-scale and physical-phone approval",
+    "playable release"
+  ]
+}

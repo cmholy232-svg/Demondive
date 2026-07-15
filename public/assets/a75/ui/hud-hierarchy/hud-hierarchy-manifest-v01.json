@@ -1,0 +1,77 @@
+{
+  "version": 1,
+  "status": "source-ready-correction-pending",
+  "humanApproved": false,
+  "runtime": {
+    "health": "public/assets/a75/ui/hud-hierarchy/hud-health-v01.svg",
+    "energy": "public/assets/a75/ui/hud-hierarchy/hud-energy-v01.svg",
+    "xp": "public/assets/a75/ui/hud-hierarchy/hud-xp-v01.svg",
+    "boon": "public/assets/a75/ui/hud-hierarchy/hud-boon-v01.svg",
+    "special": "public/assets/a75/ui/hud-hierarchy/hud-special-v01.svg",
+    "objective": "public/assets/a75/ui/hud-hierarchy/hud-objective-v01.svg",
+    "wager": "public/assets/a75/ui/hud-hierarchy/hud-wager-v01.svg"
+  },
+  "sourceLayouts": {
+    "desktopMinimal": "source-assets/a75/ui/hud-hierarchy/UI_HUD_Desktop_Minimal_v01.svg",
+    "mobileLandscapeMinimal": "source-assets/a75/ui/hud-hierarchy/UI_HUD_MobileLandscape_Minimal_v01.svg",
+    "pauseFull": "source-assets/a75/ui/hud-hierarchy/UI_HUD_Pause_FullInformation_v01.svg"
+  },
+  "qaContactSheet": "source-assets/a75/ui/hud-hierarchy/QA_HUDHierarchy_ContactSheet_v01.png",
+  "inventory": [
+    {
+      "id": "health",
+      "classification": "always-essential",
+      "rule": "visible during combat; damage/heal animation belongs to Alpha 7.6"
+    },
+    {
+      "id": "energy",
+      "classification": "always-essential",
+      "rule": "visible during combat; Special spend/ready relationship must be immediate"
+    },
+    {
+      "id": "special",
+      "classification": "always-essential",
+      "rule": "compact equipped Special and ready/cooldown state"
+    },
+    {
+      "id": "objective",
+      "classification": "contextually-essential",
+      "rule": "show boss mechanics, sealed-room objective or explicit route task only"
+    },
+    {
+      "id": "wager",
+      "classification": "contextually-essential",
+      "rule": "show accepted condition; collapse after completion/failure"
+    },
+    {
+      "id": "dominant-boon",
+      "classification": "always-essential",
+      "rule": "one dominant identity plus count; at most two secondary color pips"
+    },
+    {
+      "id": "secondary-boons",
+      "classification": "pause-menu-information",
+      "rule": "full list and descriptions live in loadout/pause"
+    },
+    {
+      "id": "global-xp",
+      "classification": "temporary-notification",
+      "rule": "thin bar appears on XP gain or level-up, then fades; never competes with survival information"
+    },
+    {
+      "id": "currency",
+      "classification": "temporary-notification",
+      "rule": "show on gain/spend and in pause, not continuously unless a wager uses it"
+    },
+    {
+      "id": "seed-depth-run-time",
+      "classification": "pause-menu-information",
+      "rule": "available in full information view and run summary"
+    },
+    {
+      "id": "rush-payout-announcer",
+      "classification": "removable",
+      "rule": "text-only event feed until final announcer direction is approved"
+    }
+  ]
+}

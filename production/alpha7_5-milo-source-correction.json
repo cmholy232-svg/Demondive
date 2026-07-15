@@ -1,0 +1,225 @@
+{
+  "schemaVersion": 1,
+  "packageId": "alpha7.5-milo-source-correction-v01",
+  "roadmapPosition": "Alpha 7.5 Milo final-art and animation-source preparation",
+  "approval": {
+    "status": "source-ready-correction-pending",
+    "humanApproved": false,
+    "playableRelease": false
+  },
+  "currentEvidence": {
+    "manifest": "public/assets/a5/characters/milo/chr-milo-animation-manifest-v01.json",
+    "cell": {
+      "width": 384,
+      "height": 512,
+      "feetY": 458,
+      "gameplayScale": 0.36
+    },
+    "frameScaleCompensation": {
+      "movement": [
+        1.12,
+        1.16,
+        1.14,
+        1.16,
+        1.17,
+        1.44,
+        1.17,
+        1.14
+      ],
+      "run": [
+        0.87,
+        0.96,
+        0.89,
+        0.89,
+        0.87,
+        0.95,
+        0.89,
+        0.91
+      ],
+      "dashHurt": [
+        1,
+        0.98,
+        1.12,
+        1.07,
+        1.13,
+        1.15,
+        1,
+        1.12
+      ],
+      "cast": [
+        1.04,
+        1.13,
+        1.04,
+        0.83,
+        1.33,
+        1.08,
+        1.02,
+        0.94
+      ]
+    },
+    "frameFeetY": {
+      "movement": [
+        405,
+        405,
+        457,
+        457,
+        457,
+        458,
+        458,
+        458
+      ]
+    },
+    "current": {
+      "idle": 1.16,
+      "runMean": 0.90375,
+      "runCast": 1.04,
+      "upCast": 0.83,
+      "airCast": 1.33,
+      "downCast": 1.08
+    },
+    "transitionRisks": [
+      {
+        "transition": "run → moving fire",
+        "from": 0.90375,
+        "to": 1.04,
+        "scaleChangePercent": 15.1,
+        "reportedResult": "Milo appears too large while moving and shooting."
+      },
+      {
+        "transition": "idle → upward fire",
+        "from": 1.16,
+        "to": 0.83,
+        "scaleChangePercent": -28.4,
+        "reportedResult": "Milo appears too small when shooting upward."
+      },
+      {
+        "transition": "jump/fall nominal → air fire",
+        "from": 1.17,
+        "to": 1.33,
+        "scaleChangePercent": 13.7,
+        "reportedResult": "Air-fire body mass may jump even when collider does not."
+      }
+    ]
+  },
+  "reportedDefects": [
+    {
+      "id": "floating-idle",
+      "symptom": "Visible gap between shoe sole and floor/contact shadow.",
+      "requiredResolution": "Bake every grounded frame to the common feet baseline and remove dependence on per-frame feetY."
+    },
+    {
+      "id": "moving-fire-too-large",
+      "symptom": "Milo grows when moving forward and firing.",
+      "requiredResolution": "Redraw/repack moving cast at the locked body landmarks; no frame scale multiplier."
+    },
+    {
+      "id": "up-fire-too-small",
+      "symptom": "Milo shrinks when firing upward.",
+      "requiredResolution": "Keep body landmarks at locked scale; export raised-arm Arcane effect separately."
+    },
+    {
+      "id": "purple-at-feet",
+      "symptom": "Purple pixels clip at Milo’s feet during upward fire.",
+      "requiredResolution": "Remove disconnected effect pixels below sole mask and enforce body/effect layer separation."
+    },
+    {
+      "id": "facing-latch",
+      "symptom": "Quick left/right tap can leave idle facing opposite the last intended direction.",
+      "requiredResolution": "Runtime state/input correction after source restoration; art mirrors from one declared master."
+    }
+  ],
+  "sourceContract": {
+    "version": 2,
+    "status": "source-required-correction-pending",
+    "humanApproved": false,
+    "cell": {
+      "width": 384,
+      "height": 512,
+      "feetY": 458,
+      "nativeGameplayScale": 0.36,
+      "minimumTransparentInsetPercent": 6
+    },
+    "runtimeFrameScaleAllowed": false,
+    "bodyCalibration": {
+      "uprightCrownToSoleTolerancePercent": 4,
+      "headHeightTolerancePercent": 3,
+      "shoulderWidthTolerancePercent": 4,
+      "jacketHemTolerancePercent": 4,
+      "shoeSizeTolerancePercent": 3,
+      "transitionApparentScaleTolerancePercent": 3,
+      "crouchAndAirRule": "Compare head, shoulders, jacket hem, pelvis and shoe landmarks; never normalize a tucked pose by bounding-box height."
+    },
+    "pivotRules": [
+      "every grounded frame places the visible shoe sole at y=458 in source",
+      "air frames preserve the same virtual feet reference even when legs tuck",
+      "shadow is rendered from collider and is never baked into the sprite",
+      "right-palm socket is measured after final source normalization",
+      "horizontal mirroring changes screen direction but not anatomical casting-hand ownership"
+    ],
+    "effectRules": [
+      "no purple/Arcane pixels may exist below the shoe contact mask",
+      "palm flame, projectile charge and long trails export separately from Milo’s body",
+      "effect bounds never influence body scaling or collider",
+      "upward effect may exceed the body cell only through a registered separate layer"
+    ],
+    "requiredStates": [
+      "idle breathing",
+      "turn/reversal",
+      "run contact A",
+      "run down A",
+      "run passing A",
+      "run up A",
+      "run contact B",
+      "run down B",
+      "run passing B",
+      "run up B",
+      "jump anticipation",
+      "jump rise",
+      "jump apex",
+      "jump fall",
+      "landing",
+      "dash start",
+      "dash travel",
+      "dash end/waveland",
+      "hurt light",
+      "hurt heavy",
+      "death",
+      "victory",
+      "neutral cast anticipation",
+      "neutral cast release",
+      "moving cast release",
+      "upward cast release",
+      "air cast release",
+      "downward cast release",
+      "Special charge",
+      "boon acquire"
+    ],
+    "sourceLayers": [
+      "body base",
+      "head/hair",
+      "jacket and cloth overlap",
+      "right casting arm/hand",
+      "left arm/hand",
+      "front leg",
+      "rear leg",
+      "shoe soles/contact mask",
+      "Arcane palm effect",
+      "cast trail/secondary VFX",
+      "hit-flash mask",
+      "emissive mask",
+      "shadow reference only"
+    ]
+  },
+  "integrationAfterArt": [
+    "register v02 atlas paths without overwriting v01",
+    "omit frameScales and frameFeetY from v02 runtime definitions",
+    "use the common source feetY and collider-owned world foot position",
+    "remeasure right-palm sockets after normalization",
+    "A/B capture every state transition over a fixed collider and floor line",
+    "run no-edge-pixel, disconnected-effect, source-rectangle and physical-phone tests"
+  ],
+  "outputs": {
+    "scaleBoard": "source-assets/a75/characters/milo-correction/QA_MiloScaleDriftAndSourceGate_v01.svg",
+    "handoff": "ALPHA7_5_MILO_SOURCE_CORRECTION.md"
+  }
+}

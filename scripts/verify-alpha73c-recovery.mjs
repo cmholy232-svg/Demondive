@@ -4,10 +4,10 @@ import path from 'node:path';
 
 const root = process.cwd();
 const expectedBuildHashes = Object.freeze({
-  'dist/index.html': '52f0e2e4ce14f9423c3066bae9e1cf0e3c8c4278047b46952c06b9ec2454d7ef',
+  'dist/index.html': 'c1d51a9da4b70839ef5a0ff76dcb9cd2081a258fdab570ddbc9c930ccb3c63db',
   'dist/assets/index-BmgJptvb.css': 'bb65aab281488d71c92102aa1c07c4b51d6a304010b84c71eb52a404b5212960',
-  'dist/assets/index-Bn0nmi6P.js': '7f57b879309eb50ff78db838fdb6d46307fe3faec75aad36e3f76d408e99e41b',
-  'dist/assets/index-Bn0nmi6P.js.map': '2bec6b2530723fbaa027b854d3c5b89bb622b6fdc6a166bbb7c4e5f4beb12778',
+  'dist/assets/index-Dgrynowu.js': 'd901498b8d9fdc4f4ae58b2d434a64d95b4092aef26e7bb7ac41873375a97981',
+  'dist/assets/index-Dgrynowu.js.map': 'd710a9254af72afd05b6476b4c892de9e4eb894d8502adc17d0887ba98a2e81c',
 });
 
 async function sha256(relativePath) {
@@ -35,7 +35,7 @@ for (const [relativePath, expected] of Object.entries(expectedBuildHashes)) {
   }
 }
 
-const sourceMap = JSON.parse(await readFile(path.join(root, 'dist/assets/index-Bn0nmi6P.js.map'), 'utf8'));
+const sourceMap = JSON.parse(await readFile(path.join(root, 'dist/assets/index-Dgrynowu.js.map'), 'utf8'));
 if (sourceMap.sources.length !== 20 || sourceMap.sourcesContent.length !== 20) {
   throw new Error(`Expected the exact 20-module Alpha 7.3C source corpus; received ${sourceMap.sources.length}.`);
 }
@@ -51,13 +51,14 @@ for (let index = 0; index < sourceMap.sources.length; index += 1) {
 }
 
 const publicAssets = await filesBelow('public/assets');
-if (publicAssets.length !== 111) {
-  throw new Error(`Expected 111 Alpha 7.3C runtime assets; received ${publicAssets.length}.`);
+const baselineAssets = publicAssets.filter((entry) => !entry.startsWith('public/assets/a75/'));
+if (baselineAssets.length !== 111) {
+  throw new Error(`Expected 111 Alpha 7.3C baseline assets; received ${baselineAssets.length}.`);
 }
 
 const requiredAssetRoots = ['a5', 'a6', 'a7', 'a73', 'a73c', 'v1'];
 for (const assetRoot of requiredAssetRoots) {
-  if (!publicAssets.some((entry) => entry.startsWith(`public/assets/${assetRoot}/`))) {
+  if (!baselineAssets.some((entry) => entry.startsWith(`public/assets/${assetRoot}/`))) {
     throw new Error(`Missing required asset root: ${assetRoot}`);
   }
 }
@@ -74,4 +75,4 @@ for (const marker of [
   if (!runtime.includes(marker)) throw new Error(`Missing Alpha 7.3C runtime marker: ${marker}`);
 }
 
-console.log('Alpha 7.3C recovery verified: exact runtime parity, 20 source modules, 111 assets, Levels 1–9.');
+console.log('Alpha 7.3C foundation verified with the sanctioned Alpha 7.5 late-portrait mappings: 20 modules, 111 baseline assets, Levels 1–9.');
