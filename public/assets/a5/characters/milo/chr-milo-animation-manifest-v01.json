@@ -1,0 +1,44 @@
+{
+  "version": 1,
+  "character": "milo",
+  "cell": { "width": 384, "height": 512, "feetY": 458, "gameplayScale": 0.36 },
+  "frameScaleCompensation": {
+    "movement": [1.12, 1.16, 1.14, 1.16, 1.17, 1.44, 1.17, 1.14],
+    "run": [0.87, 0.96, 0.89, 0.89, 0.87, 0.95, 0.89, 0.91],
+    "dashHurt": [1, 0.98, 1.12, 1.07, 1.13, 1.15, 1, 1.12],
+    "cast": [1.04, 1.13, 1.04, 0.96, 1.33, 1.08, 1.02, 0.94]
+  },
+  "frameFeetY": {
+    "movement": [405, 405, 457, 457, 457, 458, 458, 458],
+    "cast": [458, 458, 458, 416, 458, 458, 458, 458]
+  },
+  "frameFacing": {
+    "movement": [-1, -1, 1, 1, 1, 1, 1, 1]
+  },
+  "visualCalibration": {
+    "reference": "movement frame 1 idle visible-alpha area",
+    "goal": "constant perceived body mass across idle, run, jump, land, dash, squat-dash, and a deliberately prominent upward cast",
+    "haloAnchor": "waist, measured upward from the feet anchor"
+  },
+  "atlases": {
+    "movement": "chr-milo-movement-core-v01.png",
+    "run": "chr-milo-run-loop-v01.png",
+    "dashHurt": "chr-milo-dash-hurt-v01.png",
+    "cast": "chr-milo-cast-core-v01.png"
+  },
+  "clips": {
+    "idle": { "atlas": "movement", "frames": [1], "fps": 1, "loop": true },
+    "runLoop": { "atlas": "run", "frames": [0, 1, 2, 3, 4, 5, 6, 7], "fps": 13.5, "loop": true },
+    "jumpRise": { "atlas": "movement", "frames": [4], "fps": 1, "loop": false },
+    "jumpApex": { "atlas": "movement", "frames": [5], "fps": 1, "loop": false },
+    "jumpFall": { "atlas": "movement", "frames": [6], "fps": 1, "loop": false },
+    "land": { "atlas": "movement", "frames": [7], "fps": 1, "loop": false },
+    "dash": { "atlas": "dashHurt", "frames": [0, 1, 2, 3], "fps": 18, "loop": false },
+    "hurt": { "atlas": "dashHurt", "frames": [4, 5], "fps": 8, "loop": false },
+    "defeat": { "atlas": "dashHurt", "frames": [6, 7], "fps": 5.5, "loop": false },
+    "cast": { "atlas": "cast", "frames": [0, 1], "fps": 14, "loop": false },
+    "runCast": { "atlas": "cast", "frames": [2], "fps": 1, "loop": false },
+    "upCast": { "atlas": "cast", "frames": [3], "fps": 1, "loop": false },
+    "airCast": { "atlas": "cast", "frames": [4, 5], "fps": 1, "loop": false }
+  }
+}

@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#090713" />
+    <meta name="description" content="DemonDive is a fast supernatural 2D roguelite platformer about stacking twenty impossible Arcane boons." />
+    <title>DemonDive — Full Campaign Alpha 7.3C</title>
+  </head>
+  <body>
+    <main id="game-shell">
+      <div class="topbar">
+        <div class="brand"><span class="brand-mark">✦</span> DEMONDIVE <span class="build-stamp">A7.3C · LEVELS 8–9</span></div>
+        <div id="room-label">VERTICAL SLICE</div>
+      </div>
+
+      <div id="stage">
+        <canvas id="game" width="1280" height="720" aria-label="DemonDive game canvas"></canvas>
+
+        <div id="hud" class="hidden" aria-live="polite">
+          <div class="hud-left">
+            <div class="meter-row">
+              <span class="meter-icon health-icon">♥</span>
+              <div class="meter health"><i id="health-fill"></i><b id="health-text">100 / 100</b></div>
+            </div>
+            <div class="meter-row">
+              <span class="meter-icon energy-icon">◆</span>
+              <div class="meter energy"><i id="energy-fill"></i><b id="energy-text">100 / 100</b></div>
+            </div>
+            <div class="meter-row dive-level-row" title="Cosmetic lifetime progression only — Dive Level never changes combat power">
+              <span class="meter-icon dive-level-icon">∞</span>
+              <div class="meter dive-level"><i id="dive-level-fill"></i><b id="dive-level-text">DIVE LV. 1 · 0 / 120 XP</b></div>
+            </div>
+            <button id="modifier-toggle" type="button" aria-expanded="false"><span>Arcana</span><b>0 active · show</b></button>
+            <div id="modifier-panel" class="collapsed"></div>
+          </div>
+          <div class="hud-center">
+            <div id="objective">Clear the room</div>
+            <div id="room-map"></div>
+            <div id="boon-pips"></div>
+          </div>
+          <div class="hud-right">
+            <span class="currency">✧ <b id="run-shards">0</b></span>
+            <span id="special-name">TEMPTATION NOVA</span>
+          </div>
+        </div>
+
+        <section id="overlay" class="overlay"></section>
+        <div id="toast" role="status"></div>
+        <div id="tutorial-prompt" role="status"></div>
+
+        <div id="mobile-controls" aria-label="Touch controls">
+          <div class="touch-cluster move-cluster">
+            <button data-control="up" aria-label="Aim up">▲</button>
+            <button data-control="left" aria-label="Move left">◀</button>
+            <button data-control="down" aria-label="Aim down">▼</button>
+            <button data-control="right" aria-label="Move right">▶</button>
+          </div>
+          <div class="touch-cluster action-cluster">
+            <button class="jump" data-control="jump" aria-label="Jump">↑</button>
+            <button class="dash" data-control="dash" aria-label="Dash">»</button>
+            <button class="fire" data-control="fire" aria-label="Arcane Magic">●</button>
+            <button class="special" data-control="special" aria-label="Special ability">✦</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="controls-strip">
+        <span><kbd>WASD</kbd> MOVE / AIM</span>
+        <span><kbd>SPACE</kbd> JUMP</span><span><kbd>SHIFT</kbd> DASH</span>
+        <span><kbd>J</kbd> MAGIC</span>
+        <span><kbd>K</kbd> SPECIAL</span>
+        <span><kbd>E</kbd> INTERACT</span>
+        <span><kbd>ESC</kbd> PAUSE</span>
+      </div>
+    </main>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
