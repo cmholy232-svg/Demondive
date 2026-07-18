@@ -18,6 +18,7 @@ import { RuntimeTelemetry } from '../src/game/telemetry';
 import { SeededRandom } from '../src/game/rng';
 import { campaignThreat, deepDiveThreat } from '../src/game/difficulty';
 import { deepDiveBiome, deepDiveCrossPollination, deepDiveCycle, deepDiveEncounter, deepDiveHasBoonReward, deepDiveHasRouteChoice, deepDiveHasWager, deepDiveIsDoubleBoss, deepDiveMinimumEnemies, deepDivePowers, deepDiveRewardStacks, deepDiveRoute, deepDiveSlot } from '../src/game/deep-dive';
+import { ACTION_FEEDBACK_BUDGETS, PROCEDURAL_SFX_PROFILES, sfxPitchMultiplier } from '../src/game/feedback-policy';
 import type { Projectile, RoomDefinition } from '../src/game/types';
 
 class MemoryStorage implements SaveStorage {
@@ -161,6 +162,14 @@ const meanStarterOffers=starterOfferTotal/starterOfferHistogram.length;
 assert.ok(meanStarterOffers>=3&&meanStarterOffers<=6.5,`starter affinity mean ${meanStarterOffers.toFixed(2)} escaped the curated middle`);
 assert.ok(starterOfferHistogram.some(count=>count<=3)&&starterOfferHistogram.some(count=>count>=8),'smart curation lost either low-stack variety or rare tall-stack possibility');
 assert.ok(uninvestedOfferTotal>starterOfferTotal,'new-boon discovery must remain stronger than starter repetition across the cohort');
+
+assert.equal(Object.keys(PROCEDURAL_SFX_PROFILES).length,14,'routine combat SFX event family is incomplete');
+for(const [event,profile] of Object.entries(PROCEDURAL_SFX_PROFILES)){
+  assert.ok(profile.startHz>0&&profile.endHz>0&&profile.durationSeconds>=.05&&profile.gain>=.03,`${event} has an inaudible or invalid procedural profile`);
+  assert.ok(sfxPitchMultiplier(event as keyof typeof PROCEDURAL_SFX_PROFILES,0)>0&&sfxPitchMultiplier(event as keyof typeof PROCEDURAL_SFX_PROFILES,11)>0,`${event} variation is invalid`);
+}
+assert.ok(ACTION_FEEDBACK_BUDGETS.step.tier<ACTION_FEEDBACK_BUDGETS.enemyHit.tier&&ACTION_FEEDBACK_BUDGETS.enemyHit.tier<ACTION_FEEDBACK_BUDGETS.hurt.tier&&ACTION_FEEDBACK_BUDGETS.hurt.tier<ACTION_FEEDBACK_BUDGETS.bossDown.tier,'feedback intensity hierarchy is not ordered');
+assert.ok(ACTION_FEEDBACK_BUDGETS.bossDown.hitStopMs<=90&&ACTION_FEEDBACK_BUDGETS.bossDown.cameraImpulse<=14,'Tier 4 feedback escaped its accessibility budget');
 
 assert.deepEqual(sameSeedRetryRequest(0xfeedbeef),{ depth:1,seed:0xfeedbeef });
 assert.deepEqual(newRunRequest(),{ depth:1 });

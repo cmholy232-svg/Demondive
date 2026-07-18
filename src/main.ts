@@ -11,6 +11,7 @@ import { BOONS, BOON_ORDER, ENEMY_BODIES, FLOOR_Y, HEIGHT, HUB_ROOM, LEVEL_EIGHT
 import { campaignContent } from './game/content-registry';
 import { deepDiveBiome, deepDiveCrossPollination, deepDiveCycle, deepDiveEncounter, deepDiveHasBoonReward, deepDiveHasRouteChoice, deepDiveHasWager, deepDiveIsDoubleBoss, deepDiveMinimumEnemies, deepDivePowers, deepDiveRewardStacks, deepDiveRoute } from './game/deep-dive';
 import { campaignThreat, deepDiveThreat } from './game/difficulty';
+import { PROCEDURAL_SFX_PROFILES, sfxPitchMultiplier, type ProceduralSfxEvent } from './game/feedback-policy';
 import { DIALOGUE_BEATS, TUTORIAL_STEPS, applyDialogueBeatMutation, type DialogueBeat, type TutorialAction } from './game/dialogue';
 import { canAccessCampaignLevel, PC_MASTER_ACCESS } from './game/entitlements';
 import { KeyboardBindingRepository, bindingConflicts, profileBindings, rebindAction, type KeyboardBindingState, type KeyboardProfileId } from './game/input-bindings';
@@ -313,6 +314,9 @@ class DemonGame {
   private readonly levelTiles = new Image();
   private readonly hubBackdrop = new Image();
   private audioContext: AudioContext | null = null;
+  private sfxOutput: GainNode | null = null;
+  private sfxNoiseBuffer: AudioBuffer | null = null;
+  private sfxSequence = 0;
   private arcaneShotCounter = 0;
   private soundEnabled = true;
   private voiceEnabled = true;
@@ -471,9 +475,9 @@ class DemonGame {
     // Browsers require one trusted gesture before audio playback. Unlock on
     // the first pointer press anywhere, so Settings is never a hidden music
     // start switch and the title cue begins on the player's first click.
-    window.addEventListener('pointerdown', () => { void this.music.unlock(); }, { capture:true });
+    window.addEventListener('pointerdown', () => { void this.unlockAudio(); }, { capture:true });
     window.addEventListener('keydown', (event) => {
-      void this.music.unlock();
+      void this.unlockAudio();
       const code = event.code;
       this.noteInputDevice('keyboard');
       if(this.rebindingAction){
@@ -549,7 +553,7 @@ class DemonGame {
       if (!control || !isGameAction(control)) return;
       const press = (event: PointerEvent) => {
         event.preventDefault();
-        void this.music.unlock();
+        void this.unlockAudio();
         this.noteInputDevice('touch');
         button.setPointerCapture(event.pointerId);
         this.touchControls.add(control);
@@ -712,7 +716,7 @@ class DemonGame {
       </div>`;
     mustElement<HTMLButtonElement>('#enter-hub').addEventListener('click', () => this.activateTitle());
     mustElement<HTMLButtonElement>('#title-settings').addEventListener('click', () => {
-      void this.music.unlock();
+      void this.unlockAudio();
       this.showSettings('title');
     });
     window.setTimeout(() => {
@@ -727,7 +731,7 @@ class DemonGame {
     const button = this.overlay.querySelector<HTMLButtonElement>('#enter-hub');
     if (!button || button.disabled) return;
     this.titleStartLocked = true;
-    void this.music.unlock();
+    void this.unlockAudio();
     button.disabled = true;
     button.textContent = 'DESCENDING…';
     this.overlay.querySelector('.title-panel')?.classList.add('starting');
@@ -782,7 +786,7 @@ class DemonGame {
       this.save.settings.sound = this.soundEnabled;
       this.music.setMasterVolume(this.save.settings.masterVolume);
       this.music.setMusicVolume(this.save.settings.musicVolume);
-      void this.music.unlock();
+      void this.unlockAudio();
       this.persistSave();
     }));
     mustElement<HTMLButtonElement>('#toggle-shake-setting').addEventListener('click', () => {
@@ -2398,6 +2402,7 @@ class DemonGame {
     if (this.lunaTurretTimer > 0) this.fireLunaTurretShot(aimX, aimY, color, accentColor);
     this.burst(muzzleX, muzzleY, color, 4, 100);
     this.playArcaneBlastSound();
+    this.playSound('fire');
     this.telemetry.recordAction(performance.now(),this.screen,'fire','consumed','fired');
     this.telemetry.recordShot(performance.now(),this.screen,shotCount,this.totalBoonStacks());
     this.tutorialAction('magic');
@@ -4555,47 +4560,67 @@ class DemonGame {
 
   private repairAndTestAudio():void {
     this.save.settings.masterVolume=.8;this.save.settings.musicVolume=.72;this.save.settings.sfxVolume=.9;this.save.settings.sound=true;this.soundEnabled=true;this.persistSave();
-    this.music.setMasterVolume(.8);this.music.setMusicVolume(.72);this.music.resume();void this.music.unlock();
-    const demo=emptyBoonStacks();for(const id of BOON_ORDER.slice(0,12))demo[id]=1;
-    this.arcaneAudio.playReveal(demo,'belladonna',.72);this.showToast('AUDIO REPAIRED · MUSIC + 12-BOON ARCANE TEST');
+    this.music.setMasterVolume(.8);this.music.setMusicVolume(.72);this.music.resume();
+    void this.unlockAudio().then(()=>{
+      this.playSound('fire');window.setTimeout(()=>this.playSound('enemyHit'),130);window.setTimeout(()=>this.playSound('enemyDown'),270);
+      const demo=emptyBoonStacks();for(const id of BOON_ORDER.slice(0,12))demo[id]=1;
+      this.arcaneAudio.playReveal(demo,'belladonna',.72);
+    });
+    this.showToast('AUDIO REPAIRED · FIRE + HIT + DEFEAT + ARCANE TEST');
     window.setTimeout(()=>{if(this.screen==='paused')this.music.pause();},2200);
   }
 
-  private playSound(kind: 'step' | 'land' | 'jump' | 'doubleJump' | 'dash' | 'fire' | 'special' | 'hurt' | 'pickup' | 'boon' | 'enemyHit' | 'enemyShoot' | 'enemyDown' | 'bossDown'): void {
+  private ensureAudioContext():AudioContext|null {
+    if(this.audioContext&&this.audioContext.state!=='closed')return this.audioContext;
+    try{
+      const AudioContextConstructor=window.AudioContext??(window as Window&{webkitAudioContext?:typeof AudioContext}).webkitAudioContext;
+      if(!AudioContextConstructor)return null;
+      this.audioContext=new AudioContextConstructor();
+      this.sfxOutput=this.audioContext.createGain();this.sfxOutput.gain.value=1;this.sfxOutput.connect(this.audioContext.destination);
+      this.sfxNoiseBuffer=null;
+      return this.audioContext;
+    }catch{return null;}
+  }
+
+  private async unlockAudio():Promise<void> {
+    const context=this.ensureAudioContext();
+    const tasks:Promise<unknown>[]=[this.music.unlock()];
+    if(context?.state==='suspended')tasks.push(context.resume());
+    await Promise.allSettled(tasks);
+  }
+
+  private noiseBuffer(context:AudioContext):AudioBuffer {
+    if(this.sfxNoiseBuffer&&this.sfxNoiseBuffer.sampleRate===context.sampleRate)return this.sfxNoiseBuffer;
+    const length=Math.ceil(context.sampleRate*.65);const buffer=context.createBuffer(1,length,context.sampleRate);const data=buffer.getChannelData(0);
+    for(let index=0;index<length;index+=1)data[index]=(Math.random()*2-1)*(1-index/length*.35);
+    this.sfxNoiseBuffer=buffer;return buffer;
+  }
+
+  private playSound(kind: ProceduralSfxEvent): void {
     if (!this.sfxIsAudible() || this.activeSfx>=18) return;
     const combatEvent: CombatSfxEvent | undefined = kind === 'hurt' ? 'playerHit'
       : kind === 'enemyHit' || kind === 'enemyShoot' || kind === 'enemyDown' || kind === 'bossDown' ? kind : undefined;
     if (combatEvent && !this.combatSfxLimiter.tryAcquire(combatEvent,performance.now()/1000)) return;
-    let voiceCounted = false;
-    try {
-      this.audioContext ??= new AudioContext();
-      if (this.audioContext.state === 'suspended') void this.audioContext.resume();
-      const context = this.audioContext;
-      const oscillator = context.createOscillator();
-      const gain = context.createGain();
-      const settings = {
-        step: [92, 68, .045, 'triangle'], land: [145, 72, .08, 'triangle'],
-        jump: [260, 410, .08, 'square'], doubleJump: [390, 680, .12, 'triangle'], dash: [170, 70, .13, 'sawtooth'],
-        fire: [330, 150, .055, 'square'], special: [180, 620, .24, 'sawtooth'], hurt: [150, 65, .16, 'sawtooth'],
-        pickup: [520, 820, .1, 'sine'], boon: [240, 920, .5, 'triangle'],
-        enemyHit: [245, 105, .05, 'triangle'], enemyShoot: [520, 175, .08, 'sawtooth'],
-        enemyDown: [180, 95, .09, 'square'], bossDown: [110, 45, .42, 'sawtooth'],
-      } as const;
-      const [start, end, duration, wave] = settings[kind];
-      oscillator.type = wave;
-      oscillator.frequency.setValueAtTime(start, context.currentTime);
-      oscillator.frequency.exponentialRampToValueAtTime(Math.max(20, end), context.currentTime + duration);
-      const sfxGain = this.save.settings.masterVolume * this.save.settings.sfxVolume;
-      gain.gain.setValueAtTime((kind === 'step' ? .012 : kind === 'land' ? .022 : kind === 'fire' ? .025 : kind === 'enemyHit' ? .028 : kind === 'enemyShoot' ? .026 : .045) * sfxGain, context.currentTime);
-      gain.gain.exponentialRampToValueAtTime(.0001, context.currentTime + duration);
-      oscillator.connect(gain); gain.connect(context.destination);
-      this.activeSfx+=1; voiceCounted=true; oscillator.onended=()=>{this.activeSfx=Math.max(0,this.activeSfx-1);if(combatEvent)this.combatSfxLimiter.release(combatEvent);};
-      oscillator.start(); oscillator.stop(context.currentTime + duration);
-    } catch {
-      if(voiceCounted)this.activeSfx=Math.max(0,this.activeSfx-1);
-      if(combatEvent)this.combatSfxLimiter.release(combatEvent);
-      // Audio is enhancement-only; browsers may deny it before user interaction.
-    }
+    const context=this.ensureAudioContext();
+    if(!context){if(combatEvent)this.combatSfxLimiter.release(combatEvent);return;}
+    const emit=()=>this.emitProceduralSound(context,kind,combatEvent);
+    if(context.state==='suspended')void context.resume().then(emit).catch(()=>{if(combatEvent)this.combatSfxLimiter.release(combatEvent);});
+    else emit();
+  }
+
+  private emitProceduralSound(context:AudioContext,kind:ProceduralSfxEvent,combatEvent?:CombatSfxEvent):void {
+    let voiceCounted=false;
+    try{
+      const profile=PROCEDURAL_SFX_PROFILES[kind],sequence=this.sfxSequence++,pitch=sfxPitchMultiplier(kind,sequence),now=context.currentTime,duration=profile.durationSeconds;
+      const output=this.sfxOutput??context.destination;const sfxGain=this.save.settings.masterVolume*this.save.settings.sfxVolume;
+      const oscillator=context.createOscillator(),gain=context.createGain();oscillator.type=profile.waveform;
+      oscillator.frequency.setValueAtTime(profile.startHz*pitch,now);oscillator.frequency.exponentialRampToValueAtTime(Math.max(20,profile.endHz*pitch),now+duration);
+      gain.gain.setValueAtTime(.0001,now);gain.gain.exponentialRampToValueAtTime(profile.gain*sfxGain,now+.004);gain.gain.exponentialRampToValueAtTime(.0001,now+duration);
+      oscillator.connect(gain);gain.connect(output);
+      if(profile.secondaryMix>0){const secondary=context.createOscillator(),secondaryGain=context.createGain();secondary.type=kind==='pickup'||kind==='boon'?'sine':'triangle';secondary.frequency.setValueAtTime(profile.startHz*1.51*pitch,now);secondary.frequency.exponentialRampToValueAtTime(Math.max(22,profile.endHz*.76*pitch),now+duration);secondaryGain.gain.setValueAtTime(.0001,now);secondaryGain.gain.exponentialRampToValueAtTime(profile.gain*profile.secondaryMix*sfxGain,now+.008);secondaryGain.gain.exponentialRampToValueAtTime(.0001,now+duration);secondary.connect(secondaryGain);secondaryGain.connect(output);secondary.start(now);secondary.stop(now+duration);}
+      if(profile.noiseMix>0){const source=context.createBufferSource(),filter=context.createBiquadFilter(),noiseGain=context.createGain();source.buffer=this.noiseBuffer(context);filter.type=kind==='land'||kind==='bossDown'?'lowpass':'bandpass';filter.frequency.value=kind==='enemyHit'||kind==='hurt'?1350:kind==='dash'?850:620;filter.Q.value=.72;noiseGain.gain.setValueAtTime(.0001,now);noiseGain.gain.exponentialRampToValueAtTime(profile.gain*profile.noiseMix*sfxGain,now+.002);noiseGain.gain.exponentialRampToValueAtTime(.0001,now+Math.min(duration,.19));source.connect(filter);filter.connect(noiseGain);noiseGain.connect(output);source.start(now);source.stop(now+Math.min(duration,.2));}
+      this.activeSfx+=1;voiceCounted=true;oscillator.onended=()=>{this.activeSfx=Math.max(0,this.activeSfx-1);if(combatEvent)this.combatSfxLimiter.release(combatEvent);};oscillator.start(now);oscillator.stop(now+duration);
+    }catch{if(voiceCounted)this.activeSfx=Math.max(0,this.activeSfx-1);if(combatEvent)this.combatSfxLimiter.release(combatEvent);}
   }
 
   private playArcaneBlastSound():void {
@@ -4612,19 +4637,19 @@ class DemonGame {
   private playRewardChord(kind: 'rank' | 'payout' | 'clear'): void {
     if (!this.sfxIsAudible()) return;
     try {
-      this.audioContext ??= new AudioContext(); if (this.audioContext.state === 'suspended') void this.audioContext.resume();
-      const context = this.audioContext; const notes = kind === 'payout' ? [523.25,783.99,1046.5] : kind === 'clear' ? [261.63,392,523.25] : [329.63,493.88,659.25];
+      const context=this.ensureAudioContext();if(!context)return;if(context.state==='suspended'){void this.unlockAudio();return;}
+      const output=this.sfxOutput??context.destination; const notes = kind === 'payout' ? [523.25,783.99,1046.5] : kind === 'clear' ? [261.63,392,523.25] : [329.63,493.88,659.25];
       notes.forEach((frequency,index) => {
         const oscillator = context.createOscillator(); const gain = context.createGain(); const start = context.currentTime + index * .055;
         oscillator.type = kind === 'payout' ? 'sine' : 'triangle'; oscillator.frequency.setValueAtTime(frequency, start); oscillator.frequency.exponentialRampToValueAtTime(frequency * 1.08, start + .28);
         const sfxGain = this.save.settings.masterVolume * this.save.settings.sfxVolume;
-        gain.gain.setValueAtTime(.0001, start); gain.gain.exponentialRampToValueAtTime(.045 * sfxGain, start + .025); gain.gain.exponentialRampToValueAtTime(.0001, start + .34);
-        oscillator.connect(gain); gain.connect(context.destination); oscillator.start(start); oscillator.stop(start + .36);
+        gain.gain.setValueAtTime(.0001, start); gain.gain.exponentialRampToValueAtTime(.085 * sfxGain, start + .025); gain.gain.exponentialRampToValueAtTime(.0001, start + .34);
+        oscillator.connect(gain); gain.connect(output); oscillator.start(start); oscillator.stop(start + .36);
       });
     } catch { /* Reward audio is enhancement-only. */ }
   }
 
-  private sfxIsAudible():boolean { return this.save.settings.masterVolume>.001&&this.save.settings.sfxVolume>.001; }
+  private sfxIsAudible():boolean { return this.soundEnabled&&this.save.settings.masterVolume>.001&&this.save.settings.sfxVolume>.001; }
 
   private announce(text: string): void {
     if (!ANNOUNCER_ENABLED || !this.voiceEnabled || !('speechSynthesis' in window) || !('SpeechSynthesisUtterance' in window)) return;

@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "roadmapPosition": "Alpha 7.6A — feedback and audio infrastructure",
+  "feedbackTiers": {
+    "tier1": "routine movement and neutral fire",
+    "tier2": "ordinary hit, defeat, dash and room-scale confirmation",
+    "tier3": "Milo hurt, Specials, boon acquisition and wager outcomes",
+    "tier4": "boss defeat, jackpot, transformation and personal-best spectacle"
+  },
+  "runtimeSfxEvents": [
+    "step",
+    "land",
+    "jump",
+    "doubleJump",
+    "dash",
+    "fire",
+    "special",
+    "hurt",
+    "pickup",
+    "boon",
+    "enemyHit",
+    "enemyShoot",
+    "enemyDown",
+    "bossDown"
+  ],
+  "runtimeImplementation": {
+    "unlock": "music and WebAudio SFX unlock together on pointer, keyboard, touch and explicit audio repair interactions",
+    "output": "one reusable AudioContext and SFX output bus",
+    "voices": "event-specific oscillator, optional harmonic layer and filtered-noise transient",
+    "variation": "bounded deterministic pitch variation prevents identical rapid repeats",
+    "limiting": "combat event cooldown and active-voice limits remain enabled",
+    "arcane": "sampled Arcane blast/chord is layered with a short procedural muzzle transient",
+    "repairTest": "fire, enemy hit, enemy defeat and evolved Arcane reveal are auditioned in sequence"
+  },
+  "accessibilityBudgets": {
+    "maximumTier4HitStopMs": 90,
+    "maximumTier4CameraImpulse": 14,
+    "routineFullScreenFlash": false,
+    "reducedVfxDoesNotHideTelegraphs": true
+  },
+  "assetStatus": {
+    "proceduralRuntimeFallback": "implemented",
+    "finalAuthoredCombatSfxFamilies": "missing",
+    "finalBoonSpecificSfxFamilies": "missing",
+    "finalEnemyMaterialAndMassVariants": "missing",
+    "finalBossSignatureAndPhaseSfx": "missing"
+  },
+  "automatedStatus": "implemented-and-contract-tested",
+  "humanExitBlockers": [
+    "Confirm title music and SFX begin from the first valid pointer and keyboard interaction in target browsers.",
+    "Audition all fourteen event families over every biome music track.",
+    "Approve routine-action loudness, fatigue and combat priority on speakers and headphones.",
+    "Replace procedural fallbacks with authored masters where the final sensory identity requires it.",
+    "Verify mobile audio interruption, Bluetooth latency and background/resume behavior in Beta."
+  ]
+}
