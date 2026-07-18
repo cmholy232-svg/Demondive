@@ -15,6 +15,7 @@ import { DIALOGUE_BEATS, TUTORIAL_STEPS, applyDialogueBeatMutation, type Dialogu
 import { canAccessCampaignLevel, PC_MASTER_ACCESS } from './game/entitlements';
 import { KeyboardBindingRepository, bindingConflicts, profileBindings, rebindAction, type KeyboardBindingState, type KeyboardProfileId } from './game/input-bindings';
 import { buildRoomFrame, generateRunPlan, roomCountBounds } from './game/generator';
+import { buildHudPriorityView } from './game/hud-view';
 import { calyptraCriticalMultiplier, calyptraPowerMultiplier, jackpotChanceFor, roomGradeFor, rushChargeForRank, scoreMultiplierForRank, styleRankFor } from './game/feel';
 import { MusicDirector } from './game/music-director';
 import type { MusicState } from './game/music';
@@ -117,11 +118,13 @@ class DemonGame {
   private readonly energyText = mustElement<HTMLElement>('#energy-text');
   private readonly diveLevelFill = mustElement<HTMLElement>('#dive-level-fill');
   private readonly diveLevelText = mustElement<HTMLElement>('#dive-level-text');
+  private readonly diveLevelRow = mustElement<HTMLElement>('.dive-level-row');
   private readonly objective = mustElement<HTMLElement>('#objective');
   private readonly boonPips = mustElement<HTMLElement>('#boon-pips');
   private readonly modifierPanel = mustElement<HTMLElement>('#modifier-panel');
   private readonly roomMap = mustElement<HTMLElement>('#room-map');
   private readonly runShardsLabel = mustElement<HTMLElement>('#run-shards');
+  private readonly currencyDisplay = mustElement<HTMLElement>('.currency');
   private readonly specialName = mustElement<HTMLElement>('#special-name');
   private readonly toastElement = mustElement<HTMLElement>('#toast');
   private readonly tutorialPrompt = mustElement<HTMLElement>('#tutorial-prompt');
@@ -216,6 +219,8 @@ class DemonGame {
   private stoneBarrierY = 0;
   private stoneBarrierFacing: 1 | -1 = 1;
   private toastTimer = 0;
+  private xpRevealTimer = 0;
+  private currencyRevealTimer = 0;
   private ambientEmbers: Particle[] = [];
   private waves: GroundWave[] = [];
   private titleStartLocked = false;
@@ -446,6 +451,7 @@ class DemonGame {
     if (result.awarded === 0) return;
     this.save.diveLevel = result.level;
     this.save.diveXp = result.xp;
+    this.xpRevealTimer=result.levelsGained>0?5:2.8;
     this.runMetrics.diveXpEarned += result.awarded;
     if (result.levelsGained > 0) {
       this.playRewardChord('rank');
@@ -672,6 +678,8 @@ class DemonGame {
     this.roomIntro = Math.max(0, this.roomIntro - dt);
     this.transition = Math.max(0, this.transition - dt);
     this.toastTimer = Math.max(0, this.toastTimer - dt);
+    this.xpRevealTimer=Math.max(0,this.xpRevealTimer-dt);
+    this.currencyRevealTimer=Math.max(0,this.currencyRevealTimer-dt);
     this.comboTimer = Math.max(0, this.comboTimer - dt);
     for (const impact of this.arcaneImpacts) impact.life -= dt;
     this.arcaneImpacts = this.arcaneImpacts.filter((impact) => impact.life > 0);
@@ -1341,6 +1349,9 @@ class DemonGame {
     this.overlay.innerHTML = '';
     this.hubModalOpen = false;
     this.hud.classList.remove('hidden');
+    // The XP bar remains a contextual HUD element, but every run reveals it
+    // long enough for players to learn where their persistent level lives.
+    this.xpRevealTimer = Math.max(this.xpRevealTimer, 4);
     this.loadRoom(0);
     this.music.requestState(this.currentDepth === 1 ? 'PORTAL_TRANSITION' : this.explorationMusicState());
     window.setTimeout(() => {
@@ -3885,6 +3896,7 @@ class DemonGame {
           const currencyWithRemainder=pickup.value*(1+this.effectiveBoonStacks('aurelia')*.15)+this.aureliaCurrencyRemainder;
           const awarded=Math.max(1,Math.floor(currencyWithRemainder));this.aureliaCurrencyRemainder=currencyWithRemainder-awarded;
           this.runShards += awarded;
+          this.currencyRevealTimer=2.8;
           this.floatingText.push({ x: pickup.x, y: pickup.y, text: `+${awarded} SHARD${awarded === 1 ? '' : 'S'}`, color: '#ffc75a', life: .8, maxLife: .8, size: 14 });
         }
         if(this.boonStacks.belladonna>0){
@@ -4648,20 +4660,26 @@ class DemonGame {
     const deepPowers=this.room.deepDivePowers?.length?` · ${this.room.deepDivePowers.map(power=>power.toUpperCase()).join(' + ')}`:'';
     this.objective.textContent = this.boonPickups.length ? `Choose 1 of ${this.boonPickups.length} Arcane boons` : this.roomCleared ? `Gate open ${exitArrow[this.room.exitSide ?? 'right']}` : this.room.type === 'traversal' || this.room.type === 'recovery' ? this.room.objective : `${this.room.objective} · ${living} left${fanStatus}${daughterStatus}${rushStatus}${lilithStatus}${hollowStatus}${preyStatus}${dreamStatus}${wagerClock}${snareStatus}${deepPowers}`;
     this.runShardsLabel.textContent = `${this.runShards}`;
-    this.specialName.textContent = this.getSpecialName(this.player.special).toUpperCase();
     const activeBoons = BOON_ORDER.filter((id) => this.boonStacks[id] > 0);
     const synergies=this.activeSynergies();
+    const dominant=this.getDominantBoon();
+    const attached=selectAttachedBoons(this.boonStacks,BOON_ORDER,dominant);
+    const specialCost=this.getSpecialCost(this.player.special);
+    const hudView=buildHudPriorityView({xpRevealSeconds:this.xpRevealTimer,currencyRevealSeconds:this.currencyRevealTimer,wagerActive:Boolean(this.activeWager),roomCleared:this.roomCleared,roomIntroSeconds:this.roomIntro,dominantBoon:dominant,attachedBoons:attached,activeBoonCount:activeBoons.length,specialCooldownSeconds:this.player.specialCooldown,specialEnergyCost:specialCost,currentEnergy:this.player.energy});
+    this.diveLevelRow.classList.toggle('context-hidden',!hudView.showXp);
+    this.currencyDisplay.classList.toggle('context-hidden',!hudView.showCurrency);
+    this.roomMap.classList.toggle('context-hidden',!hudView.showRoomMap);
+    this.specialName.textContent = `${this.getSpecialName(this.player.special).toUpperCase()} · ${hudView.specialState==='ready'?'READY':hudView.specialState==='cooldown'?'COOLDOWN':`${Math.ceil(specialCost-this.player.energy)} ENERGY`}`;
     const inspecting = Boolean(this.loadoutReturnScreen);
     this.modifierToggle.innerHTML = `<span>Arcana loadout</span><b>${activeBoons.length} active${synergies.length?` · ${synergies.length} synergy${synergies.length===1?'':'ies'}`:''} · inspect</b>`;
     this.modifierToggle.setAttribute('aria-expanded', String(inspecting));
     this.modifierPanel.classList.remove('expanded');
     this.modifierPanel.classList.add('collapsed');
-    const visiblePips = activeBoons.slice(0, 8);
+    const visiblePips = hudView.combatBoonIds;
     this.boonPips.innerHTML = visiblePips.map((id) => `<i class="boon-pip" style="color:${BOONS[id].color}">${BOONS[id].glyph}<b>×${this.boonStacks[id]}</b></i>`).join('')
-      + (activeBoons.length > visiblePips.length ? `<i class="boon-pip boon-more">+${activeBoons.length - visiblePips.length}</i>` : '');
+      + (hudView.hiddenBoonCount > 0 ? `<i class="boon-pip boon-more">+${hudView.hiddenBoonCount}</i>` : '');
     const arcane = this.getArcaneColor();
     const arcaneAccent = this.getArcaneAccentColor();
-    const dominant=this.getDominantBoon();
     this.modifierPanel.innerHTML = `
       <div class="modifier-chip flame-chip" style="--boon:${arcane};--flame:${arcane};--flame2:${arcaneAccent}"><span class="glyph">${dominant?BOONS[dominant].glyph:'◆'}</span><b>${dominant?`${BOONS[dominant].name.toUpperCase()}-LED ARCANA`:'NEUTRAL ARCANA'}</b><span>${arcaneHarmonyLabel(this.boonStacks)} · ${dominant?`dominant ×${this.boonStacks[dominant]}`:'unbound'}</span></div>`;
     this.updateRoomMap();

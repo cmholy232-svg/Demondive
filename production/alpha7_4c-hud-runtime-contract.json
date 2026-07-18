@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "roadmapPosition": "Alpha 7.4C2 — HUD hierarchy",
+  "objective": "Keep combat information readable without hiding persistent progress or build identity.",
+  "minimalCombatHud": {
+    "alwaysEssential": [
+      "health",
+      "demon energy",
+      "active Special and readiness",
+      "current objective"
+    ],
+    "contextual": {
+      "diveLevelXp": "revealed at run start, XP gain and level-up, then fades",
+      "currency": "revealed on collection and while a wager is active",
+      "roomMap": "revealed during room intro and after room clear",
+      "boonStacks": "dominant boon plus no more than two attached identities and one hidden-count summary"
+    },
+    "pauseOrSummary": [
+      "complete boon stack ledger",
+      "run seed",
+      "detailed statistics",
+      "permanent upgrade detail"
+    ]
+  },
+  "specialStates": [
+    "ready",
+    "cooldown",
+    "needs-energy"
+  ],
+  "mobileGuardrails": [
+    "objective remains visible on narrow screens",
+    "room map and boon pips yield first to touch-safe space",
+    "health and energy never yield to notifications",
+    "no hover-only information"
+  ],
+  "automatedStatus": "implemented-and-fixture-protected",
+  "humanExitBlockers": [
+    "Verify hierarchy at 16:9, 16:10, ultrawide and narrow mobile-reference aspect ratios.",
+    "Verify XP reveal is noticed by a new player without becoming persistent clutter.",
+    "Verify Special state wording remains readable during high-effect combat.",
+    "Approve final compact boon-stack presentation after five-second recognition testing."
+  ]
+}

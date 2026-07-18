@@ -391,6 +391,7 @@ export interface RoomDefinition {
   mapY?: number;
   stageDepth?: number;
   complexity?: number;
+  quality?: RoomQualityMetadata;
   objective: string;
   entryDialogue?: StoryBeatId;
   clearDialogue?: StoryBeatId;
@@ -404,6 +405,20 @@ export interface RoomDefinition {
   deepDiveBoonStacks?: number;
   deepDiveWagerTier?: number;
   doubleBoss?: boolean;
+}
+
+export interface RoomQualityMetadata {
+  intendedMovement: 'grounded'|'vertical'|'air-control'|'wave-route'|'mixed';
+  difficultyTier: 1|2|3|4|5|6|7|8|9|10;
+  enemyBudget: number;
+  hazardBudget: number;
+  densityClass: 'low'|'medium'|'high';
+  traversalType: string;
+  recoveryLevel: 'none'|'partial'|'full';
+  compatibleModifiers: string[];
+  compatibleBiomes: number[];
+  mobileSuitability: 'safe'|'review'|'unsuitable';
+  performanceWeight: number;
 }
 
 export interface BoonPickup extends Rect {

@@ -2,6 +2,7 @@ import { ENEMY_BODIES, FLOOR_Y, HEIGHT, LEVEL_EIGHT_ENCOUNTERS, LEVEL_FIVE_ENCOU
 import { desiredEnemyCount } from './difficulty';
 import { createRunSeed, SeededRandom } from './rng';
 import type { RandomSource } from './rng';
+import { buildRoomQualityMetadata } from './room-metadata';
 import { validateRoomTraversal } from './room-quality';
 import type { EnemySpawn, EnemyType, GateSide, GeneratedRunPlan, Hazard, Rect, RoomDefinition, RoomType, RouteChoice, RouteKind, WagerType } from './types';
 
@@ -279,7 +280,7 @@ function buildBox(index: number, type: RoomType, difficulty: number, depth: numb
 export function buildRoomFrame(type: RoomType, depth: number, difficulty: number, entrySide: GateSide, exitSide: GateSide, seed: string | number, variant = 0) {
   const rng = new SeededRandom(`${seed}:room-frame:${variant}`);
   const geometry = buildBox(variant + rng.int(0, BOXES.length * 3), type, difficulty, depth, entrySide, exitSide, rng);
-  return { ...geometry, playerStart:playerStart(entrySide), exit:gateRect(exitSide) };
+  return { ...geometry, quality:buildRoomQualityMetadata(type,depth,difficulty,entrySide,exitSide,geometry), playerStart:playerStart(entrySide), exit:gateRect(exitSide) };
 }
 
 function generateRoute(count: number, depth: number, rng: RandomSource) {
@@ -408,6 +409,7 @@ function makeBranchRoom(base: RoomDefinition, kind: RouteKind, stage: number, in
     seedKey:`branch-${index}-${kind}-${rng.seed}`,
   };
   if (kind === 'event') { room.name='The Unmarked Door'; room.subtitle=`Level ${stage} · Infernal Event`; room.objective='Make a bounded choice'; room.spawns=[]; room.hazards=[]; room.rewardKind='none'; room.danger=2; }
+  room.quality=buildRoomQualityMetadata(type,stage,difficulty,room.entrySide??'left',room.exitSide??'right',room);
   return room;
 }
 
@@ -493,6 +495,7 @@ function buildRunPlan(depth: number, seed: number, attempt: number): GeneratedRu
       type, theme:identity.theme,
       platforms:geometry.platforms,hazards:geometry.hazards,spawns:geometry.spawns,playerStart:playerStart(entrySide),exit:gateRect(exitSide),entrySide,exitSide,
       mapX:coordinate.x,mapY:coordinate.y,stageDepth:stage,complexity:geometry.complexity,
+      quality:buildRoomQualityMetadata(type,stage,difficulty,entrySide,exitSide,geometry),
       objective:identity.objective,
       routeKind:type === 'cache'?'cache':'combat',
       rewardKind:type === 'cache'?'arcane-cache':type === 'miniboss' || type === 'boss'?'major-boon':'none',
@@ -579,6 +582,7 @@ function buildRunPlan(depth: number, seed: number, attempt: number): GeneratedRu
     const mechanicRoom=rooms.find(room=>room.type==='combat')??rooms[0];
     if (!rooms.some(room=>room.hazards.some(hazard=>hazard.type==='memoryRift'))) mechanicRoom.hazards.push({type:'memoryRift',x:565,y:575,w:150,h:75,damage:13,cycleOffset:.5});
   }
+  rooms.forEach((room,index)=>{const difficulty=index+1+(stage-1)*1.5;room.quality=buildRoomQualityMetadata(room.type,stage,difficulty,room.entrySide??'left',room.exitSide??'right',room);});
   if (!rooms.every(roomIsTraversable)) return null;
 
   const wagerRooms = chooseWagerRooms(rooms, rng.fork('wagers'));

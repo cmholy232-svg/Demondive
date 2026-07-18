@@ -1,0 +1,54 @@
+{
+  "schemaVersion": 1,
+  "roadmapPosition": "Alpha 7.4C2 — Procedural-room quality contracts",
+  "objective": "Validate generated rooms as combat spaces and movement routes, not only as technically connected geometry.",
+  "requiredMetadata": [
+    "intendedMovement",
+    "difficultyTier",
+    "enemyBudget",
+    "hazardBudget",
+    "densityClass",
+    "traversalType",
+    "recoveryLevel",
+    "compatibleModifiers",
+    "compatibleBiomes",
+    "mobileSuitability",
+    "performanceWeight"
+  ],
+  "automatedFailures": [
+    "missing metadata",
+    "enemy count exceeds declared budget",
+    "hazard count exceeds declared budget",
+    "invalid performance weight",
+    "damaging hazard in a recovery room",
+    "unreachable critical traversal path"
+  ],
+  "automatedWarnings": [
+    "high visual density requires human review",
+    "mobile suitability requires review",
+    "ice and current combine into contradictory momentum hazards"
+  ],
+  "currentCoverage": {
+    "generatedCampaignRooms": "13,413 deterministic fixtures across Levels 1–9",
+    "metadataRefresh": "performed after biome-specific hazard injection so declarations match final room state",
+    "budgetMeaning": "current budgets are generated-room declarations and regression guards, not final independent difficulty ceilings"
+  },
+  "humanReviewChecklist": [
+    "clear entry and exit",
+    "platform and hazard readability",
+    "enemy sightlines and recovery space",
+    "ordinary jump route and wavedash opportunities",
+    "foreground/background separation",
+    "reward placement and biome coherence",
+    "contradictory modifier combinations",
+    "small-screen legibility and touch occlusion",
+    "performance under the declared room weight"
+  ],
+  "automatedStatus": "implemented-and-fixture-protected",
+  "humanExitBlockers": [
+    "Assign independent enemy and hazard ceilings by difficulty tier.",
+    "Review every high-density warning in a generated-room contact sheet or playable sweep.",
+    "Validate mixed-biome Deep Dive combinations after the 7.4D stability changes.",
+    "Approve representative ordinary-jump and advanced-movement routes on keyboard and controller."
+  ]
+}

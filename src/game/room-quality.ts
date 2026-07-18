@@ -11,6 +11,10 @@ export interface RoomTraversalReport {
   reachableSurfaceCount: number;
 }
 
+export type RoomQualityFailure = 'missing-metadata'|'enemy-budget-exceeded'|'hazard-budget-exceeded'|'invalid-performance-weight'|'hazard-in-recovery-room';
+export type RoomQualityWarning = 'high-density-human-review'|'mobile-review-required'|'contradictory-momentum-hazards';
+export interface RoomQualityReport { valid:boolean;failures:RoomQualityFailure[];warnings:RoomQualityWarning[]; }
+
 function horizontalGap(a: Rect, b: Rect): number {
   if (a.x + a.w < b.x) return b.x - (a.x + a.w);
   if (b.x + b.w < a.x) return a.x - (b.x + b.w);
@@ -68,4 +72,17 @@ export function validateRoomTraversal(room: Pick<RoomDefinition, 'platforms' | '
     exitSurfaceCount:targets.size,
     reachableSurfaceCount:visited.size,
   };
+}
+
+export function validateRoomQuality(room:Pick<RoomDefinition,'type'|'hazards'|'spawns'|'quality'>):RoomQualityReport {
+  const failures:RoomQualityFailure[]=[];const warnings:RoomQualityWarning[]=[];const metadata=room.quality;
+  if(!metadata)return {valid:false,failures:['missing-metadata'],warnings};
+  if(room.spawns.length>metadata.enemyBudget)failures.push('enemy-budget-exceeded');
+  if(room.hazards.length>metadata.hazardBudget)failures.push('hazard-budget-exceeded');
+  if(!Number.isFinite(metadata.performanceWeight)||metadata.performanceWeight<=0)failures.push('invalid-performance-weight');
+  if(room.type==='recovery'&&room.hazards.some((hazard)=>hazard.damage>0))failures.push('hazard-in-recovery-room');
+  if(metadata.densityClass==='high')warnings.push('high-density-human-review');
+  if(metadata.mobileSuitability!=='safe')warnings.push('mobile-review-required');
+  const kinds=new Set(room.hazards.map((hazard)=>hazard.type));if(kinds.has('ice')&&kinds.has('current'))warnings.push('contradictory-momentum-hazards');
+  return {valid:failures.length===0,failures,warnings};
 }

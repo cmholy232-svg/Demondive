@@ -5,9 +5,10 @@ import { BOON_PROJECTILE_SHAPES, buildupThreshold, incomingDamageMultiplier, pic
 import { BOONS, BOON_ORDER, FLOOR_Y, WIDTH } from '../src/game/content';
 import { canAccessBoon, canAccessCampaignLevel, ENTITLEMENT_TEST_CONTEXTS } from '../src/game/entitlements';
 import { generateRunPlan, roomIsEmpty } from '../src/game/generator';
+import { buildHudPriorityView } from '../src/game/hud-view';
 import { KeyboardBindingRepository, bindingConflicts, profileBindings, rebindAction } from '../src/game/input-bindings';
 import { MOVEMENT_PROFILES, selectMovementProfile } from '../src/game/player-tuning';
-import { validateRoomTraversal } from '../src/game/room-quality';
+import { validateRoomQuality, validateRoomTraversal } from '../src/game/room-quality';
 import { newRunRequest, sameSeedRetryRequest } from '../src/game/run-retry';
 import { cloneDefaultSave } from '../src/game/save';
 import { BrowserSaveRepository, CURRENT_SAVE_KEY, LEGACY_SAVE_KEYS, type SaveStorage } from '../src/game/save-repository';
@@ -93,6 +94,11 @@ assert.ok(Math.abs(incomingDamageMultiplier(2,4,true)-.5712)<.000001,'Gaia armor
 assert.deepEqual([buildupThreshold(1),buildupThreshold(4),buildupThreshold(8)],[4,3,2],'status buildup must accelerate only at explicit effective-stack thresholds');
 assert.deepEqual([somniaEchoCount(0),somniaEchoCount(1),somniaEchoCount(4),somniaEchoCount(8)],[0,1,2,3],'Somnia echoes must escalate at bounded thresholds');
 assert.deepEqual([seraphineMaximumShieldCharges(0),seraphineMaximumShieldCharges(1),seraphineMaximumShieldCharges(4),seraphineMaximumShieldCharges(10)],[0,1,2,4],'Seraphine regeneration must use a bounded shield cap');
+const minimalHud=buildHudPriorityView({xpRevealSeconds:0,currencyRevealSeconds:0,wagerActive:false,roomCleared:false,roomIntroSeconds:0,dominantBoon:'pyrra',attachedBoons:['maris','gaia','zephyra'],activeBoonCount:10,specialCooldownSeconds:0,specialEnergyCost:24,currentEnergy:10});
+assert.equal(minimalHud.showXp,false);assert.equal(minimalHud.showCurrency,false);assert.equal(minimalHud.showRoomMap,false);
+assert.deepEqual(minimalHud.combatBoonIds,['pyrra','maris','gaia']);assert.equal(minimalHud.hiddenBoonCount,7);assert.equal(minimalHud.specialState,'needs-energy');
+const contextualHud=buildHudPriorityView({xpRevealSeconds:2,currencyRevealSeconds:0,wagerActive:true,roomCleared:true,roomIntroSeconds:0,dominantBoon:'pyrra',attachedBoons:['maris','gaia'],activeBoonCount:3,specialCooldownSeconds:.2,specialEnergyCost:24,currentEnergy:100});
+assert.equal(contextualHud.showXp,true);assert.equal(contextualHud.showCurrency,true);assert.equal(contextualHud.showRoomMap,true);assert.equal(contextualHud.specialState,'cooldown');
 
 assert.deepEqual(sameSeedRetryRequest(0xfeedbeef),{ depth:1,seed:0xfeedbeef });
 assert.deepEqual(newRunRequest(),{ depth:1 });
@@ -110,6 +116,11 @@ for (let depth = 1; depth <= 9; depth += 1) {
     const plan = generateRunPlan(depth,depth * 100000 + sample * 7919);
     for (const room of plan.rooms) {
       assert.equal(validateRoomTraversal(room).valid,true,`depth ${depth} seed ${plan.seed} generated a disconnected room`);
+      assert.ok(room.quality,`depth ${depth} seed ${plan.seed} lacks room-quality metadata`);
+      assert.ok((room.quality?.performanceWeight??0)>0&&Number.isFinite(room.quality?.performanceWeight),`depth ${depth} seed ${plan.seed} has invalid performance weight`);
+      assert.ok((room.quality?.compatibleBiomes??[]).includes(depth),`depth ${depth} seed ${plan.seed} lacks its biome compatibility`);
+      const qualityReport=validateRoomQuality(room);
+      assert.equal(qualityReport.valid,true,`depth ${depth} seed ${plan.seed} exceeds a room-quality budget: ${qualityReport.failures.join(',')}`);
       generatedRooms += 1;
     }
     for (let index = 1; index < plan.rooms.length; index += 1) {
