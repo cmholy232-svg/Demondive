@@ -1,0 +1,35 @@
+{
+  "version": "alpha-7.5",
+  "status": "runtime-ready-human-review-pending",
+  "humanApproved": false,
+  "layout": {
+    "width": 1024,
+    "height": 768,
+    "columns": 4,
+    "rows": 3,
+    "cellWidth": 256,
+    "cellHeight": 256,
+    "cells": [
+      "platformWide",
+      "platformEdge",
+      "platformOneWay",
+      "exitGate",
+      "propA",
+      "propB",
+      "propC",
+      "propD",
+      "hazardAInactive",
+      "hazardAActive",
+      "hazardBInactive",
+      "hazardBActive"
+    ]
+  },
+  "atlases": [
+    {"level": 4, "biome": "Thunder Jackpot", "path": "assets/a75/environment/level4/env-thunder-jackpot-construction-atlas-v01.png", "sha256": "5087839313173b7d3f969ab4b67c638efe9e4e4f670f342155181d88673fcee0"},
+    {"level": 5, "biome": "Frozen Basilica", "path": "assets/a75/environment/level5/env-frozen-basilica-construction-atlas-v01.png", "sha256": "2f6852b98555adc1bdb724b98554f8082d2812b506203811773660f122757d3d"},
+    {"level": 6, "biome": "Forever Motel", "path": "assets/a75/environment/level6/env-forever-motel-construction-atlas-v01.png", "sha256": "5333a367f6790920897ec9313e363a42d11679eed9dacc371229e63c634e4345"},
+    {"level": 7, "biome": "Thousand Faces", "path": "assets/a75/environment/level7/env-thousand-faces-construction-atlas-v01.png", "sha256": "185b1ba09c6c70680a6b7021d0529e93ea8ea445dba9861110c74d1ce32b6352"},
+    {"level": 8, "biome": "Lilith's Throne", "path": "assets/a75/environment/level8/env-liliths-throne-construction-atlas-v01.png", "sha256": "3e55e77b78ab85f42468095042d9495aad555501065d4cdda388021779bc98b0"},
+    {"level": 9, "biome": "The Self Below", "path": "assets/a75/environment/level9/env-self-below-construction-atlas-v01.png", "sha256": "9af7595658ee4b19e524e4e46ac8c81d24faae54622db0f5ec0b61c6d1a5b993"}
+  ]
+}

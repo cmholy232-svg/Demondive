@@ -261,6 +261,11 @@ class DemonGame {
   private readonly levelBackdrop = new Image();
   private readonly levelTwoBackdrop = new Image();
   private readonly levelThreeBackdrop = new Image();
+  private readonly lateBackdrops = new Map<number, HTMLImageElement>();
+  private readonly lateEnemyAtlases = new Map<number, HTMLImageElement>();
+  private readonly lateEncounterAtlases = new Map<number, HTMLImageElement>();
+  private readonly lateEnvironmentAtlases = new Map<number, HTMLImageElement>();
+  private readonly boonSigils = new Map<BoonId, HTMLImageElement>();
   private readonly levelTiles = new Image();
   private readonly hubBackdrop = new Image();
   private audioContext: AudioContext | null = null;
@@ -301,6 +306,27 @@ class DemonGame {
     this.levelBackdrop.src = `${import.meta.env.BASE_URL}assets/a5/environment/env-neonmaw-background-main-v01.png`;
     this.levelTwoBackdrop.src = `${import.meta.env.BASE_URL}assets/a6/environment/env-drownedcourt-background-main-v01.png`;
     this.levelThreeBackdrop.src = `${import.meta.env.BASE_URL}assets/a7/environment/env-thornwild-background-main-v01.png`;
+    const lateAssets: Record<number, { backdrop: string; enemies: string; encounters: string; environment: string }> = {
+      4: { backdrop: 'assets/a75/environment/level4/env-thunder-jackpot-background-main-v02.png', enemies: 'assets/a75/enemies/level4/enm-thunder-jackpot-atlas-v01.png', encounters: 'assets/a75/bosses/level4/bos-thunder-jackpot-encounters-v01.png', environment: 'assets/a75/environment/level4/env-thunder-jackpot-construction-atlas-v01.png' },
+      5: { backdrop: 'assets/a75/environment/level5/env-frozen-basilica-background-main-v02.png', enemies: 'assets/a75/enemies/level5/enm-frozen-basilica-atlas-v01.png', encounters: 'assets/a75/bosses/level5/bos-frozen-basilica-encounters-v01.png', environment: 'assets/a75/environment/level5/env-frozen-basilica-construction-atlas-v01.png' },
+      6: { backdrop: 'assets/a75/environment/level6/env-forever-motel-background-main-v02.png', enemies: 'assets/a75/enemies/level6/enm-forever-motel-atlas-v01.png', encounters: 'assets/a75/bosses/level6/bos-forever-motel-encounters-v01.png', environment: 'assets/a75/environment/level6/env-forever-motel-construction-atlas-v01.png' },
+      7: { backdrop: 'assets/a75/environment/level7/env-thousand-faces-background-main-v02.png', enemies: 'assets/a75/enemies/level7/enm-thousand-faces-atlas-v01.png', encounters: 'assets/a75/bosses/level7/bos-thousand-faces-encounters-v01.png', environment: 'assets/a75/environment/level7/env-thousand-faces-construction-atlas-v01.png' },
+      8: { backdrop: 'assets/a75/environment/level8/env-liliths-throne-background-main-v02.png', enemies: 'assets/a75/enemies/level8/enm-liliths-throne-atlas-v01.png', encounters: 'assets/a75/bosses/level8/bos-liliths-throne-encounters-v01.png', environment: 'assets/a75/environment/level8/env-liliths-throne-construction-atlas-v01.png' },
+      9: { backdrop: 'assets/a75/environment/level9/env-self-below-background-main-v02.png', enemies: 'assets/a75/enemies/level9/enm-self-below-atlas-v01.png', encounters: 'assets/a75/bosses/level9/bos-self-below-encounters-v01.png', environment: 'assets/a75/environment/level9/env-self-below-construction-atlas-v01.png' },
+    };
+    for (const [depthText, assets] of Object.entries(lateAssets)) {
+      const depth = Number(depthText);
+      for (const [registry, path] of [
+        [this.lateBackdrops, assets.backdrop],
+        [this.lateEnemyAtlases, assets.enemies],
+        [this.lateEncounterAtlases, assets.encounters],
+        [this.lateEnvironmentAtlases, assets.environment],
+      ] as const) {
+        const image = new Image();
+        image.src = `${import.meta.env.BASE_URL}${path}`;
+        registry.set(depth, image);
+      }
+    }
     this.levelTiles.src = `${import.meta.env.BASE_URL}assets/v1/environment/neon-maw-tiles-v1.png`;
     this.hubBackdrop.src = `${import.meta.env.BASE_URL}assets/a5/hub/env-hellroom-background-main-v01.png`;
     this.miloPortrait.src = `${import.meta.env.BASE_URL}assets/a5/characters/level1/chr-milo-portrait-v01.png`;
@@ -309,6 +335,9 @@ class DemonGame {
       const image = new Image();
       if (BOONS[id].portraitAsset) image.src = `${import.meta.env.BASE_URL}${BOONS[id].portraitAsset}`;
       this.boonPortraits.set(id, image);
+      const sigil = new Image();
+      sigil.src = `${import.meta.env.BASE_URL}assets/a75/ui/boon-sigils/sigil-${id}-v01.svg`;
+      this.boonSigils.set(id, sigil);
     }
     this.seedAmbientEmbers();
     this.showTitle();
@@ -571,7 +600,7 @@ class DemonGame {
           <p class="title-save">${this.save.storyFlags.includes(DIALOGUE_BEATS.prologue_dive.flag) ? `Continue · Best Rush ${styleRankFor(this.save.bestStyle)} · High Score ${this.save.highScore.toLocaleString()}` : 'New descent · The Neon Maw awaits'}</p>
           <button class="btn primary title-start" id="enter-hub" disabled>DIVE IN</button>
           <button class="title-settings" id="title-settings">Settings</button>
-          <span class="version">A7.3C · FULL CAMPAIGN · LEVELS 1–9</span>
+          <span class="version">A7.5 · ART-INTEGRATED FULL CAMPAIGN · LEVELS 1–9</span>
         </div>
       </div>`;
     mustElement<HTMLButtonElement>('#enter-hub').addEventListener('click', () => this.activateTitle());
@@ -4732,6 +4761,16 @@ class DemonGame {
     this.ctx.fillStyle = '#fff'; this.ctx.font = '900 18px Barlow Condensed'; this.ctx.fillText('ROOM CLEAR', WIDTH / 2, 278); this.ctx.restore();
   }
 
+  private lateDepthForTheme(theme: RoomDefinition['theme']): number | null {
+    if (theme === 'casino' || theme === 'rail' || theme === 'roulette') return 4;
+    if (theme === 'basilica' || theme === 'reliquary' || theme === 'sanctum') return 5;
+    if (theme === 'motel' || theme === 'hallway' || theme === 'dreamsuite') return 6;
+    if (theme === 'city' || theme === 'gallery' || theme === 'mirrorcourt') return 7;
+    if (theme === 'capital' || theme === 'succubusHall' || theme === 'royalThrone') return 8;
+    if (theme === 'apartment' || theme === 'brokenHub' || theme === 'selfBelow') return 9;
+    return null;
+  }
+
   private drawBackground(theme: RoomDefinition['theme']): void {
     const palettes: Record<RoomDefinition['theme'], [string, string, string]> = {
       alley: ['#100c1d', '#241029', '#ff425c'],
@@ -4777,10 +4816,11 @@ class DemonGame {
     this.ctx.fillStyle = gradient;
     this.ctx.fillRect(-20, -20, WIDTH + 40, HEIGHT + 40);
 
-    const backdrop = jackpot || frozen || foreverMotel ? null : thornwild ? this.levelThreeBackdrop : drowned ? this.levelTwoBackdrop : this.levelBackdrop;
+    const lateDepth = this.lateDepthForTheme(theme);
+    const backdrop = lateDepth ? this.lateBackdrops.get(lateDepth) : thornwild ? this.levelThreeBackdrop : drowned ? this.levelTwoBackdrop : this.levelBackdrop;
     if (backdrop?.complete && backdrop.naturalWidth > 0) {
       const drift = ((this.room.mapX ?? this.roomIndex) * 17 + Math.sin(this.time * .08) * 7) % 70;
-      this.ctx.save(); this.ctx.globalAlpha = theme === 'throne' || theme === 'canopy' ? .86 : .76;
+      this.ctx.save(); this.ctx.globalAlpha = lateDepth ? .9 : theme === 'throne' || theme === 'canopy' ? .86 : .76;
       this.ctx.drawImage(backdrop, -28 + drift * .12, -2, WIDTH + 56, HEIGHT + 4);
       this.ctx.fillStyle = `${accent}10`; this.ctx.globalCompositeOperation = 'screen'; this.ctx.fillRect(0, 0, WIDTH, HEIGHT); this.ctx.restore();
       const gameplayShade = this.ctx.createLinearGradient(0, 0, 0, HEIGHT);
@@ -4931,8 +4971,36 @@ class DemonGame {
     }
   }
 
+  private drawAtlasCell(image: HTMLImageElement, columns: number, rows: number, index: number, x: number, y: number, width: number, height: number): void {
+    if (!image.complete || image.naturalWidth <= 0) return;
+    const cellWidth = image.naturalWidth / columns;
+    const cellHeight = image.naturalHeight / rows;
+    const column = index % columns;
+    const row = Math.floor(index / columns);
+    this.ctx.drawImage(image, column * cellWidth, row * cellHeight, cellWidth, cellHeight, x, y, width, height);
+  }
+
+  private drawLateRoomProps(seed: number): boolean {
+    const depth = this.lateDepthForTheme(this.room.theme);
+    const atlas = depth ? this.lateEnvironmentAtlases.get(depth) : undefined;
+    if (!atlas?.complete || atlas.naturalWidth <= 0) return false;
+    const firstX = seed % 2 === 0 ? 42 : WIDTH - 202;
+    const firstIndex = 4 + seed % 4;
+    this.ctx.save();
+    this.ctx.globalAlpha = .92;
+    this.drawAtlasCell(atlas, 4, 3, firstIndex, firstX, FLOOR_Y - 205, 170, 205);
+    if ((this.room.complexity ?? 0) > 11) {
+      const secondX = seed % 3 === 0 ? WIDTH * .34 : WIDTH * .61;
+      this.ctx.globalAlpha = .72;
+      this.drawAtlasCell(atlas, 4, 3, 4 + ((firstIndex - 3) % 4), secondX, FLOOR_Y - 142, 128, 148);
+    }
+    this.ctx.restore();
+    return true;
+  }
+
   private drawRoomProps(): void {
     const seed = (this.roomIndex * 193 + (this.room.complexity ?? 0) * 17) % 997;
+    if (this.drawLateRoomProps(seed)) return;
     const propX = seed % 2 === 0 ? 88 : WIDTH - 188;
     this.ctx.save();this.ctx.globalAlpha=.58;
     if(this.currentDepth===7){
@@ -4956,6 +5024,8 @@ class DemonGame {
 
   private drawPlatforms(): void {
     const drowned=this.currentDepth===2;const thornwild=this.currentDepth===3;const jackpot=this.currentDepth===4;const frozen=this.currentDepth===5;const mirrorCity=this.currentDepth===7;
+    const constructionDepth = this.lateDepthForTheme(this.room.theme);
+    const constructionAtlas = constructionDepth ? this.lateEnvironmentAtlases.get(constructionDepth) : undefined;
     const platformAccent = mirrorCity?(this.room.type==='boss'?'#8ff7ff':this.room.type==='miniboss'?'#d06cff':'#61edff'):frozen?(this.room.type==='boss'?'#d8fbff':this.room.type==='miniboss'?'#a9efff':'#72dcff'):jackpot?(this.room.type==='boss'?'#ff69e7':this.room.type==='miniboss'?'#ffe05a':'#59eaff'):thornwild?(this.room.type==='boss'?'#ef4e43':'#9fbd48'):drowned ? (this.room.type==='boss'?'#b9ffff':'#42e8f5') : this.room.type === 'recovery' ? '#62e59b' : this.room.type === 'cache' ? '#a85cff' : this.room.type === 'elite' ? '#ff425c' : this.room.type === 'miniboss' ? '#ff9b4a' : this.room.type === 'boss' ? '#ff345e' : '#ff5ab5';
     for (const platform of this.room.platforms) {
       if (platform.h <= 24 && platform.y < FLOOR_Y - 35) {
@@ -4987,7 +5057,7 @@ class DemonGame {
       }
       this.ctx.fillStyle = 'rgba(0,0,0,.22)';
       for (let x = platform.x + 18; x < platform.x + platform.w; x += 46) this.ctx.fillRect(x, platform.y + 13, 3, Math.max(0, platform.h - 13));
-      if (!drowned && !thornwild && !jackpot && !frozen && this.levelTiles.complete && this.levelTiles.naturalWidth > 0) {
+      if (!constructionAtlas && !drowned && !thornwild && !jackpot && !frozen && this.levelTiles.complete && this.levelTiles.naturalWidth > 0) {
         const cellW = this.levelTiles.naturalWidth / 4, cellH = this.levelTiles.naturalHeight / 2;
         this.ctx.save(); this.ctx.globalAlpha = .9;
         if (platform.h <= 25) {
@@ -5001,11 +5071,47 @@ class DemonGame {
         }
         this.ctx.restore();
       }
+      if (constructionAtlas?.complete && constructionAtlas.naturalWidth > 0) {
+        this.ctx.save();
+        this.ctx.globalAlpha = .96;
+        if (platform.h <= 25) {
+          this.drawAtlasCell(constructionAtlas, 4, 3, 2, platform.x - 8, platform.y - 23, platform.w + 16, 65);
+        } else {
+          const segmentWidth = Math.min(230, Math.max(110, platform.w));
+          for (let offset = 0; offset < platform.w; offset += segmentWidth) {
+            const width = Math.min(segmentWidth, platform.w - offset);
+            this.drawAtlasCell(constructionAtlas, 4, 3, offset + width >= platform.w ? 1 : 0, platform.x + offset - 4, platform.y - 12, width + 8, Math.min(132, platform.h + 48));
+          }
+        }
+        this.ctx.restore();
+      }
     }
+  }
+
+  private drawLateHazardArt(hazard: RoomDefinition['hazards'][number]): void {
+    const depth = this.lateDepthForTheme(this.room.theme);
+    const atlas = depth ? this.lateEnvironmentAtlases.get(depth) : undefined;
+    if (!atlas?.complete || atlas.naturalWidth <= 0) return;
+    if (hazard.type === 'dreamDoor') {
+      this.ctx.save(); this.ctx.globalAlpha = .9;
+      this.drawAtlasCell(atlas, 4, 3, 3, hazard.x - 22, hazard.y - 18, hazard.w + 44, hazard.h + 30);
+      this.ctx.restore(); return;
+    }
+    const timedActive = hazard.type === 'electric' || hazard.type === 'royalSigil'
+      ? this.electricHazardActive(hazard.cycleOffset)
+      : hazard.type === 'memoryRift'
+        ? (this.time + (hazard.cycleOffset ?? 0)) % 2.8 > 1.45
+        : Math.sin(this.time * 3 + (hazard.cycleOffset ?? 0)) > -.15;
+    const primary = hazard.type === 'electric' || hazard.type === 'ice' || hazard.type === 'royalSigil' || hazard.type === 'memoryRift';
+    const index = (primary ? 8 : 10) + (timedActive ? 1 : 0);
+    this.ctx.save(); this.ctx.globalAlpha = .82;
+    this.drawAtlasCell(atlas, 4, 3, index, hazard.x - 10, hazard.y - 55, hazard.w + 20, Math.max(76, hazard.h + 58));
+    this.ctx.restore();
   }
 
   private drawHazards(): void {
     for (const hazard of this.room.hazards) {
+      this.drawLateHazardArt(hazard);
       if (hazard.type === 'current') {
         const direction=Math.sign(hazard.forceX??1);this.ctx.save();this.ctx.globalAlpha=.48;this.ctx.fillStyle='rgba(47,220,236,.13)';this.ctx.fillRect(hazard.x,hazard.y,hazard.w,hazard.h);this.ctx.strokeStyle='#62f5ff';this.ctx.lineWidth=3;
         for(let y=hazard.y+16;y<hazard.y+hazard.h;y+=22){this.ctx.beginPath();for(let x=hazard.x+12;x<hazard.x+hazard.w-12;x+=24){const px=direction>0?x:hazard.x+hazard.w-(x-hazard.x);const py=y+Math.sin(this.time*7+x*.05)*5;if(x===hazard.x+12)this.ctx.moveTo(px,py);else this.ctx.lineTo(px,py);}this.ctx.stroke();}
@@ -5636,6 +5742,9 @@ class DemonGame {
   }
 
   private drawEnemyBody(enemy: Enemy): void {
+    if (this.drawLateEncounterSprite(enemy)) {
+      this.drawEnemyTelegraph(enemy); return;
+    }
     if (enemy.type === 'fanChampion' && this.fanChampionAtlas.complete && this.fanChampionAtlas.naturalWidth > 0) {
       const frame=enemy.attackPoseTime>0?1:0;this.drawLevelOneBossSprite(enemy,this.fanChampionAtlas,2,frame,310,[853,823][frame]);
       this.drawEnemyTelegraph(enemy); return;
@@ -5682,6 +5791,10 @@ class DemonGame {
       if (enemy.health < enemy.maxHealth) this.drawSmallHealth(enemy);
       this.drawEnemyTelegraph(enemy);
       return;
+    }
+    if (this.drawLateCommonEnemySprite(enemy)) {
+      if (enemy.health < enemy.maxHealth) this.drawSmallHealth(enemy);
+      this.drawEnemyTelegraph(enemy); return;
     }
     this.ctx.save();
     this.ctx.translate(centerX(enemy), enemy.y + enemy.h);
@@ -5946,6 +6059,63 @@ class DemonGame {
       this.ctx.beginPath(); this.ctx.moveTo(4, -radius + 1); this.ctx.quadraticCurveTo(11, -radius - 11, 18, -radius - 7); this.ctx.stroke();
     }
     this.ctx.restore();
+  }
+
+  private drawLateCommonEnemySprite(enemy: Enemy): boolean {
+    const rows: Array<{ depth: number; types: EnemyType[]; heights: number[] }> = [
+      { depth: 4, types: ['jackpotGremlin','railWisp','cardDealer','diceHound','slotMimic','jinxCroupier'], heights: [260,300,340,340,400,370] },
+      { depth: 5, types: ['choirShard','preservationWisp','icePenitent','frostHound','reliquaryKnight','glassDeacon'], heights: [300,300,330,340,410,370] },
+      { depth: 6, types: ['luggageImp','keyholeWisp','sleepwalker','hallwayHound','bellhopMimic','wakeUpCaller'], heights: [270,300,340,340,390,370] },
+      { depth: 7, types: ['mirrorPunk','prismWisp','facelessStriker','glassHound','echoSniper','reflectionKnight'], heights: [290,300,350,340,380,420] },
+      { depth: 8, types: ['hollowSuccubus','decreeWisp','charmAcolyte','portalHound','throneLegionary','bloodCantor'], heights: [340,300,350,340,420,380] },
+      { depth: 9, types: ['hollowShade'], heights: [320] },
+    ];
+    const group = rows.find((candidate) => candidate.types.includes(enemy.type));
+    if (!group) return false;
+    const atlas = this.lateEnemyAtlases.get(group.depth);
+    if (!atlas?.complete || atlas.naturalWidth <= 0) return false;
+    const row = group.types.indexOf(enemy.type);
+    const frame = enemy.attackPoseTime > 0 ? 1 : 0;
+    const drawHeight = group.heights[row] ?? 330;
+    const bob = ['railWisp','choirShard','preservationWisp','keyholeWisp','prismWisp','decreeWisp','hollowShade'].includes(enemy.type) ? Math.sin(enemy.timer * 4) * 5 : 0;
+    this.ctx.save();
+    this.ctx.globalAlpha = enemy.invulnerable > 0 ? .76 : enemy.dead ? clamp(enemy.deathTime / .9, 0, 1) : 1;
+    this.ctx.fillStyle = 'rgba(0,0,0,.3)';
+    this.ctx.beginPath(); this.ctx.ellipse(centerX(enemy), enemy.y + enemy.h + 2, Math.max(22, enemy.w * .48), 6, 0, 0, Math.PI * 2); this.ctx.fill();
+    this.ctx.translate(centerX(enemy), enemy.y + enemy.h + bob);
+    this.ctx.scale(enemy.facing, 1);
+    this.ctx.drawImage(atlas, frame * 512, row * 512, 512, 512, -drawHeight / 2, -drawHeight + 10, drawHeight, drawHeight);
+    this.ctx.restore();
+    return true;
+  }
+
+  private drawLateEncounterSprite(enemy: Enemy): boolean {
+    const encounters: Partial<Record<EnemyType, { depth: number; boss: boolean; height: number }>> = {
+      ladyLuckless: { depth: 4, boss: false, height: 390 }, calyptraBoss: { depth: 4, boss: true, height: 500 },
+      memoryGolem: { depth: 5, boss: false, height: 440 }, isoldeBoss: { depth: 5, boss: true, height: 510 },
+      dreamGirl: { depth: 6, boss: false, height: 390 }, somniaBoss: { depth: 6, boss: true, height: 510 },
+      betterMilo: { depth: 7, boss: false, height: 245 }, vesperaBoss: { depth: 7, boss: true, height: 510 },
+      lilithBoss: { depth: 8, boss: true, height: 540 },
+      bossRushHerald: { depth: 9, boss: false, height: 410 }, hollowBoss: { depth: 9, boss: true, height: 315 },
+    };
+    const definition = encounters[enemy.type];
+    if (!definition) return false;
+    const atlas = this.lateEncounterAtlases.get(definition.depth);
+    if (!atlas?.complete || atlas.naturalWidth <= 0) return false;
+    let row = definition.boss ? 2 : 0;
+    let column = enemy.attackPoseTime > 0 ? 1 : 0;
+    if (enemy.dead) { row = definition.boss ? 3 : 1; column = 1; }
+    else if (definition.boss && enemy.phase > 0) { row = 3; column = 0; }
+    const drawHeight = definition.height;
+    this.ctx.save();
+    this.ctx.globalAlpha = (enemy.invulnerable > 0 ? .76 : 1) * (enemy.dead ? clamp(enemy.deathTime / .9, 0, 1) : 1);
+    this.ctx.fillStyle = 'rgba(0,0,0,.38)';
+    this.ctx.beginPath(); this.ctx.ellipse(centerX(enemy), enemy.y + enemy.h + 3, Math.max(35, enemy.w * .55), 9, 0, 0, Math.PI * 2); this.ctx.fill();
+    this.ctx.translate(centerX(enemy), enemy.y + enemy.h);
+    this.ctx.scale(enemy.facing, 1);
+    this.ctx.drawImage(atlas, column * 512, row * 512, 512, 512, -drawHeight / 2, -drawHeight + 10, drawHeight, drawHeight);
+    this.ctx.restore();
+    return true;
   }
 
   private drawLevelOneEnemySprite(enemy: Enemy): void {
@@ -6218,8 +6388,13 @@ class DemonGame {
     this.ctx.strokeStyle = boon.color; this.ctx.lineWidth = 4;
     this.ctx.beginPath(); this.ctx.moveTo(0, -34); this.ctx.lineTo(29, 0); this.ctx.lineTo(0, 34); this.ctx.lineTo(-29, 0); this.ctx.closePath(); this.ctx.stroke();
     this.ctx.rotate(-pickup.time * .65);
-    this.ctx.fillStyle = '#fff'; this.ctx.font = '900 30px Barlow Condensed'; this.ctx.textAlign = 'center'; this.ctx.textBaseline = 'middle';
-    this.ctx.fillText(boon.glyph, 0, 1);
+    const sigil = this.boonSigils.get(pickup.boonId);
+    if (sigil?.complete && sigil.naturalWidth > 0) {
+      this.ctx.drawImage(sigil, -27, -27, 54, 54);
+    } else {
+      this.ctx.fillStyle = '#fff'; this.ctx.font = '900 30px Barlow Condensed'; this.ctx.textAlign = 'center'; this.ctx.textBaseline = 'middle';
+      this.ctx.fillText(boon.glyph, 0, 1);
+    }
     this.ctx.strokeStyle=boon.accentColor;this.ctx.lineWidth=1.5;this.ctx.globalAlpha=.72;
     for(let i=0;i<3;i+=1){const angle=-pickup.time*1.2+i*Math.PI*2/3;const ox=Math.cos(angle)*55,oy=Math.sin(angle)*18;this.ctx.beginPath();this.ctx.moveTo(ox,oy-5);this.ctx.lineTo(ox+5,oy);this.ctx.lineTo(ox,oy+5);this.ctx.lineTo(ox-5,oy);this.ctx.closePath();this.ctx.stroke();}
     this.ctx.restore();
@@ -6259,7 +6434,10 @@ class DemonGame {
     this.ctx.shadowBlur=0;this.ctx.fillStyle='rgba(255,255,255,.18)';for(let mark=1;mark<5;mark+=1)this.ctx.fillRect(x+width*mark/5,y+3,2,20);
     this.ctx.strokeStyle='rgba(255,255,255,.42)';this.ctx.strokeRect(x,y,width,26);
     const portrait=boss.type==='roxyne'?this.boonPortraits.get('roxyne'):boss.type==='nerissa'?this.boonPortraits.get('nerissa'):boss.type==='warden'?this.boonPortraits.get('belladonna'):boss.type==='brute'?this.bottomlessPortrait:null;
-    if(portrait?.complete&&portrait.naturalWidth>0){this.ctx.save();this.ctx.beginPath();this.ctx.arc(x-29,y+13,30,0,Math.PI*2);this.ctx.clip();this.ctx.fillStyle='#0b0710';this.ctx.fillRect(x-59,y-17,60,60);this.ctx.drawImage(portrait,x-57,y-27,56,75);this.ctx.restore();}
+    const latePortraitDepth=boss.type==='ladyLuckless'||boss.type==='calyptraBoss'?4:boss.type==='memoryGolem'||boss.type==='isoldeBoss'?5:boss.type==='dreamGirl'||boss.type==='somniaBoss'?6:boss.type==='betterMilo'||boss.type==='vesperaBoss'?7:boss.type.startsWith('daughter')||boss.type==='lilithBoss'?8:boss.type==='bossRushHerald'||boss.type==='hollowBoss'?9:0;
+    const latePortraitAtlas=latePortraitDepth?this.lateEncounterAtlases.get(latePortraitDepth):undefined;
+    if(latePortraitAtlas?.complete&&latePortraitAtlas.naturalWidth>0){const major=['calyptraBoss','isoldeBoss','somniaBoss','vesperaBoss','lilithBoss','hollowBoss'].includes(boss.type);const row=major?2:0;this.ctx.save();this.ctx.beginPath();this.ctx.arc(x-29,y+13,30,0,Math.PI*2);this.ctx.clip();this.ctx.fillStyle='#0b0710';this.ctx.fillRect(x-59,y-17,60,60);this.ctx.drawImage(latePortraitAtlas,0,row*512,512,512,x-61,y-19,64,64);this.ctx.restore();}
+    else if(portrait?.complete&&portrait.naturalWidth>0){this.ctx.save();this.ctx.beginPath();this.ctx.arc(x-29,y+13,30,0,Math.PI*2);this.ctx.clip();this.ctx.fillStyle='#0b0710';this.ctx.fillRect(x-59,y-17,60,60);this.ctx.drawImage(portrait,x-57,y-27,56,75);this.ctx.restore();}
     else if(boss.type==='perfectPrey'&&this.perfectPreyAtlas.complete&&this.perfectPreyAtlas.naturalWidth>0){const cellW=this.perfectPreyAtlas.naturalWidth/3;this.ctx.save();this.ctx.beginPath();this.ctx.arc(x-29,y+13,30,0,Math.PI*2);this.ctx.clip();this.ctx.fillStyle='#0b0710';this.ctx.fillRect(x-59,y-17,60,60);this.ctx.drawImage(this.perfectPreyAtlas,0,0,cellW,this.perfectPreyAtlas.naturalHeight,x-60,y-18,62,66);this.ctx.restore();}
     this.ctx.strokeStyle=color;this.ctx.lineWidth=3;this.ctx.beginPath();this.ctx.arc(x-29,y+13,30,0,Math.PI*2);this.ctx.stroke();
     const daughterName:Partial<Record<EnemyType,string>>={daughterAttack:'ATTACK',daughterDefense:'DEFENSE',daughterMovement:'MOVEMENT',daughterEnergy:'ENERGY'};
@@ -6278,8 +6456,10 @@ class DemonGame {
     this.ctx.save(); this.ctx.globalAlpha = alpha;
     if(bossLike){
       this.ctx.fillStyle='rgba(5,3,9,.9)';this.ctx.fillRect(0,224,WIDTH,206);this.ctx.fillStyle=accent;this.ctx.fillRect(0,224,WIDTH,3);this.ctx.fillRect(0,427,WIDTH,3);
+      const latePortraitAtlas=this.currentDepth>=4?this.lateEncounterAtlases.get(this.currentDepth):undefined;
       const portrait=this.currentDepth>=4?undefined:this.currentDepth===3?(this.room.type==='boss'?this.boonPortraits.get('roxyne'):undefined):this.currentDepth===2?(this.room.type==='boss'?this.boonPortraits.get('nerissa'):undefined):(this.room.type==='boss'?this.boonPortraits.get('belladonna'):this.bottomlessPortrait);
-      if(portrait?.complete&&portrait.naturalWidth>0){this.ctx.save();this.ctx.globalAlpha=.82*alpha;const height=310,width=height*portrait.naturalWidth/portrait.naturalHeight;this.ctx.drawImage(portrait,WIDTH-width-45,151,width,height);this.ctx.restore();}
+      if(latePortraitAtlas?.complete&&latePortraitAtlas.naturalWidth>0){this.ctx.save();this.ctx.globalAlpha=.88*alpha;const row=this.room.type==='boss'?2:0;this.ctx.drawImage(latePortraitAtlas,0,row*512,512,512,WIDTH-430,105,390,390);this.ctx.restore();}
+      else if(portrait?.complete&&portrait.naturalWidth>0){this.ctx.save();this.ctx.globalAlpha=.82*alpha;const height=310,width=height*portrait.naturalWidth/portrait.naturalHeight;this.ctx.drawImage(portrait,WIDTH-width-45,151,width,height);this.ctx.restore();}
       else if(this.currentDepth===3&&this.room.type==='miniboss'&&this.perfectPreyAtlas.complete&&this.perfectPreyAtlas.naturalWidth>0){const cellW=this.perfectPreyAtlas.naturalWidth/3;this.ctx.save();this.ctx.globalAlpha=.82*alpha;this.ctx.drawImage(this.perfectPreyAtlas,0,0,cellW,this.perfectPreyAtlas.naturalHeight,WIDTH-370,145,325,345);this.ctx.restore();}
       const introX=110;const levelNine=this.currentDepth===9;const levelEight=this.currentDepth===8;const levelSeven=this.currentDepth===7;const levelSix=this.currentDepth===6;const levelFive=this.currentDepth===5;const levelFour=this.currentDepth===4;const levelThree=this.currentDepth===3;const levelTwo=this.currentDepth===2;const kicker=this.isEndless?`DEEP DIVE CYCLE ${this.room.deepDiveCycle??1} · ${(this.room.deepDivePowers??[]).map(power=>power.toUpperCase()).join(' + ')||'ALTERED ARENA'}`:levelNine?(this.room.type==='boss'?'FINAL ENCOUNTER · THE SELF BELOW':'MINI-BOSS · SEVEN-LORD GAUNTLET'):levelEight?(this.room.type==='boss'?'SUCCUBUS QUEEN · ROYAL DECREE':'MINI-BOSS · FOUR-DAUGHTER RELAY'):levelSeven?(this.room.type==='boss'?'DEMON LORD · REFLECTIONS':'MINI-BOSS · COPIED BASE KIT'):levelSix?(this.room.type==='boss'?'DEMON LORD · DREAMS':'MINI-BOSS · INDIRECT ANCHOR FIGHT'):levelFive?(this.room.type==='boss'?'DEMON LORD · PRESERVATION':'MINI-BOSS · ACTIVE RECOLLECTION'):levelFour?(this.room.type==='boss'?'DEMON LORD · DISCLOSED ROULETTE':'MINI-BOSS · DISCLOSED RULES'):levelThree?(this.room.type==='boss'?'DEMON LORD · THE HUNT':'MINI-BOSS · CHOKE-POINT CHASE'):levelTwo?(this.room.type==='boss'?'DEMON LORD · ADORATION':'MINI-BOSS · THREE-WAVE GAUNTLET'):(this.room.type==='boss'?'DEMON LORD · APPETITE':'MINI-BOSS · LAST CALL');const title=this.room.doubleBoss?'DOUBLE DEMON LORDS':levelNine?(this.room.type==='boss'?'THE HOLLOW':'BOSS RUSH'):levelEight?(this.room.type==='boss'?'LILITH':"LILITH'S DAUGHTERS"):levelSeven?(this.room.type==='boss'?'VESPERA':'BETTER MILO'):levelSix?(this.room.type==='boss'?'SOMNIA':'DREAM GIRL'):levelFive?(this.room.type==='boss'?'ISOLDE':'MEMORY GOLEM'):levelFour?(this.room.type==='boss'?'CALYPTRA':'LADY LUCKLESS'):levelThree?(this.room.type==='boss'?'ROXYNE':'PERFECT PREY'):levelTwo?(this.room.type==='boss'?'NERISSA':'THE FAN CLUB'):(this.room.type==='boss'?'BELLADONNA':'BOTTOMLESS BARTENDER');
       this.ctx.textAlign='left';this.ctx.fillStyle=accent;this.ctx.font='900 13px Barlow Condensed';this.ctx.letterSpacing='5px';this.ctx.fillText(kicker,introX,272);

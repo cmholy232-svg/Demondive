@@ -1,0 +1,56 @@
+{
+  "version": 1,
+  "status": "runtime-ready-human-review-pending",
+  "humanApproved": false,
+  "layout": { "width": 1024, "height": 3072, "columns": 2, "rows": 6, "cellWidth": 512, "cellHeight": 512, "poses": ["neutral", "action"] },
+  "atlases": [
+    {
+      "level": 4,
+      "id": "thunder-jackpot",
+      "runtime": "assets/a75/enemies/level4/enm-thunder-jackpot-atlas-v01.png",
+      "dimensions": [1024, 3072],
+      "rows": ["jackpotGremlin", "railWisp", "cardDealer", "diceHound", "slotMimic", "jinxCroupier"],
+      "sha256": "86ae8e9c181b10d3e40689cd72406823069ad41d473388746cc57f3b45fb8430"
+    },
+    {
+      "level": 5,
+      "id": "frozen-basilica",
+      "runtime": "assets/a75/enemies/level5/enm-frozen-basilica-atlas-v01.png",
+      "dimensions": [1024, 3072],
+      "rows": ["choirShard", "preservationWisp", "icePenitent", "frostHound", "reliquaryKnight", "glassDeacon"],
+      "sha256": "fa7558e80a8d45b0c91ced144ae3cc515a983ec07aac6f46af9dc6bb7c21b6b0"
+    },
+    {
+      "level": 6,
+      "id": "forever-motel",
+      "runtime": "assets/a75/enemies/level6/enm-forever-motel-atlas-v01.png",
+      "dimensions": [1024, 3072],
+      "rows": ["luggageImp", "keyholeWisp", "sleepwalker", "hallwayHound", "bellhopMimic", "wakeUpCaller"],
+      "sha256": "c524573aa5e469e2bff7192235080885f8555214575c097f7dec110d74d28d27"
+    },
+    {
+      "level": 7,
+      "id": "thousand-faces",
+      "runtime": "assets/a75/enemies/level7/enm-thousand-faces-atlas-v01.png",
+      "dimensions": [1024, 3072],
+      "rows": ["mirrorPunk", "prismWisp", "facelessStriker", "glassHound", "echoSniper", "reflectionKnight"],
+      "sha256": "d54febc92ee96989cdb2008bd8428198d68d8b02edc4d0f8d00e9406bf9ad4b2"
+    },
+    {
+      "level": 8,
+      "id": "liliths-throne",
+      "runtime": "assets/a75/enemies/level8/enm-liliths-throne-atlas-v01.png",
+      "dimensions": [1024, 3072],
+      "rows": ["hollowSuccubus", "decreeWisp", "charmAcolyte", "portalHound", "throneLegionary", "bloodCantor"],
+      "sha256": "986cf6fd2eed0a5426808160cd31a64d5dbecb611556d38d979c536b0013f27f"
+    },
+    {
+      "level": 9,
+      "id": "self-below",
+      "runtime": "assets/a75/enemies/level9/enm-self-below-atlas-v01.png",
+      "dimensions": [1024, 3072],
+      "rows": ["hollowShade", "brokenBoonWisp", "avoidedSelfStriker", "memoryHound", "memoryDeacon", "bossRushHerald"],
+      "sha256": "5ceb8a8468df16e388de47a9f040988fcfe684cc565bc6a543c676883047d396"
+    }
+  ]
+}

@@ -1,0 +1,51 @@
+{
+  "version": 2,
+  "status": "runtime-ready-human-review-pending",
+  "humanApproved": false,
+  "dimensions": { "width": 1672, "height": 941 },
+  "qaContactSheet": "source-assets/a75/environment/QA_Environments_FinalContactSheet_v02.png",
+  "plates": [
+    {
+      "level": 4,
+      "id": "thunder-jackpot",
+      "source": "source-assets/a75/environment/level4/ENV_THUNDER_JACKPOT_Background_Main_v02.png",
+      "runtime": "public/assets/a75/environment/level4/env-thunder-jackpot-background-main-v02.png",
+      "sha256": "9ebf9a492fca21efbdca0f606ee240642b91fe50e212a049f6d7f1474d20aa7a"
+    },
+    {
+      "level": 5,
+      "id": "frozen-basilica",
+      "source": "source-assets/a75/environment/level5/ENV_FROZEN_BASILICA_Background_Main_v02.png",
+      "runtime": "public/assets/a75/environment/level5/env-frozen-basilica-background-main-v02.png",
+      "sha256": "446efc640ccb3ab4f08bd2aa02133022da083e0b478ce5cbedd015a912ceb1a0"
+    },
+    {
+      "level": 6,
+      "id": "forever-motel",
+      "source": "source-assets/a75/environment/level6/ENV_FOREVER_MOTEL_Background_Main_v02.png",
+      "runtime": "public/assets/a75/environment/level6/env-forever-motel-background-main-v02.png",
+      "sha256": "316e1f4feda0e2b012a002dd2ca8f061e24abffadf1e3f61004b88f271827f36"
+    },
+    {
+      "level": 7,
+      "id": "thousand-faces",
+      "source": "source-assets/a75/environment/level7/ENV_THOUSAND_FACES_Background_Main_v02.png",
+      "runtime": "public/assets/a75/environment/level7/env-thousand-faces-background-main-v02.png",
+      "sha256": "fa64fd377e18c5f5381540a834449e9d03ad0213c1e1a4143101868c49f65807"
+    },
+    {
+      "level": 8,
+      "id": "liliths-throne",
+      "source": "source-assets/a75/environment/level8/ENV_LILITHS_THRONE_Background_Main_v02.png",
+      "runtime": "public/assets/a75/environment/level8/env-liliths-throne-background-main-v02.png",
+      "sha256": "652354f1703310f50b4147b0d36eb30a04fc6887aa1fcb309fd0eced9c04f727"
+    },
+    {
+      "level": 9,
+      "id": "self-below",
+      "source": "source-assets/a75/environment/level9/ENV_SELF_BELOW_Background_Main_v02.png",
+      "runtime": "public/assets/a75/environment/level9/env-self-below-background-main-v02.png",
+      "sha256": "8da51c71801d4cbb975240c3d99c3e747abc91658c4817cbc1841d18479e8235"
+    }
+  ]
+}

@@ -1,0 +1,73 @@
+{
+  "version": "alpha-7.5",
+  "status": "runtime-ready-human-review-pending",
+  "humanApproved": false,
+  "layout": {
+    "width": 1024,
+    "height": 2048,
+    "columns": 2,
+    "rows": 4,
+    "cellWidth": 512,
+    "cellHeight": 512,
+    "cells": [
+      "miniBossNeutral",
+      "miniBossAttack",
+      "miniBossHurt",
+      "miniBossDefeat",
+      "bossNeutral",
+      "bossAttack",
+      "bossPhase",
+      "bossDefeat"
+    ]
+  },
+  "atlases": [
+    {
+      "level": 4,
+      "biome": "Thunder Jackpot",
+      "miniBoss": "Lady Luckless",
+      "boss": "Calyptra",
+      "path": "assets/a75/bosses/level4/bos-thunder-jackpot-encounters-v01.png",
+      "sha256": "04a5c8b774b728967ebefe6fb5c68966bdf138a3d83c7412e7abe4a80553e5f0"
+    },
+    {
+      "level": 5,
+      "biome": "Frozen Basilica",
+      "miniBoss": "Memory Golem",
+      "boss": "Isolde",
+      "path": "assets/a75/bosses/level5/bos-frozen-basilica-encounters-v01.png",
+      "sha256": "d22a963e589bbe62c786b2cc8f86b96f0630b6bbd68f0644776bdc69e7a5c446"
+    },
+    {
+      "level": 6,
+      "biome": "Forever Motel",
+      "miniBoss": "Dream Girl",
+      "boss": "Somnia",
+      "path": "assets/a75/bosses/level6/bos-forever-motel-encounters-v01.png",
+      "sha256": "80bea7cdff32f1c54b5c5761abe5fb8d1629017b42a76bcc5f475cfee211f634"
+    },
+    {
+      "level": 7,
+      "biome": "Thousand Faces",
+      "miniBoss": "Better Milo",
+      "boss": "Vespera",
+      "path": "assets/a75/bosses/level7/bos-thousand-faces-encounters-v01.png",
+      "sha256": "07938172a7242f38a772f3fd8f194a8845b26d2f00b00557094ececba2a55338"
+    },
+    {
+      "level": 8,
+      "biome": "Lilith's Throne",
+      "miniBoss": "Lilith's Daughters",
+      "boss": "Lilith",
+      "path": "assets/a75/bosses/level8/bos-liliths-throne-encounters-v01.png",
+      "sha256": "d435019b55f64cef8aabd828b22473e6cc3570afda1c2ce6e20368aee7372efd"
+    },
+    {
+      "level": 9,
+      "biome": "The Self Below",
+      "miniBoss": "Boss Rush Herald",
+      "boss": "The Hollow",
+      "path": "assets/a75/bosses/level9/bos-self-below-encounters-v01.png",
+      "sha256": "66e08e79b59dd9a54820b5dcd54c283746a5329bb9fead48bfba34d35ba4e69d"
+    }
+  ]
+}
