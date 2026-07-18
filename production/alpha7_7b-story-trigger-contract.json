@@ -1,0 +1,11 @@
+{
+  "version": "Alpha 7.7B checkpoint 01",
+  "levels": [4,5,6,7,8,9],
+  "triggersPerLevel": ["entrance","miniboss-intro","boss-intro","aftermath"],
+  "totalLockedTriggerIds": 24,
+  "finalDialogueLinesApproved": false,
+  "runtimeDialogueWiring": false,
+  "endingOrder": ["wake","apologize","put weed away","clean one corner","queens on television","pizza","accept the Hollow"],
+  "hollowKilled": false,
+  "deepDiveUnlockDeterministic": true
+}

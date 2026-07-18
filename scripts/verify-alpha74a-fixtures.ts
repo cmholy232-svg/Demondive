@@ -23,6 +23,7 @@ import { shapedCameraOffset } from '../src/game/camera-feedback';
 import { DAMAGE_TEXT_BUDGET, PARTICLE_EFFECT_BUDGET, enemyDefeatFeedback, enemyHitFeedback, shouldEmitImpactAccent } from '../src/game/impact-feedback';
 import { THREE_ROOM_TUTORIAL, initialThreeRoomTutorialState, recordThreeRoomTutorialAction, tutorialRoomComplete } from '../src/game/tutorial-program';
 import { THREE_ROOM_TUTORIAL_ROOMS } from '../src/game/tutorial-rooms';
+import { ACCEPTANCE_ENDING_SEQUENCE, LATE_CAMPAIGN_STORY_PLAN } from '../src/game/story-plan';
 import type { Projectile, RoomDefinition } from '../src/game/types';
 
 class MemoryStorage implements SaveStorage {
@@ -203,6 +204,10 @@ tutorialState=recordThreeRoomTutorialAction(tutorialState,'dash');
 assert.equal(tutorialState.complete,false,'advanced room must confirm one wave conversion');
 tutorialState=recordThreeRoomTutorialAction(tutorialState,'wavedash');
 assert.equal(tutorialState.complete,true,'either wavedash or waveland should satisfy the non-frame-perfect exit gate');
+assert.equal(LATE_CAMPAIGN_STORY_PLAN.length,24,'Levels 4–9 need four locked narrative triggers each');
+assert.equal(new Set(LATE_CAMPAIGN_STORY_PLAN.map(beat=>beat.id)).size,LATE_CAMPAIGN_STORY_PLAN.length,'late-campaign story trigger IDs must be unique');
+for(let depth=4;depth<=9;depth+=1){const beats=LATE_CAMPAIGN_STORY_PLAN.filter(beat=>beat.depth===depth);assert.deepEqual(beats.map(beat=>beat.trigger).sort(),['aftermath','boss-intro','entrance','miniboss-intro'],`Level ${depth} story trigger coverage is incomplete`);}
+assert.deepEqual(ACCEPTANCE_ENDING_SEQUENCE,['milo-wakes','milo-apologizes','weed-put-away','one-corner-cleaned','queens-seen-on-television','pizza-ordered-and-delivered','hollow-accepted-not-destroyed'],'acceptance ending order changed');
 
 assert.deepEqual(sameSeedRetryRequest(0xfeedbeef),{ depth:1,seed:0xfeedbeef });
 assert.deepEqual(newRunRequest(),{ depth:1 });
