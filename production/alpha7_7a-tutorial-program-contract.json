@@ -1,0 +1,12 @@
+{
+  "version": "Alpha 7.7A checkpoint 01",
+  "rooms": 3,
+  "room1": ["move", "jump", "neutralFire", "enemyDefeated"],
+  "room2": ["boonCollected", "modifiedFire", "special"],
+  "room3": {"required": ["dash"], "completeWithAny": ["wavedash", "waveland"]},
+  "framePerfectCompletionRequired": false,
+  "inputArchitectureReused": true,
+  "existingSaveMigrationRequired": true,
+  "runtimeIntegrationStatus": "state-model-complete-flow-not-yet-wired",
+  "storyCoverage": {"implementedThroughLevel": 3, "levels4To9": "missing-final-dialogue"}
+}

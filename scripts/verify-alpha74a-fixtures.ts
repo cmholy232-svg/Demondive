@@ -21,6 +21,7 @@ import { deepDiveBiome, deepDiveCrossPollination, deepDiveCycle, deepDiveEncount
 import { ACTION_FEEDBACK_BUDGETS, PROCEDURAL_SFX_PROFILES, sfxPitchMultiplier } from '../src/game/feedback-policy';
 import { shapedCameraOffset } from '../src/game/camera-feedback';
 import { DAMAGE_TEXT_BUDGET, PARTICLE_EFFECT_BUDGET, enemyDefeatFeedback, enemyHitFeedback, shouldEmitImpactAccent } from '../src/game/impact-feedback';
+import { THREE_ROOM_TUTORIAL, initialThreeRoomTutorialState, recordThreeRoomTutorialAction, tutorialRoomComplete } from '../src/game/tutorial-program';
 import type { Projectile, RoomDefinition } from '../src/game/types';
 
 class MemoryStorage implements SaveStorage {
@@ -185,6 +186,17 @@ assert.ok(enemyDefeatFeedback('normal').tier<enemyDefeatFeedback('elite').tier&&
 assert.ok(PARTICLE_EFFECT_BUDGET.reduced<PARTICLE_EFFECT_BUDGET.normal&&DAMAGE_TEXT_BUDGET.reduced<DAMAGE_TEXT_BUDGET.normal,'reduced VFX budgets must be lower');
 assert.equal(shouldEmitImpactAccent(1,PARTICLE_EFFECT_BUDGET.normal,false,3),true,'high-value feedback must survive presentation pressure');
 assert.ok([0,1,2,3,4,5,6,7].some(sequence=>!shouldEmitImpactAccent(sequence,PARTICLE_EFFECT_BUDGET.normal,false,2)),'routine impact accents are not consolidating under pressure');
+assert.equal(THREE_ROOM_TUTORIAL.length,3,'final onboarding must remain three rooms');
+assert.equal(tutorialRoomComplete(THREE_ROOM_TUTORIAL[0],['move','jump','neutralFire']),false,'fundamentals room opened before the enemy was defeated');
+let tutorialState=initialThreeRoomTutorialState();
+for(const action of ['move','jump','neutralFire','enemyDefeated'] as const)tutorialState=recordThreeRoomTutorialAction(tutorialState,action);
+assert.equal(tutorialState.roomIndex,1,'fundamentals room did not advance');
+for(const action of ['boonCollected','modifiedFire','special'] as const)tutorialState=recordThreeRoomTutorialAction(tutorialState,action);
+assert.equal(tutorialState.roomIndex,2,'Arcana room did not advance');
+tutorialState=recordThreeRoomTutorialAction(tutorialState,'dash');
+assert.equal(tutorialState.complete,false,'advanced room must confirm one wave conversion');
+tutorialState=recordThreeRoomTutorialAction(tutorialState,'wavedash');
+assert.equal(tutorialState.complete,true,'either wavedash or waveland should satisfy the non-frame-perfect exit gate');
 
 assert.deepEqual(sameSeedRetryRequest(0xfeedbeef),{ depth:1,seed:0xfeedbeef });
 assert.deepEqual(newRunRequest(),{ depth:1 });
