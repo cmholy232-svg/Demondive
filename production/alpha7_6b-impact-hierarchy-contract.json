@@ -1,0 +1,24 @@
+{
+  "version": "Alpha 7.6B checkpoint 02",
+  "scope": "Impact hierarchy and simultaneous-effect safeguards",
+  "logicalCombatChanges": false,
+  "hierarchy": ["routine hit", "heavy hit", "crushing hit", "normal defeat", "elite defeat", "mini-boss defeat", "boss defeat"],
+  "readability": {
+    "briefEnemyHitOutline": true,
+    "tieredHitPause": true,
+    "tieredCameraImpulse": true,
+    "tieredDefeatBurst": true,
+    "bossFlashReserved": true
+  },
+  "pressureSafeguards": {
+    "normalParticleBudget": 460,
+    "reducedParticleBudget": 190,
+    "normalDamageTextBudget": 72,
+    "reducedDamageTextBudget": 32,
+    "damageReadoutsConsolidateAtBudget": true,
+    "logicalDamagePreserved": true,
+    "logicalProjectilesPreserved": true,
+    "tier3AndTier4AccentsAlwaysPreserved": true
+  },
+  "humanApprovalRequired": ["hit-stop comfort", "camera intensity", "boss-versus-mini-boss hierarchy", "high-stack readability"]
+}

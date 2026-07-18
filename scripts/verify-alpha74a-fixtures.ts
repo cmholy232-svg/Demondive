@@ -20,6 +20,7 @@ import { campaignThreat, deepDiveThreat } from '../src/game/difficulty';
 import { deepDiveBiome, deepDiveCrossPollination, deepDiveCycle, deepDiveEncounter, deepDiveHasBoonReward, deepDiveHasRouteChoice, deepDiveHasWager, deepDiveIsDoubleBoss, deepDiveMinimumEnemies, deepDivePowers, deepDiveRewardStacks, deepDiveRoute, deepDiveSlot } from '../src/game/deep-dive';
 import { ACTION_FEEDBACK_BUDGETS, PROCEDURAL_SFX_PROFILES, sfxPitchMultiplier } from '../src/game/feedback-policy';
 import { shapedCameraOffset } from '../src/game/camera-feedback';
+import { DAMAGE_TEXT_BUDGET, PARTICLE_EFFECT_BUDGET, enemyDefeatFeedback, enemyHitFeedback, shouldEmitImpactAccent } from '../src/game/impact-feedback';
 import type { Projectile, RoomDefinition } from '../src/game/types';
 
 class MemoryStorage implements SaveStorage {
@@ -178,6 +179,12 @@ for(let sample=0;sample<120;sample+=1){
   assert.ok(Math.abs(offset.x)<=14&&Math.abs(offset.y)<=14,'camera feedback exceeded its global impulse cap');
 }
 assert.notDeepEqual(shapedCameraOffset(8,1.25),shapedCameraOffset(8,1.3),'camera feedback curve is not moving over time');
+assert.ok(enemyHitFeedback(12,1000).cameraImpulse<enemyHitFeedback(40,1000).cameraImpulse,'heavy hits must read above routine hits');
+assert.ok(enemyHitFeedback(40,1000).cameraImpulse<enemyHitFeedback(90,1000).cameraImpulse,'crushing hits must read above heavy hits');
+assert.ok(enemyDefeatFeedback('normal').tier<enemyDefeatFeedback('elite').tier&&enemyDefeatFeedback('elite').tier<=enemyDefeatFeedback('miniboss').tier&&enemyDefeatFeedback('miniboss').tier<enemyDefeatFeedback('boss').tier,'defeat feedback hierarchy is not ordered');
+assert.ok(PARTICLE_EFFECT_BUDGET.reduced<PARTICLE_EFFECT_BUDGET.normal&&DAMAGE_TEXT_BUDGET.reduced<DAMAGE_TEXT_BUDGET.normal,'reduced VFX budgets must be lower');
+assert.equal(shouldEmitImpactAccent(1,PARTICLE_EFFECT_BUDGET.normal,false,3),true,'high-value feedback must survive presentation pressure');
+assert.ok([0,1,2,3,4,5,6,7].some(sequence=>!shouldEmitImpactAccent(sequence,PARTICLE_EFFECT_BUDGET.normal,false,2)),'routine impact accents are not consolidating under pressure');
 
 assert.deepEqual(sameSeedRetryRequest(0xfeedbeef),{ depth:1,seed:0xfeedbeef });
 assert.deepEqual(newRunRequest(),{ depth:1 });

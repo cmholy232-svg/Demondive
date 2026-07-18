@@ -18,6 +18,7 @@ import { canAccessCampaignLevel, PC_MASTER_ACCESS } from './game/entitlements';
 import { KeyboardBindingRepository, bindingConflicts, profileBindings, rebindAction, type KeyboardBindingState, type KeyboardProfileId } from './game/input-bindings';
 import { buildRoomFrame, generateRunPlan, roomCountBounds } from './game/generator';
 import { buildHudPriorityView } from './game/hud-view';
+import { DAMAGE_TEXT_BUDGET, PARTICLE_EFFECT_BUDGET, enemyDefeatFeedback, enemyHitFeedback, shouldEmitImpactAccent } from './game/impact-feedback';
 import { planProjectilePresentation, PROJECTILE_DETAIL_BUDGET, shouldEmitProjectileTrail } from './game/performance-policy';
 import { buildRoomQualityMetadata } from './game/room-metadata';
 import { calyptraCriticalMultiplier, calyptraPowerMultiplier, jackpotChanceFor, roomGradeFor, rushChargeForRank, scoreMultiplierForRank, styleRankFor } from './game/feel';
@@ -235,6 +236,7 @@ class DemonGame {
   private footstepCooldown = 0;
   private fireBuffer = 0;
   private fireBufferPending = false;
+  private impactFeedbackSequence = 0;
   private activeSfx = 0;
   private readonly combatSfxLimiter = new CombatSfxLimiter();
 
@@ -3760,9 +3762,11 @@ class DemonGame {
     if (enemy.type !== 'chantPillar' && enemy.type !== 'fantasyAnchor') enemy.vx += centerX(enemy) < centerX(this.player) ? -55 : 55;
     this.combo += 1; this.comboTimer = 1.25;
     this.addStyle(shareLink ? Math.min(2.6, .7 + amount / 45) : .25);
-    if (amount >= 30) this.hitPause = Math.max(this.hitPause, amount >= 80 ? .055 : .026);
-    this.floatingText.push({ x: centerX(enemy), y: enemy.y, text: `${Math.round(amount)}`, color, life: .65, maxLife: .65, size: amount > 30 ? 21 : 15 });
-    this.burst(centerX(enemy), centerY(enemy), color, 6, 180);
+    const feedback=enemyHitFeedback(amount,enemy.maxHealth);
+    const accented=shouldEmitImpactAccent(this.impactFeedbackSequence++,this.particles.length,this.reducedVfx,feedback.tier);
+    if(accented){this.hitPause=Math.max(this.hitPause,feedback.hitPauseSeconds);this.shake=Math.max(this.shake,feedback.cameraImpulse);}
+    this.addDamageReadout(enemy,amount,color);
+    this.burst(centerX(enemy), centerY(enemy), color, feedback.particleCount, feedback.particleSpeed);
     if (enemy.health <= 0) this.killEnemy(enemy);
     else this.playSound('enemyHit');
     if (shareLink && enemy.soulLinked && this.boonStacks.calyptra > 0) {
@@ -3775,17 +3779,21 @@ class DemonGame {
     enemy.dead = true;
     enemy.invulnerable = -2;
     const major = this.isMajorType(enemy.type);
+    const elite=Boolean(enemy.eliteModifier||enemy.deepDivePowers?.length);
+    const category=major?(this.room.type==='boss'?'boss':'miniboss'):elite?'elite':'normal';
+    const feedback=enemyDefeatFeedback(category);
     enemy.deathTime = major ? .9 : 0;
-    this.shake = major ? 12 : 4;
+    this.shake = Math.max(this.shake,feedback.cameraImpulse);
+    this.hitPause=Math.max(this.hitPause,feedback.hitPauseSeconds);
+    this.screenFlash=Math.max(this.screenFlash,feedback.screenFlash);
     const deathColor = enemy.type === 'hollowBoss' ? '#f3ecff' : enemy.type === 'lilithBoss' ? '#ff4f9a' : enemy.type.startsWith('daughter') ? '#e9a1ff' : enemy.type === 'vesperaBoss' ? '#8ff7ff' : enemy.type === 'betterMilo' ? '#d06cff' : enemy.type === 'somniaBoss' ? '#bc7cff' : enemy.type === 'dreamGirl' || enemy.type === 'fantasyAnchor' ? '#ffd8f5' : enemy.type === 'isoldeBoss' ? '#8ee7ff' : enemy.type === 'calyptraBoss' ? '#ffe05a' : enemy.type === 'ladyLuckless' ? '#f46cff' : enemy.type === 'roxyne' ? '#ef4e43' : enemy.type === 'perfectPrey' ? '#dce8c3' : enemy.type === 'nerissa' ? '#48e6f2' : enemy.type === 'warden' ? '#ff345e' : '#a66cff';
-    this.burst(centerX(enemy), centerY(enemy), deathColor, major ? 60 : 18, major ? 600 : 300);
+    this.burst(centerX(enemy), centerY(enemy), deathColor, feedback.particleCount, feedback.particleSpeed);
     this.playSound(major ? 'bossDown' : 'enemyDown');
     this.addStyle(major ? 20 : 6, major ? 'BOSS BREAK' : 'DEMON DOWN');
     if (!major && enemy.type !== 'dummy') this.runMetrics.enemiesDefeated += 1;
     else if (major) this.runMetrics.enemiesDefeated += 1;
     if (enemy.type !== 'dummy') {
       this.save.lifetimeEnemies += 1;
-      const elite = Boolean(enemy.eliteModifier || enemy.deepDivePowers?.length);
       const xp = major
         ? this.room.type === 'miniboss' ? DIVE_XP_REWARDS.miniboss : DIVE_XP_REWARDS.boss
         : elite ? DIVE_XP_REWARDS.eliteEnemy : DIVE_XP_REWARDS.enemy;
@@ -3970,9 +3978,20 @@ class DemonGame {
     this.gustEffects=this.gustEffects.filter(gust=>gust.life>0);
   }
 
+  private addDamageReadout(enemy:Enemy,amount:number,color:string):void {
+    const budget=this.reducedVfx?DAMAGE_TEXT_BUDGET.reduced:DAMAGE_TEXT_BUDGET.normal;
+    const numeric=this.floatingText.filter((text)=>/^\d+$/.test(text.text));
+    if(numeric.length>=budget){
+      const target=numeric.reduce((closest,text)=>Math.hypot(text.x-centerX(enemy),text.y-enemy.y)<Math.hypot(closest.x-centerX(enemy),closest.y-enemy.y)?text:closest,numeric[0]);
+      target.text=`${Number(target.text)+Math.round(amount)}`;target.x=centerX(enemy);target.y=enemy.y;target.life=Math.max(target.life,.5);target.maxLife=Math.max(target.maxLife,.65);target.size=Math.max(target.size,amount>30?21:15);target.color=color;
+      return;
+    }
+    this.floatingText.push({x:centerX(enemy),y:enemy.y,text:`${Math.round(amount)}`,color,life:.65,maxLife:.65,size:amount>30?21:15});
+  }
+
   private burst(x: number, y: number, color: string, count: number, speed: number): void {
     if (this.reducedVfx) count = Math.max(3, Math.ceil(count * .38));
-    const effectBudget = (this.reducedVfx ? 190 : 460) - this.particles.length;
+    const effectBudget = (this.reducedVfx ? PARTICLE_EFFECT_BUDGET.reduced : PARTICLE_EFFECT_BUDGET.normal) - this.particles.length;
     count = Math.max(0, Math.min(count, effectBudget));
     for (let i = 0; i < count; i += 1) {
       const angle = Math.random() * Math.PI * 2;
@@ -6085,9 +6104,18 @@ class DemonGame {
     }
     this.drawEnemyBody(enemy);
     this.ctx.restore();
+    if(enemy.hitStun>0&&!enemy.dead)this.drawEnemyHitConfirmation(enemy);
     if(!enemy.dead)this.drawEnemyStatusEffects(enemy);
     if (enemy.eliteModifier && !enemy.dead) this.drawEliteIdentifier(enemy);
     if (enemy.deepDivePowers?.length && !enemy.dead) this.drawDeepDivePowerIdentifier(enemy);
+  }
+
+  private drawEnemyHitConfirmation(enemy:Enemy):void {
+    const strength=clamp(enemy.hitStun/.16,.18,1);
+    this.ctx.save();this.ctx.globalCompositeOperation='screen';this.ctx.globalAlpha=.22+strength*.42;
+    this.ctx.strokeStyle='#ffffff';this.ctx.shadowColor='#ffffff';this.ctx.shadowBlur=8+strength*14;this.ctx.lineWidth=1.5+strength*2.5;
+    this.ctx.beginPath();this.ctx.ellipse(centerX(enemy),centerY(enemy),enemy.w*.58+strength*5,enemy.h*.56+strength*5,0,0,Math.PI*2);this.ctx.stroke();
+    this.ctx.restore();
   }
 
   private drawEnemyBody(enemy: Enemy): void {
