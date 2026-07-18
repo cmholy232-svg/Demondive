@@ -5,7 +5,7 @@ import { ARCANE_PROFILES, selectArcaneProfile, type ArcaneProfileId } from './ga
 import { arcaneHarmonyLabel, boonNoteLabel } from './game/arcane-audio';
 import { ArcaneAudioDirector } from './game/arcane-audio-director';
 import { chooseSmartBoonOffers } from './game/boon-offers';
-import { BOON_PROJECTILE_SHAPES, incomingDamageMultiplier, pickupMagnetRadius, selectAttachedBoons, selectDominantBoon } from './game/boon-runtime';
+import { BOON_PROJECTILE_SHAPES, buildupThreshold, incomingDamageMultiplier, pickupMagnetRadius, selectAttachedBoons, selectDominantBoon, seraphineMaximumShieldCharges, somniaEchoCount } from './game/boon-runtime';
 import { CombatSfxLimiter, type CombatSfxEvent } from './game/combat-audio';
 import { BOONS, BOON_ORDER, ENEMY_BODIES, FLOOR_Y, HEIGHT, HUB_ROOM, LEVEL_EIGHT_ENCOUNTERS, LEVEL_FIVE_ENCOUNTERS, LEVEL_FOUR_ENCOUNTERS, LEVEL_NINE_ENCOUNTERS, LEVEL_ONE_ENCOUNTERS, LEVEL_SEVEN_ENCOUNTERS, LEVEL_SIX_ENCOUNTERS, LEVEL_THREE_ENCOUNTERS, LEVEL_TWO_ENCOUNTERS, ROOMS, UPGRADE_INFO, WIDTH, upgradeCost } from './game/content';
 import { campaignContent } from './game/content-registry';
@@ -156,6 +156,7 @@ class DemonGame {
   private roomIntro = 0;
   private transition = 0;
   private runShards = 0;
+  private aureliaCurrencyRemainder = 0;
   private runBanked = false;
   private boonPickups: BoonPickup[] = [];
   private rewardInspectionLocked = false;
@@ -244,6 +245,11 @@ class DemonGame {
   private lunaTurretTimer = 0;
   private bloodPactRoomBonus = 0;
   private bloodPactAuraTimer = 0;
+  private appetiteMomentumStacks = 0;
+  private appetiteMomentumTimer = 0;
+  private appetiteRoomPower = 0;
+  private seraphineShieldRegenTimer = 0;
+  private seraphineFragmentTimer = 0;
   private belladonnaVortex = 0;
   private bossHazards: BossHazard[] = [];
   private arcaneImpacts: ArcaneImpact[] = [];
@@ -1300,6 +1306,7 @@ class DemonGame {
     this.boonStacks = emptyBoonStacks();
     this.lastRewardBoon = this.selectedStartingBoon;
     this.runShards = 0;
+    this.aureliaCurrencyRemainder = 0;
     this.runBanked = false;
     this.runSeed = requestedSeed ?? createRunSeed();
     const plan = generateRunPlan(this.currentDepth, this.runSeed);
@@ -1322,6 +1329,11 @@ class DemonGame {
     this.lunaTurretTimer = 0;
     this.bloodPactRoomBonus = 0;
     this.bloodPactAuraTimer = 0;
+    this.appetiteMomentumStacks = 0;
+    this.appetiteMomentumTimer = 0;
+    this.appetiteRoomPower = 0;
+    this.seraphineShieldRegenTimer = 4;
+    this.seraphineFragmentTimer = 1.4;
     const startingBoon = BOONS[this.selectedStartingBoon];
     this.player = this.makePlayer(startingBoon.special);
     this.applyBoon(this.selectedStartingBoon, false);
@@ -1544,6 +1556,9 @@ class DemonGame {
     this.lunaTurretTimer = 0;
     this.bloodPactRoomBonus = 0;
     this.bloodPactAuraTimer = 0;
+    this.appetiteMomentumStacks = 0;
+    this.appetiteMomentumTimer = 0;
+    this.appetiteRoomPower = 0;
     this.particles = [];
     this.floatingText = [];
     this.fireBuffer=0;this.fireBufferPending=false;
@@ -1790,6 +1805,9 @@ class DemonGame {
     this.mirrorShieldTimer = Math.max(0, this.mirrorShieldTimer - dt);
     this.lunaTurretTimer = Math.max(0, this.lunaTurretTimer - dt);
     this.bloodPactAuraTimer = Math.max(0, this.bloodPactAuraTimer - dt);
+    this.appetiteMomentumTimer=Math.max(0,this.appetiteMomentumTimer-dt);
+    if(this.appetiteMomentumTimer===0)this.appetiteMomentumStacks=0;
+    this.updateSeraphinePassive(dt);
     this.roomTime += dt;
     if (this.activeWager?.type === 'rush' && !this.activeWager.failed && !this.roomCleared) {
       this.activeWager.timer = Math.max(0, this.activeWager.timer - dt);
@@ -2038,7 +2056,8 @@ class DemonGame {
     const snareMultiplier=this.playerSnareTime>0 ? .52 : 1;
     const onControlledIce=this.worldFreezeTimer<=0&&this.room.hazards.some(hazard=>hazard.type==='ice'&&overlap(this.player,hazard));
     const traction = 1 + this.save.upgrades.traction * .025;
-    const speed = movement.runSpeed * traction * (1 + this.boonStacks.zephyra * .025 + this.boonStacks.noctissa * .03) * (this.rushStateTimer > 0 ? 1.28 : 1) * snareMultiplier;
+    const appetiteSpeed=1+Math.min(.28,this.appetiteMomentumStacks*(.025+this.effectiveBoonStacks('belladonna')*.006));
+    const speed = movement.runSpeed * traction * (1 + this.boonStacks.zephyra * .025 + this.boonStacks.noctissa * .03) * appetiteSpeed * (this.rushStateTimer > 0 ? 1.28 : 1) * snareMultiplier;
     const accel = (this.player.grounded ? movement.groundAcceleration : movement.airAcceleration * (1 + this.boonStacks.maris * .05)) * traction * (this.playerSnareTime>0 ? .58 : 1) * (onControlledIce?.42:1);
 
     this.player.dashCooldown = Math.max(0, this.player.dashCooldown - dt);
@@ -2068,7 +2087,7 @@ class DemonGame {
         this.player.dashCooldown = movement.dashCooldownSeconds;
         this.player.dashRecoveryTime = 0;
         this.player.dashCharges -= 1;
-        this.player.invulnerable = Math.max(this.player.invulnerable, .38);
+        this.player.invulnerable = Math.max(this.player.invulnerable, .38+Math.min(.14,this.effectiveBoonStacks('vespera')*.02));
         this.shake = 4;
         this.burst(centerX(this.player), centerY(this.player), this.getArcaneColor(), 14, 240);
         this.playSound('dash');
@@ -2302,18 +2321,25 @@ class DemonGame {
     const gaiaPower=this.effectiveBoonStacks('gaia');
     const zephyraPower=this.effectiveBoonStacks('zephyra');
     const floraPower=this.effectiveBoonStacks('flora');
+    const solaraPower=this.effectiveBoonStacks('solara');
+    const aureliaPower=this.effectiveBoonStacks('aurelia');
+    const lilithPower=this.effectiveBoonStacks('lilith');
+    const somniaPower=this.effectiveBoonStacks('somnia');
     const fireRateBonus = zephyraPower * .08 + floraPower * .04 + this.styleMeter * .002 + this.save.upgrades.cadence * .04 + (this.rushStateTimer > 0 ? .38 : 0);
     this.player.fireCooldown = arcane.baseCooldownSeconds / (1 + fireRateBonus);
-    const size = Math.min(42,arcane.baseRadius * (1 + marisPower * .16 + gaiaPower * .3));
+    const size = Math.min(42,arcane.baseRadius * (1 + marisPower * .16 + gaiaPower * .3) * Math.max(.58,1-zephyraPower*.08));
     let damage = arcane.baseDamage * (1 + this.save.upgrades.kindling * .05) * (1 + pyrraPower * .10 + gaiaPower * .16);
     damage *= 1 + this.styleMeter * .0012;
+    damage *= 1+this.appetiteRoomPower;
+    damage *= 1+Math.min(.45,this.runShards*.003*aureliaPower);
+    damage *= 1+lilithPower*.18*(1-this.player.health/Math.max(1,this.player.maxHealth));
     if (steamPressure) damage*=1.15;
     if (this.boonStacks.calyptra > 0) damage *= calyptraPowerMultiplier(this.boonStacks.calyptra, this.runRng.next());
     const crit = this.runRng.next() < Math.min(.42, floraPower * .06 + this.effectiveBoonStacks('calyptra') * .025 + (crystalGarden ? .08 : 0));
     if (crit) damage *= calyptraCriticalMultiplier(this.boonStacks.calyptra);
     const color = this.getArcaneColor();
     const accentColor = this.getArcaneAccentColor();
-    const projectileSpeed = arcane.projectileSpeed * (1 + zephyraPower * .14) * Math.max(.62, 1 - gaiaPower * .08);
+    const projectileSpeed = arcane.projectileSpeed * (1 + zephyraPower * .14 + solaraPower*.06) * Math.max(.62, 1 - gaiaPower * .08);
     let aimX = Number(this.isControl('right')) - Number(this.isControl('left'));
     let aimY = Number(this.isControl('down')) - Number(this.isControl('up'));
     if (aimY > 0 && this.player.grounded && aimX === 0) aimX = this.player.facing;
@@ -2340,12 +2366,21 @@ class DemonGame {
       this.projectiles.push({
         id: this.entityId++, owner: 'player', x: muzzleX - size, y: muzzleY - size, w: size * 2, h: size * 2,
         vx: Math.cos(angle) * projectileSpeed, vy: Math.sin(angle) * projectileSpeed,
-        damage: shotDamage, life: arcane.projectileLifeSeconds * (1 + this.boonStacks.isolde * .12), color, radius: size,
-        pierce: Math.min(16,this.boonStacks.gaia + this.boonStacks.solara + Math.floor(this.boonStacks.maris / 2)),
+        damage: shotDamage, life: arcane.projectileLifeSeconds * (1 + this.boonStacks.isolde * .12 + solaraPower*.08), color, radius: size,
+        pierce: Math.min(16,this.boonStacks.gaia + this.boonStacks.solara + Math.floor(this.boonStacks.maris / 2)+Math.floor(zephyraPower)),
         bounces: Math.min(12,this.boonStacks.isolde+(mirrorDream?1:0)), homing: Math.min(2.4,this.boonStacks.nerissa * .38), explosive: steamPressure&&this.boonStacks.pyrra+this.boonStacks.maris>=4,
         age: 0, baseRadius: size,
-        wave: this.boonStacks.maris, boomerang: this.boonStacks.seraphine > 0, returning: false,
+        wave: this.boonStacks.maris, boomerang: false, returning: false,
         accentColor,primaryBoon:primaryBoon??undefined,attachedBoons,
+      });
+      const echoCount=somniaEchoCount(this.boonStacks.somnia);
+      for(let echo=0;echo<echoCount;echo+=1)this.projectiles.push({
+        id:this.entityId++,owner:'player',x:muzzleX-size*.72,y:muzzleY-size*.72,w:size*1.44,h:size*1.44,
+        vx:Math.cos(angle)*projectileSpeed,vy:Math.sin(angle)*projectileSpeed,damage:shotDamage*Math.min(.5,.18+somniaPower*.045),
+        life:arcane.projectileLifeSeconds*(1+this.boonStacks.isolde*.12+solaraPower*.08),color:BOONS.somnia.color,radius:size*.72,
+        pierce:Math.min(8,Math.floor((this.boonStacks.gaia+this.boonStacks.solara+this.boonStacks.zephyra)/2)),bounces:Math.min(6,this.boonStacks.isolde),
+        homing:Math.min(1.8,this.boonStacks.nerissa*.3),explosive:false,age:0,baseRadius:size*.72,wave:this.boonStacks.maris,
+        boomerang:false,returning:false,accentColor:BOONS.somnia.accentColor,primaryBoon:'somnia',attachedBoons:[],spawnDelay:.16+echo*.11,
       });
     }
     if (this.lunaTurretTimer > 0) this.fireLunaTurretShot(aimX, aimY, color, accentColor);
@@ -2610,6 +2645,22 @@ class DemonGame {
     return Math.ceil((definition?.specialEnergyCost ?? 25) * Math.max(.45, 1 - this.save.upgrades.ritual * .04 - lunaDiscount-eclipseDiscount));
   }
 
+  private updateSeraphinePassive(dt:number):void {
+    if(this.boonStacks.seraphine<=0)return;
+    const power=this.effectiveBoonStacks('seraphine');
+    const maxCharges=seraphineMaximumShieldCharges(this.boonStacks.seraphine);
+    if(this.player.shieldCharges<maxCharges){
+      this.seraphineShieldRegenTimer-=dt;
+      if(this.seraphineShieldRegenTimer<=0){this.player.shieldCharges+=1;this.seraphineShieldRegenTimer=Math.max(3.2,8-power*.38);this.burst(centerX(this.player),centerY(this.player),BOONS.seraphine.color,12,180);}
+    }else this.seraphineShieldRegenTimer=Math.max(this.seraphineShieldRegenTimer,1.2);
+    this.seraphineFragmentTimer-=dt;
+    if(this.seraphineFragmentTimer>0)return;
+    this.seraphineFragmentTimer=Math.max(.72,2.4-power*.13);
+    const target=this.nearestEnemy(centerX(this.player),centerY(this.player));if(!target)return;
+    const angle=Math.atan2(centerY(target)-centerY(this.player),centerX(target)-centerX(this.player));const radius=6;const speed=690;
+    this.projectiles.push({id:this.entityId++,owner:'player',x:centerX(this.player)-radius,y:centerY(this.player)-radius,w:radius*2,h:radius*2,vx:Math.cos(angle)*speed,vy:Math.sin(angle)*speed,damage:8+power*3,life:1.5,color:BOONS.seraphine.color,radius,pierce:0,bounces:0,homing:.45,explosive:false,accentColor:BOONS.seraphine.accentColor,primaryBoon:'seraphine',attachedBoons:[]});
+  }
+
   private updateEnemies(dt: number): void {
     const threat = this.currentThreat();
     for (const enemy of this.enemies) {
@@ -2619,6 +2670,7 @@ class DemonGame {
       enemy.rootTime = Math.max(0, enemy.rootTime - dt);
       enemy.charmTime = Math.max(0, enemy.charmTime - dt);
       enemy.blindTime = Math.max(0, enemy.blindTime - dt);
+      enemy.frozenTime = Math.max(0,(enemy.frozenTime??0)-dt);
       if (enemy.slowTime > 0) {
         enemy.vx *= Math.pow(.12, dt);
         enemy.attackTimer += dt * .48;
@@ -3347,6 +3399,7 @@ class DemonGame {
     for (const projectile of this.projectiles) {
       if (remove.has(projectile.id)) continue;
       if (this.worldFreezeTimer > 0 && projectile.owner === 'enemy') continue;
+      if((projectile.spawnDelay??0)>0){projectile.spawnDelay=Math.max(0,(projectile.spawnDelay??0)-dt);continue;}
       projectile.life -= dt;
       projectile.age = (projectile.age ?? 0) + dt;
       if (projectile.owner === 'player' && projectile.wave && projectile.wave > 0) {
@@ -3361,12 +3414,6 @@ class DemonGame {
         const speed = Math.max(620, Math.hypot(projectile.vx, projectile.vy));
         projectile.vx += (Math.cos(angle) * speed - projectile.vx) * dt * 7;
         projectile.vy += (Math.sin(angle) * speed - projectile.vy) * dt * 7;
-      }
-      if (projectile.owner === 'player' && this.boonStacks.crya > 0 && !projectile.explosive) {
-        const oldRadius = projectile.radius;
-        projectile.radius = (projectile.baseRadius ?? projectile.radius) * (1 + Math.min(.75, projectile.age * .28 * this.boonStacks.crya));
-        projectile.x -= projectile.radius - oldRadius; projectile.y -= projectile.radius - oldRadius;
-        projectile.w = projectile.radius * 2; projectile.h = projectile.radius * 2;
       }
       if (projectile.homing > 0 && projectile.owner === 'player') {
         const target = this.nearestEnemy(centerX(projectile), centerY(projectile));
@@ -3431,11 +3478,14 @@ class DemonGame {
           }
           let hitDamage = projectile.damage;
           const major = this.isMajorType(enemy.type);
+          const wasFrozen=(enemy.frozenTime??0)>0;
           if (major) hitDamage *= 1 + this.boonStacks.solara * .12;
           const nearbyAllies = this.enemies.filter((other) => other.id !== enemy.id && !other.dead && Math.hypot(centerX(other)-centerX(enemy),centerY(other)-centerY(enemy)) < 220).length;
           if (nearbyAllies === 0) hitDamage *= 1 + this.boonStacks.roxyne * .12;
+          if(enemy.health>=enemy.maxHealth*.98&&this.boonStacks.noctissa>0)hitDamage*=1+this.effectiveBoonStacks('noctissa')*.15;
           if (major && this.boonStacks.lilith > 0) this.player.health = Math.min(this.player.maxHealth, this.player.health + hitDamage * this.boonStacks.lilith * .025);
           this.damageEnemy(enemy, hitDamage, projectile.color);
+          if(this.boonStacks.maris>0&&!enemy.dead)enemy.vx+=Math.sign(projectile.vx||this.player.facing)*(35+this.effectiveBoonStacks('maris')*18);
           this.spawnArcaneImpact(centerX(enemy), centerY(enemy), projectile.color, projectile.accentColor ?? this.arcaneCore(projectile.color), projectile.explosive || hitDamage >= 42);
           if (this.boonStacks.pyrra > 0) {
             enemy.dotTime = Math.max(enemy.dotTime, 1.8 + this.boonStacks.pyrra * .28);
@@ -3449,8 +3499,30 @@ class DemonGame {
               this.floatingText.push({ x: centerX(enemy), y: enemy.y - 12, text: 'EMBER BLOOM', color: BOONS.pyrra.accentColor, life: .55, maxLife: .55, size: 13 });
             }
           }
-          if (this.boonStacks.flora > 0) this.impactBurst(centerX(enemy), centerY(enemy), 58 + this.boonStacks.flora * 5, projectile.damage * .2, BOONS.flora.color, enemy.id);
-          if (this.boonStacks.crya > 0) enemy.slowTime = Math.max(enemy.slowTime, .8 + this.boonStacks.crya * .18);
+          if (this.boonStacks.flora > 0&&!enemy.dead) {
+            const floraPower=this.effectiveBoonStacks('flora');
+            const threshold=buildupThreshold(floraPower);
+            enemy.thornMarks=(enemy.thornMarks??0)+1;
+            this.floatingText.push({x:centerX(enemy),y:enemy.y-12,text:`THORN ${enemy.thornMarks}/${threshold}`,color:BOONS.flora.accentColor,life:.42,maxLife:.42,size:11});
+            if(enemy.thornMarks>=threshold){enemy.thornMarks=0;this.impactBurst(centerX(enemy),centerY(enemy),72+floraPower*7,16+floraPower*7,BOONS.flora.color,enemy.id);this.floatingText.push({x:centerX(enemy),y:enemy.y-20,text:'THORN BLOOM',color:BOONS.flora.accentColor,life:.65,maxLife:.65,size:14});}
+          }
+          if (this.boonStacks.crya > 0&&!enemy.dead) {
+            const cryaPower=this.effectiveBoonStacks('crya');
+            enemy.slowTime=Math.max(enemy.slowTime,.8+cryaPower*.18);
+            if(wasFrozen&&hitDamage>=36){enemy.frozenTime=0;enemy.frostHits=0;this.impactBurst(centerX(enemy),centerY(enemy),76+cryaPower*5,14+cryaPower*6,BOONS.crya.color,enemy.id);this.floatingText.push({x:centerX(enemy),y:enemy.y-18,text:'SHATTER',color:BOONS.crya.accentColor,life:.65,maxLife:.65,size:15});}
+            else{const threshold=buildupThreshold(cryaPower);enemy.frostHits=(enemy.frostHits??0)+1;if(enemy.frostHits>=threshold){enemy.frostHits=0;enemy.frozenTime=Math.max(enemy.frozenTime??0,(major?.7:1.35)+cryaPower*.08);enemy.hitStun=Math.max(enemy.hitStun,enemy.frozenTime);this.floatingText.push({x:centerX(enemy),y:enemy.y-18,text:'FROZEN',color:BOONS.crya.accentColor,life:.7,maxLife:.7,size:15});}}
+          }
+          if(this.boonStacks.luna>0&&!enemy.dead){
+            const lunaPower=this.effectiveBoonStacks('luna');enemy.dreamHits=(enemy.dreamHits??0)+1;enemy.dreamDamageBank=(enemy.dreamDamageBank??0)+hitDamage;
+            if(enemy.dreamHits>=3){const echo=(enemy.dreamDamageBank??0)*Math.min(.62,.14+lunaPower*.08);enemy.dreamHits=0;enemy.dreamDamageBank=0;this.damageEnemy(enemy,echo,BOONS.luna.color);this.floatingText.push({x:centerX(enemy),y:enemy.y-24,text:'MOON ECHO',color:BOONS.luna.accentColor,life:.7,maxLife:.7,size:14});}
+          }
+          if(this.boonStacks.vespera>0&&!enemy.dead){
+            const shardTargets=this.enemies.filter((target)=>target.id!==enemy.id&&!target.dead&&Math.hypot(centerX(target)-centerX(enemy),centerY(target)-centerY(enemy))<250).slice(0,Math.min(3,this.boonStacks.vespera));
+            for(const target of shardTargets){const shardDamage=Math.min(28,hitDamage*(.12+this.effectiveBoonStacks('vespera')*.025));this.damageEnemy(target,shardDamage,BOONS.vespera.color,false);this.lightningEffects.push({x1:centerX(enemy),y1:centerY(enemy),x2:centerX(target),y2:centerY(target),life:.1,maxLife:.1,color:BOONS.vespera.accentColor});}
+          }
+          if(this.boonStacks.nerissa>=7&&!enemy.dead&&enemy.health/enemy.maxHealth<=(major?.04:.1)){
+            this.floatingText.push({x:centerX(enemy),y:enemy.y-26,text:'DEATH NOTE',color:BOONS.nerissa.accentColor,life:.8,maxLife:.8,size:16});this.damageEnemy(enemy,enemy.health+1,BOONS.nerissa.color);
+          }
           if (this.boonStacks.voltara > 0) {
             const voltaraPower=this.effectiveBoonStacks('voltara');
             enemy.hitStun = Math.max(enemy.hitStun, .13 + voltaraPower * .025);
@@ -3722,6 +3794,7 @@ class DemonGame {
     }
     if (major) return;
     this.spawnPickup('shard', centerX(enemy), centerY(enemy), this.wagerMultiplier);
+    if(this.boonStacks.aurelia>0&&this.runRng.chance(Math.min(.5,this.effectiveBoonStacks('aurelia')*.08)))this.spawnPickup('shard',centerX(enemy)+18,centerY(enemy)-8,1);
     if (this.hasBoonPair('aurelia','belladonna')&&this.runRng.chance(.24)) this.spawnPickup('shard',centerX(enemy)+18,centerY(enemy)-8,1);
     const roll = this.runRng.next();
     if (roll < .15) this.spawnPickup('pizza', centerX(enemy), enemy.y, 18);
@@ -3760,9 +3833,10 @@ class DemonGame {
     this.runMetrics.damageTaken += amount;
     this.player.health -= amount;
     this.player.invulnerable = .78;
-    this.player.hurtFlash = .25;
-    this.player.vx = centerX(this.player) < sourceX ? -310 : 310;
-    this.player.vy = -280;
+    const somniaRecovery=Math.max(.55,1-this.effectiveBoonStacks('somnia')*.1);
+    this.player.hurtFlash = .25*somniaRecovery;
+    this.player.vx = (centerX(this.player) < sourceX ? -310 : 310)*somniaRecovery;
+    this.player.vy = -280*somniaRecovery;
     this.shake = 10;
     this.screenFlash = .3;
     this.floatingText.push({ x: centerX(this.player), y: this.player.y, text: `-${Math.round(amount)}`, color: '#ff5269', life: .75, maxLife: .75, size: 20 });
@@ -3796,17 +3870,28 @@ class DemonGame {
       pickup.vx *= Math.pow(.22, dt);
       pickup.vy = body.vy;
       if (overlap(pickup, this.player)) {
+        let overflowedResource=false;
         if (pickup.type === 'pizza') {
           const healed = Math.min(pickup.value*(1+this.save.upgrades.pizzaQuality*.08), this.player.maxHealth - this.player.health);
           this.player.health += healed;
+          overflowedResource=healed<=.01;
           this.floatingText.push({ x: pickup.x, y: pickup.y, text: `+${Math.round(healed)} HP`, color: '#62e59b', life: .8, maxLife: .8, size: 15 });
         } else if (pickup.type === 'coffee') {
           const restored = Math.min(pickup.value*(1+this.save.upgrades.coffeeQuality*.08), this.player.maxEnergy - this.player.energy);
           this.player.energy += restored;
+          overflowedResource=restored<=.01;
           this.floatingText.push({ x: pickup.x, y: pickup.y, text: `+${Math.round(restored)} ENERGY`, color: '#b46cff', life: .8, maxLife: .8, size: 15 });
         } else {
-          this.runShards += pickup.value;
-          this.floatingText.push({ x: pickup.x, y: pickup.y, text: `+${pickup.value} SHARD${pickup.value === 1 ? '' : 'S'}`, color: '#ffc75a', life: .8, maxLife: .8, size: 14 });
+          const currencyWithRemainder=pickup.value*(1+this.effectiveBoonStacks('aurelia')*.15)+this.aureliaCurrencyRemainder;
+          const awarded=Math.max(1,Math.floor(currencyWithRemainder));this.aureliaCurrencyRemainder=currencyWithRemainder-awarded;
+          this.runShards += awarded;
+          this.floatingText.push({ x: pickup.x, y: pickup.y, text: `+${awarded} SHARD${awarded === 1 ? '' : 'S'}`, color: '#ffc75a', life: .8, maxLife: .8, size: 14 });
+        }
+        if(this.boonStacks.belladonna>0){
+          const appetitePower=this.effectiveBoonStacks('belladonna');
+          this.appetiteMomentumStacks=Math.min(5,this.appetiteMomentumStacks+1);this.appetiteMomentumTimer=3.2+appetitePower*.22;
+          this.appetiteRoomPower=Math.min(.4,this.appetiteRoomPower+.02+appetitePower*.008);
+          if(overflowedResource){this.player.invulnerable=Math.max(this.player.invulnerable,.3);this.impactBurst(centerX(this.player),centerY(this.player),92+appetitePower*5,8+appetitePower*3,BOONS.belladonna.color,-1);this.floatingText.push({x:centerX(this.player),y:this.player.y-18,text:'FEAST OVERFLOW',color:BOONS.belladonna.accentColor,life:.65,maxLife:.65,size:14});}
         }
         this.burst(centerX(pickup), centerY(pickup), pickup.type === 'pizza' ? '#62e59b' : pickup.type === 'coffee' ? '#b46cff' : '#ffc75a', 10, 180);
         this.playSound('pickup');
@@ -6443,6 +6528,7 @@ class DemonGame {
   }
 
   private drawProjectile(projectile: Projectile): void {
+    if((projectile.spawnDelay??0)>0)return;
     this.ctx.save();
     this.ctx.shadowColor = projectile.color;
     this.ctx.shadowBlur = projectile.explosive ? 26 : 18;

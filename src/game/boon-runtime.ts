@@ -44,3 +44,15 @@ export function incomingDamageMultiplier(gaiaStacks:number,cryaStacks:number,con
 export function pickupMagnetRadius(upgradeStacks:number,nerissaStacks:number):number {
   return 70+Math.max(0,upgradeStacks)*45+Math.max(0,nerissaStacks)*55;
 }
+
+export function buildupThreshold(effectiveStacks:number):number {
+  return Math.max(2,4-Math.floor(Math.max(0,effectiveStacks)/3));
+}
+
+export function somniaEchoCount(rawStacks:number):number {
+  return rawStacks<=0?0:rawStacks>=8?3:rawStacks>=4?2:1;
+}
+
+export function seraphineMaximumShieldCharges(rawStacks:number):number {
+  return rawStacks<=0?0:Math.min(4,1+Math.floor((rawStacks-1)/3));
+}

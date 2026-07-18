@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { GAME_ACTIONS, DevicePromptService, GamepadActionResolver } from '../src/game/actions';
 import { ARCANE_PROFILES, selectArcaneProfile } from '../src/game/arcane-tuning';
-import { BOON_PROJECTILE_SHAPES, incomingDamageMultiplier, pickupMagnetRadius, selectAttachedBoons, selectDominantBoon } from '../src/game/boon-runtime';
+import { BOON_PROJECTILE_SHAPES, buildupThreshold, incomingDamageMultiplier, pickupMagnetRadius, selectAttachedBoons, selectDominantBoon, seraphineMaximumShieldCharges, somniaEchoCount } from '../src/game/boon-runtime';
 import { BOONS, BOON_ORDER, FLOOR_Y, WIDTH } from '../src/game/content';
 import { canAccessBoon, canAccessCampaignLevel, ENTITLEMENT_TEST_CONTEXTS } from '../src/game/entitlements';
 import { generateRunPlan, roomIsEmpty } from '../src/game/generator';
@@ -90,6 +90,9 @@ assert.equal(new Set(Object.values(BOON_PROJECTILE_SHAPES)).size,BOON_ORDER.leng
 assert.equal(pickupMagnetRadius(2,3),325,'Nerissa pickup pull must stack with the permanent magnet upgrade');
 assert.equal(incomingDamageMultiplier(2,4,false),.84,'Crya defense must not apply without a controlled enemy');
 assert.ok(Math.abs(incomingDamageMultiplier(2,4,true)-.5712)<.000001,'Gaia armor and conditional Crya defense must combine predictably');
+assert.deepEqual([buildupThreshold(1),buildupThreshold(4),buildupThreshold(8)],[4,3,2],'status buildup must accelerate only at explicit effective-stack thresholds');
+assert.deepEqual([somniaEchoCount(0),somniaEchoCount(1),somniaEchoCount(4),somniaEchoCount(8)],[0,1,2,3],'Somnia echoes must escalate at bounded thresholds');
+assert.deepEqual([seraphineMaximumShieldCharges(0),seraphineMaximumShieldCharges(1),seraphineMaximumShieldCharges(4),seraphineMaximumShieldCharges(10)],[0,1,2,4],'Seraphine regeneration must use a bounded shield cap');
 
 assert.deepEqual(sameSeedRetryRequest(0xfeedbeef),{ depth:1,seed:0xfeedbeef });
 assert.deepEqual(newRunRequest(),{ depth:1 });

@@ -252,6 +252,11 @@ export interface Enemy extends Rect {
   blindTime: number;
   soulLinked: boolean;
   statusHits: number;
+  thornMarks?: number;
+  dreamHits?: number;
+  dreamDamageBank?: number;
+  frostHits?: number;
+  frozenTime?: number;
   milestones: number;
   eliteModifier?: EliteModifier;
   eliteArmor?: number;
@@ -289,6 +294,7 @@ export interface Projectile extends Rect {
   mirrorReflected?: boolean;
   primaryBoon?: BoonId;
   attachedBoons?: BoonId[];
+  spawnDelay?: number;
 }
 
 export type PickupType = 'pizza' | 'coffee' | 'shard';
