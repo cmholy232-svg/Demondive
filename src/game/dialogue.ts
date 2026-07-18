@@ -1,4 +1,5 @@
 import type { BoonId, SaveData, StoryBeatId } from './types';
+import { LATE_DIALOGUE_BEATS } from './late-dialogue';
 
 export interface DialogueLine {
   id: string;
@@ -24,7 +25,7 @@ export interface DialogueBeat {
   mutation?: DialogueMutation;
 }
 
-export const DIALOGUE_BEATS: Record<StoryBeatId, DialogueBeat> = {
+const EARLY_DIALOGUE_BEATS: Record<StoryBeatId, DialogueBeat> = {
   prologue_dive: {
     id: 'prologue_dive', title: 'One Clean Page', location: "Milo's Room · 2:13 AM", once: true, flag: 'prologue_dive_seen',
     lines: [
@@ -199,6 +200,8 @@ export const DIALOGUE_BEATS: Record<StoryBeatId, DialogueBeat> = {
     mutation: { unlocks: ['crya', 'roxyne'], flags: ['milo_shadow_is_aware'] },
   },
 };
+
+export const DIALOGUE_BEATS:Record<StoryBeatId,DialogueBeat>={...EARLY_DIALOGUE_BEATS,...LATE_DIALOGUE_BEATS};
 
 export const TUTORIAL_STEPS = [
   { action: 'move', text: 'MOVE · A / D or LEFT / RIGHT' },

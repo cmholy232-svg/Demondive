@@ -4,7 +4,7 @@
   "triggersPerLevel": ["entrance","miniboss-intro","boss-intro","aftermath"],
   "totalLockedTriggerIds": 24,
   "finalDialogueLinesApproved": false,
-  "runtimeDialogueWiring": false,
+  "runtimeDialogueWiring": true,
   "endingOrder": ["wake","apologize","put weed away","clean one corner","queens on television","pizza","accept the Hollow"],
   "hollowKilled": false,
   "deepDiveUnlockDeterministic": true

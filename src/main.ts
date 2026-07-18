@@ -957,12 +957,18 @@ class DemonGame {
       Nerissa:'assets/a6/characters/level2/chr-nerissa-demon-lord-portrait-v02.png',
       Crya:'assets/a7/characters/level3/chr-crya-portrait-v01.png',
       Roxyne:'assets/a7/characters/level3/chr-roxyne-demon-lord-portrait-v01.png',
+      Luna:'assets/a75/characters/boon-givers/chr-luna-portrait-v01.png',Calyptra:'assets/a75/characters/boon-givers/chr-calyptra-portrait-v01.png',
+      Solara:'assets/a75/characters/boon-givers/chr-solara-portrait-v01.png',Isolde:'assets/a75/characters/boon-givers/chr-isolde-portrait-v01.png',
+      Aurelia:'assets/a75/characters/boon-givers/chr-aurelia-portrait-v01.png',Somnia:'assets/a75/characters/boon-givers/chr-somnia-portrait-v01.png',
+      Noctissa:'assets/a75/characters/boon-givers/chr-noctissa-portrait-v01.png',Vespera:'assets/a75/characters/boon-givers/chr-vespera-portrait-v01.png',
+      Lilith:'assets/a75/characters/boon-givers/chr-lilith-portrait-v01.png',Seraphine:'assets/a75/characters/boon-givers/chr-seraphine-portrait-v01.png',
     };
     const portraitFocus: Record<string, { scale: number; y: number }> = {
       Milo:{scale:1.08,y:7}, Pyrra:{scale:1.08,y:5}, Maris:{scale:1.08,y:5}, Gaia:{scale:1.05,y:5},
       Zephyra:{scale:1.08,y:5}, Belladonna:{scale:1.05,y:3}, 'Bottomless Bartender':{scale:1.06,y:5},
       Flora:{scale:1.1,y:3}, Voltara:{scale:1.1,y:3}, Nerissa:{scale:1.1,y:3},
       Crya:{scale:1.08,y:3}, Roxyne:{scale:1.1,y:2},
+      Luna:{scale:1.08,y:3},Calyptra:{scale:1.08,y:3},Solara:{scale:1.08,y:3},Isolde:{scale:1.08,y:3},Aurelia:{scale:1.08,y:3},Somnia:{scale:1.08,y:3},Noctissa:{scale:1.08,y:3},Vespera:{scale:1.08,y:3},Lilith:{scale:1.08,y:2},Seraphine:{scale:1.08,y:3},
     };
     const portraitFile = portraitFiles[line.speaker];
     const portrait = portraitFile ? `${import.meta.env.BASE_URL}${portraitFile}` : '';
@@ -4352,12 +4358,12 @@ class DemonGame {
     else if (this.room.type === 'boss' && this.currentDepth === 1) this.showDialogueBeat('level_one_revelation', 'playing', () => this.transitionToLevelTwo());
     else if (this.room.type === 'boss' && this.currentDepth === 2) this.showDialogueBeat('level_two_revelation','playing',()=>this.transitionToLevelThree());
     else if (this.room.type === 'boss' && this.currentDepth === 3) this.showDialogueBeat('level_three_revelation','playing',()=>this.transitionToLevelFour());
-    else if (this.room.type === 'boss' && this.currentDepth === 4) this.transitionToLevelFive();
-    else if (this.room.type === 'boss' && this.currentDepth === 5) this.transitionToLevelSix();
-    else if (this.room.type === 'boss' && this.currentDepth === 6) this.transitionToLevelSeven();
-    else if (this.room.type === 'boss' && this.currentDepth === 7) this.transitionToLevelEight();
-    else if (this.room.type === 'boss' && this.currentDepth === 8) this.transitionToLevelNine();
-    else if (this.room.type === 'boss' && this.currentDepth === 9) this.showVictory();
+    else if (this.room.type === 'boss' && this.currentDepth === 4) this.showDialogueBeat('level_four_aftermath','playing',()=>this.transitionToLevelFive());
+    else if (this.room.type === 'boss' && this.currentDepth === 5) this.showDialogueBeat('level_five_aftermath','playing',()=>this.transitionToLevelSix());
+    else if (this.room.type === 'boss' && this.currentDepth === 6) this.showDialogueBeat('level_six_aftermath','playing',()=>this.transitionToLevelSeven());
+    else if (this.room.type === 'boss' && this.currentDepth === 7) this.showDialogueBeat('level_seven_aftermath','playing',()=>this.transitionToLevelEight());
+    else if (this.room.type === 'boss' && this.currentDepth === 8) this.showDialogueBeat('level_eight_aftermath','playing',()=>this.transitionToLevelNine());
+    else if (this.room.type === 'boss' && this.currentDepth === 9) this.showDialogueBeat('level_nine_aftermath','playing',()=>this.showVictory());
     else if (this.room.type === 'boss') this.showVictory();
     else {
       this.screen = 'playing';

@@ -24,6 +24,7 @@ import { DAMAGE_TEXT_BUDGET, PARTICLE_EFFECT_BUDGET, enemyDefeatFeedback, enemyH
 import { THREE_ROOM_TUTORIAL, initialThreeRoomTutorialState, recordThreeRoomTutorialAction, tutorialRoomComplete } from '../src/game/tutorial-program';
 import { THREE_ROOM_TUTORIAL_ROOMS } from '../src/game/tutorial-rooms';
 import { ACCEPTANCE_ENDING_SEQUENCE, LATE_CAMPAIGN_STORY_PLAN } from '../src/game/story-plan';
+import { DIALOGUE_BEATS } from '../src/game/dialogue';
 import type { Projectile, RoomDefinition } from '../src/game/types';
 
 class MemoryStorage implements SaveStorage {
@@ -208,6 +209,9 @@ assert.equal(LATE_CAMPAIGN_STORY_PLAN.length,24,'Levels 4–9 need four locked n
 assert.equal(new Set(LATE_CAMPAIGN_STORY_PLAN.map(beat=>beat.id)).size,LATE_CAMPAIGN_STORY_PLAN.length,'late-campaign story trigger IDs must be unique');
 for(let depth=4;depth<=9;depth+=1){const beats=LATE_CAMPAIGN_STORY_PLAN.filter(beat=>beat.depth===depth);assert.deepEqual(beats.map(beat=>beat.trigger).sort(),['aftermath','boss-intro','entrance','miniboss-intro'],`Level ${depth} story trigger coverage is incomplete`);}
 assert.deepEqual(ACCEPTANCE_ENDING_SEQUENCE,['milo-wakes','milo-apologizes','weed-put-away','one-corner-cleaned','queens-seen-on-television','pizza-ordered-and-delivered','hollow-accepted-not-destroyed'],'acceptance ending order changed');
+for(const planned of LATE_CAMPAIGN_STORY_PLAN){const beat=DIALOGUE_BEATS[planned.id];assert.ok(beat,`missing dialogue beat ${planned.id}`);assert.ok(beat.lines.length>=2,`${planned.id} is not a playable scene`);}
+const dialogueLineIds=Object.values(DIALOGUE_BEATS).flatMap(beat=>beat.lines.map(line=>line.id));assert.equal(new Set(dialogueLineIds).size,dialogueLineIds.length,'dialogue line IDs must remain localization-safe and unique');
+for(let depth=4;depth<=9;depth+=1){const plan=generateRunPlan(depth,0x770000+depth);const expected=LATE_CAMPAIGN_STORY_PLAN.filter(beat=>beat.depth===depth);assert.equal(plan.rooms[0].entryDialogue,expected.find(beat=>beat.trigger==='entrance')?.id);assert.equal(plan.rooms.find(room=>room.type==='miniboss')?.entryDialogue,expected.find(beat=>beat.trigger==='miniboss-intro')?.id);assert.equal(plan.rooms.find(room=>room.type==='boss')?.entryDialogue,expected.find(beat=>beat.trigger==='boss-intro')?.id);}
 
 assert.deepEqual(sameSeedRetryRequest(0xfeedbeef),{ depth:1,seed:0xfeedbeef });
 assert.deepEqual(newRunRequest(),{ depth:1 });

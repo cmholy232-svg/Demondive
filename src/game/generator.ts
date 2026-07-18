@@ -548,6 +548,19 @@ function buildRunPlan(depth: number, seed: number, attempt: number): GeneratedRu
     if (!rooms.some(room=>room.hazards.some(hazard=>hazard.type==='vine'))) mechanicRoom.hazards.push({type:'vine',x:310,y:620,w:150,h:30,damage:12});
     if (!rooms.some(room=>room.hazards.some(hazard=>hazard.type==='snare'))) mechanicRoom.hazards.push({type:'snare',x:830,y:565,w:145,h:85,damage:0,forceX:-90});
   }
+  if(stage>=4&&stage<=9){
+    const triggers:Record<number,[string,string,string]>={
+      4:['level_four_entrance','lady_luckless_intro','calyptra_intro'],
+      5:['level_five_entrance','memory_golem_intro','isolde_intro'],
+      6:['level_six_entrance','dream_girl_intro','somnia_intro'],
+      7:['level_seven_entrance','better_milo_intro','vespera_intro'],
+      8:['level_eight_entrance','daughters_intro','lilith_intro'],
+      9:['level_nine_entrance','boss_rush_intro','hollow_intro'],
+    };
+    const [entrance,minibossIntro,bossIntro]=triggers[stage];rooms[0].entryDialogue=entrance;
+    const miniboss=rooms.find(room=>room.type==='miniboss'),boss=rooms.find(room=>room.type==='boss');
+    if(miniboss)miniboss.entryDialogue=minibossIntro;if(boss)boss.entryDialogue=bossIntro;
+  }
   if (stage === 4) {
     const mechanicRoom=rooms.find(room=>room.type==='combat')??rooms[0];
     if (!rooms.some(room=>room.hazards.some(hazard=>hazard.type==='electric'))) mechanicRoom.hazards.push({type:'electric',x:535,y:610,w:210,h:40,damage:16,cycleOffset:.35});
