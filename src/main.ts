@@ -27,6 +27,8 @@ import type { MusicState } from './game/music';
 import { MILO_ATLASES, type MiloAtlasDefinition } from './game/milo-animation';
 import { awardDiveXp, diveXpRequired, DIVE_XP_REWARDS } from './game/profile-level';
 import { MOVEMENT_PROFILES, selectMovementProfile, type MovementProfileId } from './game/player-tuning';
+import { THREE_ROOM_TUTORIAL_ROOMS } from './game/tutorial-rooms';
+import { THREE_ROOM_TUTORIAL, initialThreeRoomTutorialState, recordThreeRoomTutorialAction, type ThreeRoomTutorialAction, type ThreeRoomTutorialState } from './game/tutorial-program';
 import { cloneDefaultSave } from './game/save';
 import { BrowserSaveRepository } from './game/save-repository';
 import { newRunRequest, sameSeedRetryRequest } from './game/run-retry';
@@ -186,6 +188,8 @@ class DemonGame {
   private tutorialActive = false;
   private tutorialStep = 0;
   private tutorialRecovery = new Set<'pizza' | 'coffee'>();
+  private threeRoomTutorialActive = false;
+  private threeRoomTutorialState:ThreeRoomTutorialState=initialThreeRoomTutorialState();
   private time = 0;
   private lastTime = performance.now();
   private entityId = 1;
@@ -592,7 +596,8 @@ class DemonGame {
       if(device==='keyboard')element.textContent=this.keyboardBindingState.bindings[action].map((code)=>this.formatInputCode(code)).join(' / ');
       else element.textContent=this.promptService.prompt(action,device);
     });
-    if(this.tutorialActive)this.updateTutorialPrompt();
+    if(this.threeRoomTutorialActive)this.updateThreeRoomTutorialPrompt();
+    else if(this.tutorialActive)this.updateTutorialPrompt();
   }
 
   private menuButtons(): HTMLButtonElement[] { return [...this.overlay.querySelectorAll<HTMLButtonElement>('button:not(:disabled)')].filter(button=>button.offsetParent!==null); }
@@ -909,7 +914,7 @@ class DemonGame {
     if (!this.save.storyFlags.includes(DIALOGUE_BEATS.prologue_dive.flag)) {
       this.showDialogueBeat('prologue_dive', 'title', () => {
         this.showHub();
-        this.showDialogueBeat('prologue_arrival', 'hub', () => this.beginHubTutorial());
+        this.showDialogueBeat('prologue_arrival', 'hub', () => this.startThreeRoomTutorial());
       });
       return;
     }
@@ -1022,6 +1027,47 @@ class DemonGame {
     this.tutorialRecovery.clear();
     this.updateTutorialPrompt();
     this.showToast('Pyrra will walk you through the Hellroom');
+  }
+
+  private startThreeRoomTutorial():void {
+    if(this.save.storyFlags.includes('three_room_tutorial_v1_complete')){this.showHub();return;}
+    this.threeRoomTutorialActive=true;this.tutorialActive=false;this.threeRoomTutorialState=initialThreeRoomTutorialState();
+    this.isEndless=false;this.currentDepth=1;this.runSeed=0x7A700001;this.runRng=new SeededRandom('tutorial-v1');
+    this.boonStacks=emptyBoonStacks();this.boonOfferDrought=emptyBoonStacks();this.runRooms=THREE_ROOM_TUTORIAL_ROOMS.map(room=>({...room,platforms:room.platforms.map(platform=>({...platform})),hazards:room.hazards.map(hazard=>({...hazard})),spawns:room.spawns.map(spawn=>({...spawn})),playerStart:{...room.playerStart},exit:{...room.exit}}));
+    this.routeBranches={};this.branchChosenAt.clear();this.clearedRoomIndices.clear();this.roomIndex=0;
+    this.player=this.makePlayer(BOONS.pyrra.special);this.runMetrics={seed:this.runSeed,startedAt:performance.now(),roomsCleared:0,endlessDepth:0,damageTaken:0,enemiesDefeated:0,boonsAcquired:0,wagersAttempted:0,wagersWon:0,diveXpEarned:0,highestStyle:0,routeChoices:[],rewardChoices:[]};
+    this.screen='playing';this.overlay.innerHTML='';this.hubModalOpen=false;this.hud.classList.remove('hidden');this.loadRoom(0);this.music.requestState('LEVEL_1_EXPLORATION');this.updateThreeRoomTutorialPrompt();
+    this.showToast('THREE ROOMS · ORDINARY CONTROL FIRST · EXPRESSION NEXT');
+  }
+
+  private observeThreeRoomTutorial(action:ThreeRoomTutorialAction):void {
+    if(!this.threeRoomTutorialActive)return;
+    this.threeRoomTutorialState=recordThreeRoomTutorialAction(this.threeRoomTutorialState,action);
+    this.updateThreeRoomTutorialPrompt();
+  }
+
+  private updateThreeRoomTutorialFlow():void {
+    if(!this.threeRoomTutorialActive)return;
+    if(this.threeRoomTutorialState.complete){this.finishThreeRoomTutorial(false);return;}
+    if(this.threeRoomTutorialState.roomIndex!==this.roomIndex){
+      this.loadRoom(this.threeRoomTutorialState.roomIndex);
+      this.roomCleared=false;
+      if(this.roomIndex===1)this.boonPickups=[{x:WIDTH/2-30,y:FLOOR_Y-150,w:60,h:60,boonId:'pyrra',time:0}];
+      this.updateThreeRoomTutorialPrompt();
+    }
+  }
+
+  private updateThreeRoomTutorialPrompt():void {
+    if(!this.threeRoomTutorialActive){this.tutorialPrompt.classList.remove('show');return;}
+    const room=THREE_ROOM_TUTORIAL[this.threeRoomTutorialState.roomIndex];if(!room)return;
+    const observed=new Set(this.threeRoomTutorialState.observed);const remaining=[...room.required.filter(action=>!observed.has(action)),...(room.anyOf&&!room.anyOf.some(action=>observed.has(action))?[room.anyOf.join(' OR ')]:[])];
+    this.tutorialPrompt.innerHTML=`<span>${room.title.toUpperCase()} · ${this.threeRoomTutorialState.roomIndex+1}/3</span><b>${room.completionCopy}</b><small>Remaining: ${remaining.join(' · ')||'gate opening'}</small>`;this.tutorialPrompt.classList.add('show');
+  }
+
+  private finishThreeRoomTutorial(skipped:boolean):void {
+    this.threeRoomTutorialActive=false;this.tutorialPrompt.classList.remove('show');
+    for(const flag of ['three_room_tutorial_v1_complete','hellroom_tutorial_complete'])if(!this.save.storyFlags.includes(flag))this.save.storyFlags.push(flag);
+    this.persistSave();this.showHub();this.showToast(skipped?'TUTORIAL SKIPPED · REPLAY OPTION WILL REMAIN IN PLAYTEST TOOLS':'CRASH COURSE COMPLETE · ADVANCED MOVEMENT REMAINS OPTIONAL MASTERY');
   }
 
   private completeHubTutorial(): void {
@@ -1175,6 +1221,7 @@ class DemonGame {
           <button class="btn primary" id="test-level-seven">Jump to Level 7</button>
           <button class="btn primary" id="test-level-eight">Jump to Level 8</button>
           <button class="btn primary" id="test-level-nine">Jump to Level 9</button>
+          <button class="btn" id="replay-three-room-tutorial">Replay three-room tutorial</button>
           <button class="btn" id="test-endless">Jump to Deep Dive room 1</button>
           <button class="btn" id="test-depth-ten">Depth-10 layout stress test</button>
           <button class="btn" id="unlock-all">Unlock all boon-givers</button>
@@ -1227,6 +1274,7 @@ class DemonGame {
       for (const id of ['pyrra','maris','gaia','zephyra','flora','voltara','crya','luna','solara','belladonna','nerissa','roxyne','calyptra','isolde','somnia','vespera','lilith'] as BoonId[]) if (this.boonStacks[id] === 0) this.applyBoon(id,false);
       this.showToast('LEVEL 9 PLAYTEST · THE SELF BELOW');
     });
+    mustElement<HTMLButtonElement>('#replay-three-room-tutorial').addEventListener('click',()=>this.startThreeRoomTutorial());
     mustElement<HTMLButtonElement>('#test-depth-ten').addEventListener('click', () => {
       this.startRun(10); this.showToast('DEPTH 10 · MAX-COMPLEXITY LAYOUT TEST');
     });
@@ -1595,6 +1643,7 @@ class DemonGame {
       this.enemies = [];
       this.spawnBossRushWave(1);
     } else for (const enemy of this.enemies) this.applyCurrentThreat(enemy);
+    if(this.threeRoomTutorialActive)for(const enemy of this.enemies){enemy.touchDamage=0;enemy.maxHealth=Math.min(enemy.maxHealth,36);enemy.health=enemy.maxHealth;}
     if(this.isEndless&&this.room.deepDivePowers?.length){for(const enemy of this.enemies.filter(target=>this.isMajorType(target.type))){
       enemy.deepDivePowers=[...this.room.deepDivePowers];
       if(enemy.deepDivePowers.includes('armored')){enemy.maxHealth*=1.3;enemy.health*=1.3;enemy.eliteArmor=3+Math.min(7,this.room.deepDiveCycle??1);}
@@ -1846,7 +1895,8 @@ class DemonGame {
     this.updateBoonPickup(dt);
     this.updateWagerShrine();
     this.updateParticles(dt);
-    this.checkRoomState(dt);
+    if(this.threeRoomTutorialActive)this.updateThreeRoomTutorialFlow();
+    else this.checkRoomState(dt);
     this.capTransientEntities();
     this.updateHud();
   }
@@ -2073,7 +2123,7 @@ class DemonGame {
       this.telemetry.recordAction(inputAt,this.screen,'fire','ignored','buffer-expired');
     }
     if(firePressed){this.fireBuffer=movement.fireBufferSeconds;this.fireBufferPending=true;}
-    if (move !== 0) this.tutorialAction('move');
+    if (move !== 0) {this.tutorialAction('move');this.observeThreeRoomTutorial('move');}
     this.playerSnareTime=Math.max(0,this.playerSnareTime-dt);this.snareNoticeCooldown=Math.max(0,this.snareNoticeCooldown-dt);this.dreamDoorCooldown=Math.max(0,this.dreamDoorCooldown-dt);
     const snareMultiplier=this.playerSnareTime>0 ? .52 : 1;
     const onControlledIce=this.worldFreezeTimer<=0&&this.room.hazards.some(hazard=>hazard.type==='ice'&&overlap(this.player,hazard));
@@ -2113,6 +2163,7 @@ class DemonGame {
         this.shake = 4;
         this.burst(centerX(this.player), centerY(this.player), this.getArcaneColor(), 14, 240);
         this.playSound('dash');
+        this.observeThreeRoomTutorial('dash');
         this.tutorialAction('dash');
         this.telemetry.recordAction(inputAt,this.screen,'dash','consumed','activated');
       }
@@ -2135,6 +2186,7 @@ class DemonGame {
         waveLandingConfirmed=true;
         this.burst(centerX(this.player), this.player.y + this.player.h, isWavedash?this.getArcaneAccentColor():'#eaffff', isWavedash?16:13, isWavedash?300:250);
         this.playSound(isWavedash?'wavedash':'waveland');
+        this.observeThreeRoomTutorial(isWavedash?'wavedash':'waveland');
         this.shake=Math.max(this.shake,isWavedash?2.5:2.25);
       } else if (this.player.dashTime === 0) this.player.dashRecoveryTime = movement.dashRecoverySeconds;
     } else {
@@ -2175,6 +2227,7 @@ class DemonGame {
       this.player.jumpBuffer = 0;
       this.burst(centerX(this.player), this.player.y + this.player.h, airJump ? '#42e8f5' : '#ffc75a', airJump ? 13 : 7, airJump ? 240 : 160);
       this.playSound(airJump ? 'doubleJump' : 'jump');
+      this.observeThreeRoomTutorial('jump');
       this.tutorialAction('jump');
     }
     if (!jump && this.player.vy < -210) this.player.vy += movement.jumpReleaseGravity * dt;
@@ -2416,6 +2469,7 @@ class DemonGame {
     this.telemetry.recordAction(performance.now(),this.screen,'fire','consumed','fired');
     this.telemetry.recordShot(performance.now(),this.screen,shotCount,this.totalBoonStacks());
     this.tutorialAction('magic');
+    this.observeThreeRoomTutorial(this.boonStacks.pyrra>0?'modifiedFire':'neutralFire');
     if (crit) this.floatingText.push({ x: centerX(this.player), y: this.player.y - 10, text: 'CRIT READY', color: '#ffc75a', life: .5, maxLife: .5, size: 12 });
   }
 
@@ -2509,6 +2563,7 @@ class DemonGame {
     this.screenFlash = .22;
     this.playSound('special');
     this.tutorialAction('special');
+    if(this.boonStacks.pyrra>0)this.observeThreeRoomTutorial('special');
 
     if (this.player.special === 'flameNova') {
       const count = 12 + Math.min(6, this.boonStacks.pyrra * 2);
@@ -3787,6 +3842,7 @@ class DemonGame {
   private killEnemy(enemy: Enemy): void {
     if (enemy.dead) return;
     enemy.dead = true;
+    if(this.threeRoomTutorialActive&&this.roomIndex===0)this.observeThreeRoomTutorial('enemyDefeated');
     enemy.invulnerable = -2;
     const major = this.isMajorType(enemy.type);
     const elite=Boolean(enemy.eliteModifier||enemy.deepDivePowers?.length);
@@ -4253,6 +4309,7 @@ class DemonGame {
     this.lastRewardBoon = id;
     const grantedStacks=this.isEndless?Math.max(1,this.room.deepDiveBoonStacks??1):1;
     for(let stack=0;stack<grantedStacks;stack+=1)this.applyBoon(id,false);
+    if(this.threeRoomTutorialActive)this.observeThreeRoomTutorial('boonCollected');
     this.awardProfileXp(DIVE_XP_REWARDS.boon, 'Boon claimed', true);
     this.playArcaneHarmonyReveal(id);
     this.showToast(`ARCANE CHORD EVOLVED · ${BOONS[id].name.toUpperCase()} ADDS ${boonNoteLabel(id)}`);
@@ -4286,6 +4343,7 @@ class DemonGame {
   private resolveReward(special: SpecialId): void {
     this.player.special = special;
     this.overlay.innerHTML = '';
+    if(this.threeRoomTutorialActive){this.screen='playing';this.player.invulnerable=.6;this.boonPickups=[];this.roomCleared=false;this.showToast('PYRRA EQUIPPED · THE BOLT CHANGED · PASSIVE STACKED · SPECIAL READY');return;}
     if (this.room.type === 'boss' && this.isEndless) {
       this.screen='playing'; this.roomCleared=true; this.player.invulnerable=.7;
       this.spawnPickup('pizza',this.player.x+60,this.player.y,30); this.spawnPickup('coffee',this.player.x+98,this.player.y,40);
@@ -4576,6 +4634,7 @@ class DemonGame {
           <button class="btn" id="toggle-shake">Screen shake: ${this.shakeEnabled ? 'On' : 'Off'}</button>
           <button class="btn" id="toggle-vfx">Reduced flashes: ${this.reducedVfx ? 'On' : 'Off'}</button>
           ${this.isEndless?'<button class="btn primary" id="cashout-endless">Cash out Deep Dive</button>':''}
+          ${this.threeRoomTutorialActive?'<button class="btn" id="skip-three-room-tutorial">Skip tutorial</button>':''}
           <button class="btn ghost" id="pause-hub">Abandon run</button>
         </div>
       </div>`;
@@ -4585,7 +4644,8 @@ class DemonGame {
     mustElement<HTMLButtonElement>('#toggle-shake').addEventListener('click', () => { this.shakeEnabled = !this.shakeEnabled; this.save.settings.shake=this.shakeEnabled; this.persistSave(); this.renderPauseMenu(); });
     mustElement<HTMLButtonElement>('#toggle-vfx').addEventListener('click', () => { this.reducedVfx=!this.reducedVfx; this.save.settings.reducedVfx=this.reducedVfx; this.persistSave(); this.renderPauseMenu(); });
     this.overlay.querySelector<HTMLButtonElement>('#cashout-endless')?.addEventListener('click',()=>this.cashOutEndless());
-    mustElement<HTMLButtonElement>('#pause-hub').addEventListener('click', () => { const banked=this.bankRun(); this.recordRun('returned',banked); this.showHub(); });
+    this.overlay.querySelector<HTMLButtonElement>('#skip-three-room-tutorial')?.addEventListener('click',()=>this.finishThreeRoomTutorial(true));
+    mustElement<HTMLButtonElement>('#pause-hub').addEventListener('click', () => { if(this.threeRoomTutorialActive){this.finishThreeRoomTutorial(true);return;} const banked=this.bankRun(); this.recordRun('returned',banked); this.showHub(); });
     this.focusFirstMenuButton();
   }
 

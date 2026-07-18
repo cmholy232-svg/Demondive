@@ -22,6 +22,7 @@ import { ACTION_FEEDBACK_BUDGETS, PROCEDURAL_SFX_PROFILES, sfxPitchMultiplier } 
 import { shapedCameraOffset } from '../src/game/camera-feedback';
 import { DAMAGE_TEXT_BUDGET, PARTICLE_EFFECT_BUDGET, enemyDefeatFeedback, enemyHitFeedback, shouldEmitImpactAccent } from '../src/game/impact-feedback';
 import { THREE_ROOM_TUTORIAL, initialThreeRoomTutorialState, recordThreeRoomTutorialAction, tutorialRoomComplete } from '../src/game/tutorial-program';
+import { THREE_ROOM_TUTORIAL_ROOMS } from '../src/game/tutorial-rooms';
 import type { Projectile, RoomDefinition } from '../src/game/types';
 
 class MemoryStorage implements SaveStorage {
@@ -187,6 +188,11 @@ assert.ok(PARTICLE_EFFECT_BUDGET.reduced<PARTICLE_EFFECT_BUDGET.normal&&DAMAGE_T
 assert.equal(shouldEmitImpactAccent(1,PARTICLE_EFFECT_BUDGET.normal,false,3),true,'high-value feedback must survive presentation pressure');
 assert.ok([0,1,2,3,4,5,6,7].some(sequence=>!shouldEmitImpactAccent(sequence,PARTICLE_EFFECT_BUDGET.normal,false,2)),'routine impact accents are not consolidating under pressure');
 assert.equal(THREE_ROOM_TUTORIAL.length,3,'final onboarding must remain three rooms');
+assert.equal(THREE_ROOM_TUTORIAL_ROOMS.length,3,'playable tutorial room count diverged from its program');
+assert.equal(THREE_ROOM_TUTORIAL_ROOMS[0].spawns.length,1,'fundamentals room needs exactly one readable training enemy');
+assert.equal(THREE_ROOM_TUTORIAL_ROOMS[1].spawns.length,0,'Arcana explanation room must not add combat noise');
+assert.equal(THREE_ROOM_TUTORIAL_ROOMS[2].hazards.length,0,'advanced movement teaching must not punish with hazards');
+for(const room of THREE_ROOM_TUTORIAL_ROOMS){assert.ok(room.platforms.some(platform=>platform.x===0&&platform.w===WIDTH),'tutorial room lost its stable ground route');assert.equal(room.danger,1);}
 assert.equal(tutorialRoomComplete(THREE_ROOM_TUTORIAL[0],['move','jump','neutralFire']),false,'fundamentals room opened before the enemy was defeated');
 let tutorialState=initialThreeRoomTutorialState();
 for(const action of ['move','jump','neutralFire','enemyDefeated'] as const)tutorialState=recordThreeRoomTutorialAction(tutorialState,action);

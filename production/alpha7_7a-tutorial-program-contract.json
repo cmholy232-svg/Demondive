@@ -7,6 +7,6 @@
   "framePerfectCompletionRequired": false,
   "inputArchitectureReused": true,
   "existingSaveMigrationRequired": true,
-  "runtimeIntegrationStatus": "state-model-complete-flow-not-yet-wired",
+  "runtimeIntegrationStatus": "fresh-save-flow-wired-and-automated-tests-pending-human-play",
   "storyCoverage": {"implementedThroughLevel": 3, "levels4To9": "missing-final-dialogue"}
 }
