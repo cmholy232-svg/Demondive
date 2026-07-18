@@ -61,7 +61,7 @@ assert.ok(disconnectedReport.failures.includes('no-entry-to-exit-route'));
 
 let generatedRooms = 0;
 for (let depth = 1; depth <= 9; depth += 1) {
-  for (let sample = 0; sample < 32; sample += 1) {
+  for (let sample = 0; sample < 96; sample += 1) {
     const plan = generateRunPlan(depth,depth * 100000 + sample * 7919);
     for (const room of plan.rooms) {
       assert.equal(validateRoomTraversal(room).valid,true,`depth ${depth} seed ${plan.seed} generated a disconnected room`);

@@ -111,11 +111,12 @@ class DemonGame {
   private readonly music = new MusicDirector(import.meta.env.BASE_URL);
   private readonly arcaneAudio = new ArcaneAudioDirector(import.meta.env.BASE_URL);
   private readonly saveRepository = new BrowserSaveRepository(window.localStorage);
+  private readonly initialSaveLoad = this.saveRepository.load();
   private readonly telemetry = new RuntimeTelemetry('alpha-7.4a-development');
 
   private screen: GameScreen = 'title';
   private previousScreen: GameScreen = 'playing';
-  private save: SaveData = this.loadSave();
+  private save: SaveData = this.initialSaveLoad.save;
   private selectedStartingBoon: BoonId = 'pyrra';
   private boonStacks: Record<BoonId, number> = emptyBoonStacks();
   private boonOfferDrought: Record<BoonId, number> = emptyBoonStacks();
@@ -345,6 +346,8 @@ class DemonGame {
     }
     this.seedAmbientEmbers();
     this.showTitle();
+    if(this.initialSaveLoad.corruptKeys.length>0)this.showToast('SAVE RECOVERY · CORRUPT DATA IGNORED · PROGRESS LOADED FROM THE SAFEST VALID SOURCE');
+    else if(!this.initialSaveLoad.storageAvailable)this.showToast('LOCAL SAVE STORAGE BLOCKED · THIS SESSION REMAINS PLAYABLE BUT MAY NOT PERSIST');
     requestAnimationFrame((time) => this.frame(time));
   }
 
@@ -393,10 +396,6 @@ class DemonGame {
       shieldCharges: 0,
       perfectDodgeCooldown: 0,
     };
-  }
-
-  private loadSave(): SaveData {
-    return this.saveRepository.load().save;
   }
 
   private persistSave(): void {
