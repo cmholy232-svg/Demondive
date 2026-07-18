@@ -165,7 +165,7 @@ assert.ok(meanStarterOffers>=3&&meanStarterOffers<=6.5,`starter affinity mean ${
 assert.ok(starterOfferHistogram.some(count=>count<=3)&&starterOfferHistogram.some(count=>count>=8),'smart curation lost either low-stack variety or rare tall-stack possibility');
 assert.ok(uninvestedOfferTotal>starterOfferTotal,'new-boon discovery must remain stronger than starter repetition across the cohort');
 
-assert.equal(Object.keys(PROCEDURAL_SFX_PROFILES).length,17,'routine combat SFX event family is incomplete');
+assert.equal(Object.keys(PROCEDURAL_SFX_PROFILES).length,21,'runtime SFX event family is incomplete');
 for(const [event,profile] of Object.entries(PROCEDURAL_SFX_PROFILES)){
   assert.ok(profile.startHz>0&&profile.endHz>0&&profile.durationSeconds>=.05&&profile.gain>=.03,`${event} has an inaudible or invalid procedural profile`);
   assert.ok(sfxPitchMultiplier(event as keyof typeof PROCEDURAL_SFX_PROFILES,0)>0&&sfxPitchMultiplier(event as keyof typeof PROCEDURAL_SFX_PROFILES,11)>0,`${event} variation is invalid`);

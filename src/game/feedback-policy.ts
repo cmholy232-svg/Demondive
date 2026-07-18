@@ -1,5 +1,5 @@
 export type FeedbackTier = 1|2|3|4;
-export type ProceduralSfxEvent = 'step'|'land'|'jump'|'doubleJump'|'dash'|'wavedash'|'waveland'|'perfectDodge'|'fire'|'special'|'hurt'|'pickup'|'boon'|'enemyHit'|'enemyShoot'|'enemyDown'|'bossDown';
+export type ProceduralSfxEvent = 'step'|'land'|'jump'|'doubleJump'|'dash'|'wavedash'|'waveland'|'perfectDodge'|'fire'|'special'|'hurt'|'pickup'|'boon'|'wagerStart'|'wagerResolve'|'bossPhase'|'jackpot'|'enemyHit'|'enemyShoot'|'enemyDown'|'bossDown';
 
 export interface FeedbackBudget {
   tier:FeedbackTier;
@@ -50,6 +50,10 @@ export const PROCEDURAL_SFX_PROFILES:Readonly<Record<ProceduralSfxEvent,Procedur
   hurt:{startHz:185,endHz:54,durationSeconds:.19,waveform:'sawtooth',gain:.15,noiseMix:.38,pitchVariationCents:24,secondaryMix:.24},
   pickup:{startHz:520,endHz:980,durationSeconds:.13,waveform:'sine',gain:.08,noiseMix:0,pitchVariationCents:18,secondaryMix:.25},
   boon:{startHz:230,endHz:980,durationSeconds:.52,waveform:'triangle',gain:.13,noiseMix:.05,pitchVariationCents:12,secondaryMix:.4},
+  wagerStart:{startHz:145,endHz:410,durationSeconds:.3,waveform:'square',gain:.105,noiseMix:.08,pitchVariationCents:12,secondaryMix:.32},
+  wagerResolve:{startHz:330,endHz:740,durationSeconds:.38,waveform:'triangle',gain:.12,noiseMix:.04,pitchVariationCents:10,secondaryMix:.38},
+  bossPhase:{startHz:96,endHz:520,durationSeconds:.48,waveform:'sawtooth',gain:.145,noiseMix:.24,pitchVariationCents:8,secondaryMix:.35},
+  jackpot:{startHz:260,endHz:1320,durationSeconds:.72,waveform:'square',gain:.16,noiseMix:.1,pitchVariationCents:6,secondaryMix:.5},
   enemyHit:{startHz:285,endHz:88,durationSeconds:.075,waveform:'triangle',gain:.092,noiseMix:.42,pitchVariationCents:52,secondaryMix:.16},
   enemyShoot:{startHz:590,endHz:155,durationSeconds:.105,waveform:'sawtooth',gain:.076,noiseMix:.1,pitchVariationCents:46,secondaryMix:.2},
   enemyDown:{startHz:210,endHz:62,durationSeconds:.15,waveform:'square',gain:.115,noiseMix:.46,pitchVariationCents:48,secondaryMix:.24},

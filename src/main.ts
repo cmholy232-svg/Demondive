@@ -237,6 +237,7 @@ class DemonGame {
   private fireBuffer = 0;
   private fireBufferPending = false;
   private impactFeedbackSequence = 0;
+  private readonly presentedBossMilestones = new Map<number,number>();
   private activeSfx = 0;
   private readonly combatSfxLimiter = new CombatSfxLimiter();
 
@@ -1582,6 +1583,7 @@ class DemonGame {
     this.particles = [];
     this.floatingText = [];
     this.fireBuffer=0;this.fireBufferPending=false;
+    this.presentedBossMilestones.clear();
     this.enemies = this.room.spawns.map((spawn) => this.createEnemy(spawn.type, spawn.x, spawn.y));
     if (this.currentDepth === 2 && this.room.type === 'miniboss' && !this.isEndless) {
       this.enemies = [];
@@ -2002,7 +2004,7 @@ class DemonGame {
         for (const enemy of this.enemies) if (!enemy.dead) this.makeElite(enemy);
         this.wagerMultiplier += .35+(this.isEndless?Math.min(1,deepTier*.08):0);
       }
-      this.addStyle(10, 'STAKES RAISED'); this.showToast(`${type.toUpperCase()} WAGER ACTIVE · CLEAR THE ROOM`); this.screenFlash = .55;
+      this.addStyle(10, 'STAKES RAISED'); this.showToast(`${type.toUpperCase()} WAGER ACTIVE · CLEAR THE ROOM`); this.screenFlash = .55; this.playSound('wagerStart');
     }
   }
 
@@ -3214,6 +3216,14 @@ class DemonGame {
       enemy.x = clamp(enemy.x, 0, WIDTH - enemy.w);
       if (overlap(this.player, enemy) && enemy.charmTime<=0) this.damagePlayer(enemy.touchDamage*courtBuff, centerX(enemy));
     }
+    for(const enemy of this.enemies){
+      if(enemy.dead||!this.isMajorType(enemy.type))continue;
+      const previous=this.presentedBossMilestones.get(enemy.id)??0;
+      const gained=enemy.milestones&~previous;
+      if(gained!==0){this.playSound('bossPhase');this.shake=Math.max(this.shake,7);}
+      this.presentedBossMilestones.set(enemy.id,enemy.milestones);
+    }
+    for(const id of this.presentedBossMilestones.keys())if(!this.enemies.some(enemy=>enemy.id===id&&!enemy.dead))this.presentedBossMilestones.delete(id);
     this.enemies = this.enemies.filter((enemy) => !enemy.dead || enemy.deathTime > 0);
   }
 
@@ -4127,18 +4137,20 @@ class DemonGame {
       this.awardProfileXp(DIVE_XP_REWARDS.wagerWin, 'Wager won', true);
       if (this.activeWager?.type === 'rush') this.rerollsRemaining += 1;
       this.persistSave();
+      this.playSound('wagerResolve');
     }
     if (this.runRng.chance(jackpotChance)) {
       this.save.jackpots += 1; this.persistSave();
       for (let i = 0; i < 6; i += 1) this.spawnPickup('shard', WIDTH / 2 + (i - 2.5) * 36, FLOOR_Y - 125 - (i % 2) * 25, 1);
       this.player.health = this.player.maxHealth; this.player.energy = this.player.maxEnergy;
       this.addRushReward(1800, 55, WIDTH / 2, FLOOR_Y - 170, 'JACKPOT');
-      this.screenFlash = 1; this.shake = 15; this.burst(WIDTH / 2, FLOOR_Y - 100, '#ffc75a', 70, 650); this.playSound('bossDown');
+      this.screenFlash = 1; this.shake = 15; this.burst(WIDTH / 2, FLOOR_Y - 100, '#ffc75a', 70, 650); this.playSound('jackpot');
       this.announce('Infernal jackpot');
       this.showToast('INFERNAL JACKPOT · FULL RESTORE + 6 SHARDS');
     } else if (wagerWon) {
       this.showToast(`WAGER WON · ${this.roomGrade}-RANK · REWARD SECURED`);
     } else if (this.activeWager?.failed) {
+      this.playSound('wagerResolve');
       this.showToast(`${this.roomGrade}-RANK CLEAR · WAGER LOST`);
     } else this.showToast(`${this.roomGrade}-RANK ROOM CLEAR`);
   }

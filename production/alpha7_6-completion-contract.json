@@ -1,0 +1,11 @@
+{
+  "version": "Alpha 7.6 code-side completion",
+  "runtimeSfxEventCount": 21,
+  "finalAuthoredAudioComplete": false,
+  "humanFeelApprovalComplete": false,
+  "logicalDamagePreservedUnderPressure": true,
+  "logicalProjectilesPreservedUnderPressure": true,
+  "accessibility": {"cameraShakeToggle": true, "reducedVfx": true, "tier4CameraCap": 14},
+  "nextPhase": "Alpha 7.7",
+  "blockingAssetRequest": "ALPHA7_6_FINAL_SFX_REQUIREMENTS.md"
+}
