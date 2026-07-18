@@ -9,6 +9,7 @@ import { BOON_PROJECTILE_SHAPES, buildupThreshold, incomingDamageMultiplier, pic
 import { CombatSfxLimiter, type CombatSfxEvent } from './game/combat-audio';
 import { BOONS, BOON_ORDER, ENEMY_BODIES, FLOOR_Y, HEIGHT, HUB_ROOM, LEVEL_EIGHT_ENCOUNTERS, LEVEL_FIVE_ENCOUNTERS, LEVEL_FOUR_ENCOUNTERS, LEVEL_NINE_ENCOUNTERS, LEVEL_ONE_ENCOUNTERS, LEVEL_SEVEN_ENCOUNTERS, LEVEL_SIX_ENCOUNTERS, LEVEL_THREE_ENCOUNTERS, LEVEL_TWO_ENCOUNTERS, ROOMS, UPGRADE_INFO, WIDTH, upgradeCost } from './game/content';
 import { campaignContent } from './game/content-registry';
+import { shapedCameraOffset } from './game/camera-feedback';
 import { deepDiveBiome, deepDiveCrossPollination, deepDiveCycle, deepDiveEncounter, deepDiveHasBoonReward, deepDiveHasRouteChoice, deepDiveHasWager, deepDiveIsDoubleBoss, deepDiveMinimumEnemies, deepDivePowers, deepDiveRewardStacks, deepDiveRoute } from './game/deep-dive';
 import { campaignThreat, deepDiveThreat } from './game/difficulty';
 import { PROCEDURAL_SFX_PROFILES, sfxPitchMultiplier, type ProceduralSfxEvent } from './game/feedback-policy';
@@ -2047,6 +2048,7 @@ class DemonGame {
   private updatePlayer(dt: number, allowCombat = true): void {
     const inputAt = performance.now();
     const wasGrounded = this.player.grounded;
+    let waveLandingConfirmed = false;
     const left = this.isControl('left');
     const right = this.isControl('right');
     const up = this.isControl('up');
@@ -2125,7 +2127,11 @@ class DemonGame {
         this.player.waveSlideTime = movement.wavelandDurationSeconds;
         this.player.vx = this.player.dashX * movement.wavelandSpeed;
         this.player.vy = 0;
-        this.burst(centerX(this.player), this.player.y + this.player.h, '#eaffff', 10, 220);
+        const isWavedash=Math.abs(this.player.dashX)>.35;
+        waveLandingConfirmed=true;
+        this.burst(centerX(this.player), this.player.y + this.player.h, isWavedash?this.getArcaneAccentColor():'#eaffff', isWavedash?16:13, isWavedash?300:250);
+        this.playSound(isWavedash?'wavedash':'waveland');
+        this.shake=Math.max(this.shake,isWavedash?2.5:2.25);
       } else if (this.player.dashTime === 0) this.player.dashRecoveryTime = movement.dashRecoverySeconds;
     } else {
 
@@ -2224,7 +2230,7 @@ class DemonGame {
     if (this.player.grounded && Math.abs(this.player.vx) > 42 && this.player.dashTime === 0 && this.player.kickTime === 0 && this.player.punchTime === 0) {
       this.player.runAnimationTime += dt * clamp(Math.abs(this.player.vx) / Math.max(1, speed), .65, 1.65);
     } else this.player.runAnimationTime = 0;
-    if (!wasGrounded && this.player.grounded) { this.player.landPoseTime = .11; this.playSound('land'); }
+    if (!wasGrounded && this.player.grounded) { this.player.landPoseTime = .11; if(!waveLandingConfirmed)this.playSound('land'); }
     this.footstepCooldown=Math.max(0,this.footstepCooldown-dt);
     if (this.player.grounded&&Math.abs(this.player.vx)>90&&this.player.dashTime<=0&&this.footstepCooldown===0) { this.footstepCooldown=.24; this.playSound('step'); }
     if (this.player.kickTime > 0) {
@@ -3826,7 +3832,7 @@ class DemonGame {
       if (this.player.dashTime > 0 && this.player.perfectDodgeCooldown === 0) {
         this.player.perfectDodgeCooldown = .7; this.player.energy = Math.min(this.player.maxEnergy, this.player.energy + 8);
         this.addStyle(14, 'PERFECT DODGE'); this.addRushReward(75, 12, centerX(this.player), this.player.y, 'DODGE'); this.hitPause = Math.max(this.hitPause, .045); this.screenFlash = .32;
-        this.burst(centerX(this.player), centerY(this.player), '#f4ffff', 24, 420); this.playSound('boon');
+        this.burst(centerX(this.player), centerY(this.player), '#f4ffff', 24, 420); this.playSound('perfectDodge');
       }
       return;
     }
@@ -4822,10 +4828,9 @@ class DemonGame {
   }
 
   private render(): void {
-    const shakeX = this.shakeEnabled && this.shake > 0 ? (Math.random() - .5) * this.shake : 0;
-    const shakeY = this.shakeEnabled && this.shake > 0 ? (Math.random() - .5) * this.shake : 0;
+    const cameraOffset=shapedCameraOffset(this.shake,this.time,this.shakeEnabled);
     this.ctx.save();
-    this.ctx.translate(shakeX, shakeY);
+    this.ctx.translate(cameraOffset.x, cameraOffset.y);
     const visibleScreen = this.screen === 'dialogue' ? this.dialogueReturnScreen : this.screen;
     if (visibleScreen === 'title') this.renderTitleBackdrop();
     else if (visibleScreen === 'hub') this.renderHub();

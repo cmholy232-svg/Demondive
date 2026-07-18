@@ -1,5 +1,5 @@
 export type FeedbackTier = 1|2|3|4;
-export type ProceduralSfxEvent = 'step'|'land'|'jump'|'doubleJump'|'dash'|'fire'|'special'|'hurt'|'pickup'|'boon'|'enemyHit'|'enemyShoot'|'enemyDown'|'bossDown';
+export type ProceduralSfxEvent = 'step'|'land'|'jump'|'doubleJump'|'dash'|'wavedash'|'waveland'|'perfectDodge'|'fire'|'special'|'hurt'|'pickup'|'boon'|'enemyHit'|'enemyShoot'|'enemyDown'|'bossDown';
 
 export interface FeedbackBudget {
   tier:FeedbackTier;
@@ -14,6 +14,9 @@ export const ACTION_FEEDBACK_BUDGETS = Object.freeze({
   land:{tier:1,hitStopMs:0,cameraImpulse:.75,fullScreenFlash:false},
   fire:{tier:1,hitStopMs:0,cameraImpulse:0,fullScreenFlash:false},
   dash:{tier:2,hitStopMs:0,cameraImpulse:2,fullScreenFlash:false},
+  wavedash:{tier:2,hitStopMs:0,cameraImpulse:2.5,fullScreenFlash:false},
+  waveland:{tier:2,hitStopMs:0,cameraImpulse:2.25,fullScreenFlash:false},
+  perfectDodge:{tier:3,hitStopMs:45,cameraImpulse:4,fullScreenFlash:false},
   enemyHit:{tier:2,hitStopMs:16,cameraImpulse:1.5,fullScreenFlash:false},
   enemyDown:{tier:2,hitStopMs:24,cameraImpulse:2.5,fullScreenFlash:false},
   hurt:{tier:3,hitStopMs:36,cameraImpulse:6,fullScreenFlash:false},
@@ -39,6 +42,9 @@ export const PROCEDURAL_SFX_PROFILES:Readonly<Record<ProceduralSfxEvent,Procedur
   jump:{startHz:255,endHz:470,durationSeconds:.09,waveform:'square',gain:.065,noiseMix:.06,pitchVariationCents:28,secondaryMix:.12},
   doubleJump:{startHz:390,endHz:760,durationSeconds:.14,waveform:'triangle',gain:.085,noiseMix:.08,pitchVariationCents:25,secondaryMix:.22},
   dash:{startHz:210,endHz:64,durationSeconds:.16,waveform:'sawtooth',gain:.095,noiseMix:.28,pitchVariationCents:34,secondaryMix:.2},
+  wavedash:{startHz:310,endHz:74,durationSeconds:.19,waveform:'sawtooth',gain:.11,noiseMix:.23,pitchVariationCents:24,secondaryMix:.28},
+  waveland:{startHz:470,endHz:105,durationSeconds:.16,waveform:'triangle',gain:.105,noiseMix:.2,pitchVariationCents:22,secondaryMix:.32},
+  perfectDodge:{startHz:680,endHz:1280,durationSeconds:.22,waveform:'sine',gain:.12,noiseMix:.04,pitchVariationCents:14,secondaryMix:.42},
   fire:{startHz:420,endHz:138,durationSeconds:.075,waveform:'square',gain:.072,noiseMix:.12,pitchVariationCents:36,secondaryMix:.18},
   special:{startHz:190,endHz:720,durationSeconds:.28,waveform:'sawtooth',gain:.135,noiseMix:.18,pitchVariationCents:18,secondaryMix:.32},
   hurt:{startHz:185,endHz:54,durationSeconds:.19,waveform:'sawtooth',gain:.15,noiseMix:.38,pitchVariationCents:24,secondaryMix:.24},

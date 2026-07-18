@@ -1,0 +1,29 @@
+{
+  "version": "Alpha 7.6B checkpoint 01",
+  "scope": "Routine movement confirmation and bounded camera feedback",
+  "simulationChanges": false,
+  "camera": {
+    "randomPerFrameJitterRemoved": true,
+    "deterministicShapedImpulse": true,
+    "maximumAmplitude": 14,
+    "accessibilityToggleRespected": true
+  },
+  "movement": {
+    "dashPhysicsChanged": false,
+    "wavedashPhysicsChanged": false,
+    "wavelandPhysicsChanged": false,
+    "distinctWavedashCue": true,
+    "distinctWavelandCue": true,
+    "ordinaryLandingCueSuppressedOnWaveContact": true
+  },
+  "combat": {
+    "distinctPerfectDodgeCue": true,
+    "proceduralFallbackEventCount": 17,
+    "finalAuthoredSfxStatus": "not yet supplied"
+  },
+  "humanApprovalRequired": [
+    "camera impulse feel",
+    "wavedash versus waveland readability",
+    "procedural cue mix on speakers and headphones"
+  ]
+}

@@ -19,6 +19,7 @@ import { SeededRandom } from '../src/game/rng';
 import { campaignThreat, deepDiveThreat } from '../src/game/difficulty';
 import { deepDiveBiome, deepDiveCrossPollination, deepDiveCycle, deepDiveEncounter, deepDiveHasBoonReward, deepDiveHasRouteChoice, deepDiveHasWager, deepDiveIsDoubleBoss, deepDiveMinimumEnemies, deepDivePowers, deepDiveRewardStacks, deepDiveRoute, deepDiveSlot } from '../src/game/deep-dive';
 import { ACTION_FEEDBACK_BUDGETS, PROCEDURAL_SFX_PROFILES, sfxPitchMultiplier } from '../src/game/feedback-policy';
+import { shapedCameraOffset } from '../src/game/camera-feedback';
 import type { Projectile, RoomDefinition } from '../src/game/types';
 
 class MemoryStorage implements SaveStorage {
@@ -163,13 +164,20 @@ assert.ok(meanStarterOffers>=3&&meanStarterOffers<=6.5,`starter affinity mean ${
 assert.ok(starterOfferHistogram.some(count=>count<=3)&&starterOfferHistogram.some(count=>count>=8),'smart curation lost either low-stack variety or rare tall-stack possibility');
 assert.ok(uninvestedOfferTotal>starterOfferTotal,'new-boon discovery must remain stronger than starter repetition across the cohort');
 
-assert.equal(Object.keys(PROCEDURAL_SFX_PROFILES).length,14,'routine combat SFX event family is incomplete');
+assert.equal(Object.keys(PROCEDURAL_SFX_PROFILES).length,17,'routine combat SFX event family is incomplete');
 for(const [event,profile] of Object.entries(PROCEDURAL_SFX_PROFILES)){
   assert.ok(profile.startHz>0&&profile.endHz>0&&profile.durationSeconds>=.05&&profile.gain>=.03,`${event} has an inaudible or invalid procedural profile`);
   assert.ok(sfxPitchMultiplier(event as keyof typeof PROCEDURAL_SFX_PROFILES,0)>0&&sfxPitchMultiplier(event as keyof typeof PROCEDURAL_SFX_PROFILES,11)>0,`${event} variation is invalid`);
 }
 assert.ok(ACTION_FEEDBACK_BUDGETS.step.tier<ACTION_FEEDBACK_BUDGETS.enemyHit.tier&&ACTION_FEEDBACK_BUDGETS.enemyHit.tier<ACTION_FEEDBACK_BUDGETS.hurt.tier&&ACTION_FEEDBACK_BUDGETS.hurt.tier<ACTION_FEEDBACK_BUDGETS.bossDown.tier,'feedback intensity hierarchy is not ordered');
 assert.ok(ACTION_FEEDBACK_BUDGETS.bossDown.hitStopMs<=90&&ACTION_FEEDBACK_BUDGETS.bossDown.cameraImpulse<=14,'Tier 4 feedback escaped its accessibility budget');
+assert.deepEqual(shapedCameraOffset(8,1.25,false),{x:0,y:0},'camera shake accessibility toggle failed');
+assert.deepEqual(shapedCameraOffset(8,1.25),shapedCameraOffset(8,1.25),'camera feedback must be deterministic');
+for(let sample=0;sample<120;sample+=1){
+  const offset=shapedCameraOffset(20,sample/120);
+  assert.ok(Math.abs(offset.x)<=14&&Math.abs(offset.y)<=14,'camera feedback exceeded its global impulse cap');
+}
+assert.notDeepEqual(shapedCameraOffset(8,1.25),shapedCameraOffset(8,1.3),'camera feedback curve is not moving over time');
 
 assert.deepEqual(sameSeedRetryRequest(0xfeedbeef),{ depth:1,seed:0xfeedbeef });
 assert.deepEqual(newRunRequest(),{ depth:1 });
