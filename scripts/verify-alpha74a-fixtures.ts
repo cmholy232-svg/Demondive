@@ -7,13 +7,14 @@ import { canAccessBoon, canAccessCampaignLevel, ENTITLEMENT_TEST_CONTEXTS } from
 import { generateRunPlan, roomIsEmpty } from '../src/game/generator';
 import { buildHudPriorityView } from '../src/game/hud-view';
 import { KeyboardBindingRepository, bindingConflicts, profileBindings, rebindAction } from '../src/game/input-bindings';
+import { planProjectilePresentation, PROJECTILE_DETAIL_BUDGET, shouldEmitProjectileTrail } from '../src/game/performance-policy';
 import { MOVEMENT_PROFILES, selectMovementProfile } from '../src/game/player-tuning';
 import { validateRoomQuality, validateRoomTraversal } from '../src/game/room-quality';
 import { newRunRequest, sameSeedRetryRequest } from '../src/game/run-retry';
 import { cloneDefaultSave } from '../src/game/save';
 import { BrowserSaveRepository, CURRENT_SAVE_KEY, LEGACY_SAVE_KEYS, type SaveStorage } from '../src/game/save-repository';
 import { RuntimeTelemetry } from '../src/game/telemetry';
-import type { RoomDefinition } from '../src/game/types';
+import type { Projectile, RoomDefinition } from '../src/game/types';
 
 class MemoryStorage implements SaveStorage {
   readonly values = new Map<string,string>();
@@ -100,6 +101,18 @@ assert.deepEqual(minimalHud.combatBoonIds,['pyrra','maris','gaia']);assert.equal
 const contextualHud=buildHudPriorityView({xpRevealSeconds:2,currencyRevealSeconds:0,wagerActive:true,roomCleared:true,roomIntroSeconds:0,dominantBoon:'pyrra',attachedBoons:['maris','gaia'],activeBoonCount:3,specialCooldownSeconds:.2,specialEnergyCost:24,currentEnergy:100});
 assert.equal(contextualHud.showXp,true);assert.equal(contextualHud.showCurrency,true);assert.equal(contextualHud.showRoomMap,true);assert.equal(contextualHud.specialState,'cooldown');
 
+const stressProjectiles:Projectile[]=Array.from({length:580},(_,index)=>({
+  id:index+1,owner:index<80?'enemy':'player',x:0,y:0,w:20,h:20,vx:400,vy:0,damage:10+(index%7),life:2,color:'#fff',radius:10,pierce:0,bounces:0,homing:index<12?.5:0,explosive:false,destructible:index<8,
+}));
+const logicalDamageBefore=stressProjectiles.reduce((total,projectile)=>total+projectile.damage,0);
+const presentationPlan=planProjectilePresentation(stressProjectiles,PROJECTILE_DETAIL_BUDGET.normal);
+assert.equal(stressProjectiles.length,580);assert.equal(stressProjectiles.reduce((total,projectile)=>total+projectile.damage,0),logicalDamageBefore,'presentation planning mutated logical projectile power');
+assert.equal(presentationPlan.logicalCount,580);assert.ok(presentationPlan.detailed.length<=PROJECTILE_DETAIL_BUDGET.normal,'projectile detail budget failed');
+assert.equal(presentationPlan.detailed.length+presentationPlan.simplified.length+presentationPlan.suppressedPlayerCount,580,'projectile presentation accounting failed');
+assert.ok(stressProjectiles.filter(projectile=>projectile.owner==='enemy').every(projectile=>presentationPlan.detailed.some(candidate=>candidate.id===projectile.id)||presentationPlan.simplified.some(candidate=>candidate.id===projectile.id)),'hostile projectile became invisible under presentation pressure');
+const emittedTrails=stressProjectiles.filter(projectile=>shouldEmitProjectileTrail(projectile.id,stressProjectiles.length,true)).length;
+assert.ok(emittedTrails>0&&emittedTrails<=50,'reduced-VFX projectile trail budget failed');
+
 assert.deepEqual(sameSeedRetryRequest(0xfeedbeef),{ depth:1,seed:0xfeedbeef });
 assert.deepEqual(newRunRequest(),{ depth:1 });
 
@@ -149,9 +162,11 @@ telemetry.recordFrame(44,33.333,{enemies:4,projectiles:280,particles:20,floating
 telemetry.recordAction(10,'playing','dash','ignored','cooldown');
 telemetry.recordAction(12,'playing','jump','consumed','buffered');
 telemetry.recordEntityCap(14,'playing','projectiles',321,320,1);
+telemetry.recordPresentationConsolidation(15,'playing',{entity:'projectiles',logicalCount:580,detailedCount:220,simplifiedCount:12,suppressedCount:348});
 const telemetrySnapshot = telemetry.snapshot();
 assert.equal(telemetrySnapshot.actionTotals.ignoredByReason.cooldown,1);
 assert.equal(telemetrySnapshot.frames.clamped,1);
 assert.equal(telemetrySnapshot.peakEntities.projectiles,280);
+assert.ok(telemetrySnapshot.events.some(event=>event.kind==='presentation-consolidation'&&event.logicalCount===580));
 
-console.log(`ALPHA 7.4A–7.4C FIXTURES PASSED · save migration/corruption/reset · retry depth 1 · disconnected-room rejection · ${generatedRooms} generated rooms · entitlement contexts · remap conflicts · controller hysteresis · protected movement/Arcane A/B · dominant boon identity · passive contracts · prompts · telemetry`);
+console.log(`ALPHA 7.4A–7.4D FIXTURES PASSED · save migration/corruption/reset · retry depth 1 · disconnected-room rejection · ${generatedRooms} generated rooms · entitlement contexts · remap conflicts · controller hysteresis · protected movement/Arcane A/B · dominant boon identity · passive contracts · simulation-safe projectile presentation · prompts · telemetry`);

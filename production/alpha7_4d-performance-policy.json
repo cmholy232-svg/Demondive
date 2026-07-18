@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "roadmapPosition": "Alpha 7.4D — Performance safeguard checkpoint 01",
+  "principle": "Earned logical power, target count, damage and proc results may not be deleted to meet a presentation budget.",
+  "projectiles": {
+    "simulationPolicy": "all live projectiles remain in the logical update and collision arrays until ordinary gameplay rules remove them",
+    "destructiveTrimRemoved": true,
+    "normalDetailedRenderBudget": 220,
+    "reducedVfxDetailedRenderBudget": 110,
+    "normalTrailBudget": 96,
+    "reducedVfxTrailBudget": 42,
+    "hostileOverflow": "rendered with a cheaper but readable shape; never hidden",
+    "playerOverflow": "visual instances are evenly consolidated while all logical projectiles continue to simulate",
+    "telemetry": "logical, detailed, simplified and suppressed presentation counts are recorded locally"
+  },
+  "otherPresentationCaps": {
+    "particles": 650,
+    "floatingText": 90,
+    "lightning": 80,
+    "lightRays": 12,
+    "gusts": 8
+  },
+  "hotPathChanges": [
+    "projectile-vs-destructible-hostile checks iterate only destructible hostile candidates",
+    "projectile trail emission scales down deterministically under entity pressure",
+    "large static campaign registries are emitted as a separate cacheable production chunk"
+  ],
+  "automatedEvidence": [
+    "580-projectile fixture retains identical logical count and summed damage",
+    "every hostile projectile remains represented as detailed or simplified",
+    "presentation accounting covers every logical projectile",
+    "reduced-VFX trail emission remains inside its fixture budget"
+  ],
+  "humanExitBlockers": [
+    "Capture browser traces for neutral, boss, high-stack and long Deep Dive presets.",
+    "Complete a two-hour Deep Dive on representative desktop and laptop hardware.",
+    "Confirm no monotonic memory growth across biome transitions.",
+    "Measure 30/60/90/120 Hz action and movement outcomes.",
+    "Approve mobile-target thermal, battery and frame budgets later on physical phones."
+  ]
+}

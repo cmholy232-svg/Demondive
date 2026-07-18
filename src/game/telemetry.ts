@@ -47,6 +47,7 @@ export type RuntimeTelemetryEvent =
   | (TelemetryEventBase & { kind:'movement'; x:number; y:number; vx:number; vy:number; grounded:boolean; dashing:boolean })
   | (TelemetryEventBase & { kind:'shot'; projectilesSpawned:number; totalStacks:number })
   | (TelemetryEventBase & { kind:'entity-cap'; entity:keyof EntityCounts; count:number; limit:number; trimmed:number })
+  | (TelemetryEventBase & { kind:'presentation-consolidation'; entity:'projectiles'; logicalCount:number; detailedCount:number; simplifiedCount:number; suppressedCount:number })
   | (TelemetryEventBase & { kind:'room'; event:'entered' | 'cleared'; depth:number; roomIndex:number; roomType:RoomType; entry:GateSide; exit:GateSide; seed:number })
   | (TelemetryEventBase & { kind:'death'; depth:number; roomIndex:number; seed:number; damageTaken:number });
 
@@ -81,6 +82,7 @@ export class RuntimeTelemetry {
   private ignoredActions = 0;
   private readonly ignoredByReason: Record<string,number> = {};
   private readonly capLastRecordedAt: Partial<Record<keyof EntityCounts,number>> = {};
+  private presentationLastRecordedAt = -Infinity;
   private readonly peakEntities: EntityCounts = { enemies:0,projectiles:0,particles:0,floatingText:0,bossHazards:0,lightning:0,lightRays:0,gusts:0,activeSfx:0 };
 
   constructor(private readonly buildId: string, private readonly maxEvents = 2400, private readonly maxFrameSamples = 900) {}
@@ -123,6 +125,12 @@ export class RuntimeTelemetry {
     if (atMs - (this.capLastRecordedAt[entity] ?? -Infinity) < 500) return;
     this.capLastRecordedAt[entity] = atMs;
     this.push({ kind:'entity-cap',atMs,screen,entity,count,limit,trimmed });
+  }
+
+  recordPresentationConsolidation(atMs:number,screen:GameScreen,data:Omit<Extract<RuntimeTelemetryEvent,{kind:'presentation-consolidation'}>,'kind'|'atMs'|'screen'>):void {
+    if(atMs-this.presentationLastRecordedAt<500)return;
+    this.presentationLastRecordedAt=atMs;
+    this.push({kind:'presentation-consolidation',atMs,screen,...data});
   }
 
   recordRoom(atMs: number, screen: GameScreen, event: 'entered' | 'cleared', data: Omit<Extract<RuntimeTelemetryEvent,{kind:'room'}>,'kind'|'atMs'|'screen'|'event'>): void {

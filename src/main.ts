@@ -16,6 +16,7 @@ import { canAccessCampaignLevel, PC_MASTER_ACCESS } from './game/entitlements';
 import { KeyboardBindingRepository, bindingConflicts, profileBindings, rebindAction, type KeyboardBindingState, type KeyboardProfileId } from './game/input-bindings';
 import { buildRoomFrame, generateRunPlan, roomCountBounds } from './game/generator';
 import { buildHudPriorityView } from './game/hud-view';
+import { planProjectilePresentation, PROJECTILE_DETAIL_BUDGET, shouldEmitProjectileTrail } from './game/performance-policy';
 import { calyptraCriticalMultiplier, calyptraPowerMultiplier, jackpotChanceFor, roomGradeFor, rushChargeForRank, scoreMultiplierForRank, styleRankFor } from './game/feel';
 import { MusicDirector } from './game/music-director';
 import type { MusicState } from './game/music';
@@ -1842,13 +1843,12 @@ class DemonGame {
 
   private capTransientEntities(): void {
     this.trimTransient('particles',this.particles,650);
-    this.trimTransient('projectiles',this.projectiles,320);
     this.trimTransient('floatingText',this.floatingText,90);
     this.trimTransient('lightning',this.lightningEffects,80);
     this.trimTransient('lightRays',this.lightRayEffects,12);
     this.trimTransient('gusts',this.gustEffects,8);
     const counts=this.currentEntityCounts();
-    for(const entity of ['enemies','bossHazards','activeSfx'] as const){
+    for(const entity of ['enemies','projectiles','bossHazards','activeSfx'] as const){
       const limit=ENTITY_WARNING_BUDGETS[entity];
       if(counts[entity]>limit)this.telemetry.recordEntityCap(performance.now(),this.screen,entity,counts[entity],limit,0);
     }
@@ -3407,6 +3407,7 @@ class DemonGame {
 
   private updateProjectiles(dt: number): void {
     const remove = new Set<number>();
+    const destructibleHostiles=this.projectiles.filter(projectile=>projectile.owner==='enemy'&&projectile.destructible);
     for (const projectile of this.projectiles) {
       if (remove.has(projectile.id)) continue;
       if (this.worldFreezeTimer > 0 && projectile.owner === 'enemy') continue;
@@ -3460,7 +3461,7 @@ class DemonGame {
           this.addStyle(3.5,'REFRACTION');
         }
       }
-      if (projectile.owner === 'player' && !projectile.explosive && Math.random() < dt * 34) {
+      if (projectile.owner === 'player' && !projectile.explosive && shouldEmitProjectileTrail(projectile.id,this.projectiles.length,this.reducedVfx) && Math.random() < dt * 34) {
         const life = .12 + Math.random() * .13;
         this.particles.push({
           x: centerX(projectile) - projectile.vx * .018, y: centerY(projectile) - projectile.vy * .018,
@@ -3470,8 +3471,8 @@ class DemonGame {
       }
 
       if (projectile.owner === 'player') {
-        for (const hostile of this.projectiles) {
-          if (hostile.owner !== 'enemy' || !hostile.destructible || remove.has(hostile.id) || !overlap(projectile,hostile)) continue;
+        for (const hostile of destructibleHostiles) {
+          if (remove.has(hostile.id) || !overlap(projectile,hostile)) continue;
           remove.add(hostile.id); remove.add(projectile.id);
           this.burst(centerX(hostile),centerY(hostile),'#d8ffff',16,280);
           this.floatingText.push({x:centerX(hostile),y:hostile.y-10,text:'NOTE BROKEN',color:'#8ff8ff',life:.55,maxLife:.55,size:13});
@@ -4852,7 +4853,7 @@ class DemonGame {
     this.ctx.fillStyle = '#ffc75a'; this.ctx.font = '800 14px Barlow Condensed'; this.ctx.textAlign = 'center'; this.ctx.fillText(`✧ ${this.save.shards} SOUL SHARDS`, 818, 360);
     for (const enemy of this.enemies) this.drawEnemy(enemy);
     for (const wave of this.waves) this.drawGroundWave(wave);
-    for (const projectile of this.projectiles) this.drawProjectile(projectile);
+    this.drawProjectilesWithBudget();
     this.drawAmbientEmbers(.35);
     this.drawPlayer();
     for (const particle of this.particles) this.drawParticle(particle);
@@ -4990,7 +4991,7 @@ class DemonGame {
     for (const enemy of this.enemies) if (!enemy.dead || enemy.deathTime > 0) this.drawEnemy(enemy);
     if (this.belladonnaVortex > 0) this.drawBelladonnaVortex();
     for (const wave of this.waves) this.drawGroundWave(wave);
-    for (const projectile of this.projectiles) this.drawProjectile(projectile);
+    this.drawProjectilesWithBudget();
     for (const gust of this.gustEffects) this.drawGustEffect(gust);
     for (const lightning of this.lightningEffects) this.drawLightning(lightning);
     for (const ray of this.lightRayEffects) this.drawLightRay(ray);
@@ -6580,6 +6581,27 @@ class DemonGame {
       this.ctx.beginPath(); this.ctx.arc(centerX(projectile), centerY(projectile), projectile.radius, 0, Math.PI * 2); this.ctx.fill();
     }
     this.ctx.restore();
+  }
+
+  private drawProjectilesWithBudget():void {
+    const detailBudget=this.reducedVfx?PROJECTILE_DETAIL_BUDGET.reduced:PROJECTILE_DETAIL_BUDGET.normal;
+    const plan=planProjectilePresentation(this.projectiles,detailBudget);
+    for(const projectile of plan.detailed)this.drawProjectile(projectile);
+    for(const projectile of plan.simplified)this.drawSimplifiedHostileProjectile(projectile);
+    if(plan.simplified.length>0||plan.suppressedPlayerCount>0)this.telemetry.recordPresentationConsolidation(performance.now(),this.screen,{
+      entity:'projectiles',logicalCount:plan.logicalCount,detailedCount:plan.detailed.length,simplifiedCount:plan.simplified.length,suppressedCount:plan.suppressedPlayerCount,
+    });
+  }
+
+  private drawSimplifiedHostileProjectile(projectile:Projectile):void {
+    if((projectile.spawnDelay??0)>0)return;
+    this.ctx.save();
+    this.ctx.fillStyle=projectile.color;
+    this.ctx.strokeStyle=projectile.songNote?'#d9ffff':'rgba(255,255,255,.78)';
+    this.ctx.lineWidth=1.5;
+    this.ctx.beginPath();
+    this.ctx.arc(centerX(projectile),centerY(projectile),Math.max(3,projectile.radius),0,Math.PI*2);
+    this.ctx.fill();this.ctx.stroke();this.ctx.restore();
   }
 
   private drawDominantProjectileShape(projectile:Projectile,radius:number):void {

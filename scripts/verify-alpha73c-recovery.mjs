@@ -17,21 +17,27 @@ async function filesBelow(directory) {
 }
 
 const builtAssets = await readdir(path.join(root,'dist/assets'));
-const sourceMapName = builtAssets.find((entry) => /^index-.*\.js\.map$/.test(entry));
-if (!sourceMapName) throw new Error('Production build did not emit an indexed JavaScript source map.');
-const sourceMap = JSON.parse(await readFile(path.join(root, 'dist/assets',sourceMapName), 'utf8'));
-if (sourceMap.sources.length !== sourceMap.sourcesContent.length || sourceMap.sources.length < 20) {
-  throw new Error(`Expected the complete Alpha 7.3C foundation plus additive modules; received ${sourceMap.sources.length}.`);
+const sourceMapNames = builtAssets.filter((entry) => entry.endsWith('.js.map'));
+if (!sourceMapNames.length) throw new Error('Production build did not emit JavaScript source maps.');
+const mappedSources = new Map();
+for (const sourceMapName of sourceMapNames) {
+  const sourceMap = JSON.parse(await readFile(path.join(root,'dist/assets',sourceMapName),'utf8'));
+  if (sourceMap.sources.length !== sourceMap.sourcesContent.length) throw new Error(`Source/content mismatch in ${sourceMapName}.`);
+  for (let index=0;index<sourceMap.sources.length;index+=1) {
+    const source=sourceMap.sources[index];const marker=source.lastIndexOf('src/');
+    if(marker<0)throw new Error(`Unexpected source-map entry in ${sourceMapName}: ${source}`);
+    const relativePath=source.slice(marker);const embedded=sourceMap.sourcesContent[index];
+    const previous=mappedSources.get(relativePath);
+    if(previous!==undefined&&previous!==embedded)throw new Error(`Conflicting embedded source for ${relativePath}.`);
+    mappedSources.set(relativePath,embedded);
+  }
 }
+if (mappedSources.size < 20) throw new Error(`Expected the complete Alpha 7.3C foundation plus additive modules; received ${mappedSources.size}.`);
 const requiredSources = ['src/game/content.ts','src/game/generator.ts','src/game/deep-dive.ts','src/game/save.ts','src/main.ts'];
-for (const required of requiredSources) if (!sourceMap.sources.some((source) => source.endsWith(required))) throw new Error(`Missing required foundation module: ${required}`);
-for (let index = 0; index < sourceMap.sources.length; index += 1) {
-  const source = sourceMap.sources[index];
-  const marker = source.lastIndexOf('src/');
-  if (marker < 0) throw new Error(`Unexpected source-map entry: ${source}`);
-  const relativePath = source.slice(marker);
+for (const required of requiredSources) if (!mappedSources.has(required)) throw new Error(`Missing required foundation module: ${required}`);
+for (const [relativePath,embedded] of mappedSources) {
   const recovered = await readFile(path.join(root, relativePath), 'utf8');
-  if (recovered !== sourceMap.sourcesContent[index]) {
+  if (recovered !== embedded) {
     throw new Error(`${relativePath} no longer matches the attached playable's exact embedded source.`);
   }
 }
@@ -61,4 +67,4 @@ for (const marker of [
   if (!runtime.includes(marker)) throw new Error(`Missing Alpha 7.3C runtime marker: ${marker}`);
 }
 
-console.log(`Alpha 7.3C foundation verified beneath additive production work: ${sourceMap.sources.length} mapped modules, 111 baseline assets, Levels 1–9.`);
+console.log(`Alpha 7.3C foundation verified beneath additive production work: ${mappedSources.size} mapped modules across ${sourceMapNames.length} production chunks, 111 baseline assets, Levels 1–9.`);
