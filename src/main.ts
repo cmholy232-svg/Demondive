@@ -16,8 +16,11 @@ import { MusicDirector } from './game/music-director';
 import type { MusicState } from './game/music';
 import { MILO_ATLASES, type MiloAtlasDefinition } from './game/milo-animation';
 import { awardDiveXp, diveXpRequired, DIVE_XP_REWARDS } from './game/profile-level';
-import { cloneDefaultSave, parseAndMigrateSave } from './game/save';
+import { cloneDefaultSave } from './game/save';
+import { BrowserSaveRepository } from './game/save-repository';
+import { newRunRequest, sameSeedRetryRequest } from './game/run-retry';
 import { createRunSeed, SeededRandom } from './game/rng';
+import { ENTITY_WARNING_BUDGETS, RuntimeTelemetry, type EntityCounts } from './game/telemetry';
 import type {
   BoonPickup,
   BoonId,
@@ -43,8 +46,6 @@ import type {
   WagerType,
 } from './game/types';
 
-const SAVE_KEY = 'demondive-save-v2';
-const LEGACY_SAVE_KEYS = ['isad-vertical-slice-v1'];
 const CURRENT_ALPHA_FINAL_LEVEL = 9;
 // The temporary browser text-to-speech announcer is intentionally disabled.
 // It can return when a production voice performance replaces it.
@@ -109,6 +110,8 @@ class DemonGame {
   private readonly modifierToggle = mustElement<HTMLButtonElement>('#modifier-toggle');
   private readonly music = new MusicDirector(import.meta.env.BASE_URL);
   private readonly arcaneAudio = new ArcaneAudioDirector(import.meta.env.BASE_URL);
+  private readonly saveRepository = new BrowserSaveRepository(window.localStorage);
+  private readonly telemetry = new RuntimeTelemetry('alpha-7.4a-development');
 
   private screen: GameScreen = 'title';
   private previousScreen: GameScreen = 'playing';
@@ -235,7 +238,7 @@ class DemonGame {
 
   private readonly keys = new Set<string>();
   private readonly touchControls = new Set<ControlName>();
-  private inputPrevious = { jump: false, special: false, dash: false, interact: false };
+  private inputPrevious = { jump: false, fire:false, special: false, dash: false, interact: false };
   private menuNavLatched = false;
   private menuActionLatched = false;
   private menuPauseLatched = false;
@@ -284,6 +287,7 @@ class DemonGame {
     this.reducedVfx = this.save.settings.reducedVfx;
     this.music.setMasterVolume(this.save.settings.masterVolume);
     this.music.setMusicVolume(this.save.settings.musicVolume);
+    (window as Window & { __DEMONDIVE_TELEMETRY__?: () => unknown }).__DEMONDIVE_TELEMETRY__ = () => this.telemetry.snapshot();
     this.bindInput();
     this.modifierToggle.addEventListener('click', () => this.showArcanaLoadout());
     // Production atlases use fixed cells and a shared feet anchor. Canvas art
@@ -392,13 +396,11 @@ class DemonGame {
   }
 
   private loadSave(): SaveData {
-    const raw = localStorage.getItem(SAVE_KEY) ?? LEGACY_SAVE_KEYS.map((key) => localStorage.getItem(key)).find(Boolean) ?? null;
-    return parseAndMigrateSave(raw);
+    return this.saveRepository.load().save;
   }
 
   private persistSave(): void {
-    try { localStorage.setItem(SAVE_KEY, JSON.stringify(this.save)); }
-    catch { /* Play remains available when a browser blocks storage. */ }
+    this.saveRepository.write(this.save);
   }
 
   private awardProfileXp(amount: number, source: string, persist = false): void {
@@ -552,7 +554,8 @@ class DemonGame {
   }
 
   private frame(now: number): void {
-    const dt = Math.min((now - this.lastTime) / 1000, 1 / 30);
+    const rawDeltaMs = Math.max(0,now - this.lastTime);
+    const dt = Math.min(rawDeltaMs / 1000, 1 / 30);
     this.lastTime = now;
     this.time += dt;
     this.updateMenuGamepad();
@@ -562,7 +565,22 @@ class DemonGame {
     else if (this.screen === 'hub' && !this.hubModalOpen) this.updateHub(dt);
     this.updatePresentation(dt);
     this.render();
+    this.telemetry.recordFrame(rawDeltaMs,dt*1000,this.currentEntityCounts());
     requestAnimationFrame((time) => this.frame(time));
+  }
+
+  private currentEntityCounts(): EntityCounts {
+    return {
+      enemies:this.enemies.length,
+      projectiles:this.projectiles.length,
+      particles:this.particles.length,
+      floatingText:this.floatingText.length,
+      bossHazards:this.bossHazards.length,
+      lightning:this.lightningEffects.length,
+      lightRays:this.lightRayEffects.length,
+      gusts:this.gustEffects.length,
+      activeSfx:this.activeSfx,
+    };
   }
 
   private updatePresentation(dt: number): void {
@@ -720,10 +738,7 @@ class DemonGame {
   }
 
   private resetAllProgress(): void {
-    try {
-      localStorage.removeItem(SAVE_KEY);
-      for (const key of LEGACY_SAVE_KEYS) localStorage.removeItem(key);
-    } catch { /* A storage-denied browser still receives an in-memory reset. */ }
+    this.saveRepository.reset();
     this.save = cloneDefaultSave();
     this.applyFreshSaveState();
     this.showToast('ALL DATA ERASED · DIVE LEVEL 1 · THE NEON MAW AWAITS');
@@ -1462,6 +1477,10 @@ class DemonGame {
     } else if (previousRoomType === 'miniboss') this.music.requestState(this.postMinibossMusicState());
     else if (index > 0) this.music.requestState(this.explorationMusicState());
     this.updateHud();
+    this.telemetry.recordRoom(performance.now(),this.screen,'entered',{
+      depth:this.currentDepth,roomIndex:this.roomIndex,roomType:this.room.type,
+      entry:this.room.entrySide??'left',exit:this.room.exitSide??'right',seed:this.runSeed,
+    });
     if (this.room.entryDialogue) this.showDialogueBeat(this.room.entryDialogue, 'playing');
     else if (this.room.routeKind==='event') this.showRoomEvent();
   }
@@ -1668,12 +1687,24 @@ class DemonGame {
   }
 
   private capTransientEntities(): void {
-    if (this.particles.length>650) this.particles.splice(0,this.particles.length-650);
-    if (this.projectiles.length>320) this.projectiles.splice(0,this.projectiles.length-320);
-    if (this.floatingText.length>90) this.floatingText.splice(0,this.floatingText.length-90);
-    if (this.lightningEffects.length>80) this.lightningEffects.splice(0,this.lightningEffects.length-80);
-    if (this.lightRayEffects.length>12) this.lightRayEffects.splice(0,this.lightRayEffects.length-12);
-    if (this.gustEffects.length>8) this.gustEffects.splice(0,this.gustEffects.length-8);
+    this.trimTransient('particles',this.particles,650);
+    this.trimTransient('projectiles',this.projectiles,320);
+    this.trimTransient('floatingText',this.floatingText,90);
+    this.trimTransient('lightning',this.lightningEffects,80);
+    this.trimTransient('lightRays',this.lightRayEffects,12);
+    this.trimTransient('gusts',this.gustEffects,8);
+    const counts=this.currentEntityCounts();
+    for(const entity of ['enemies','bossHazards','activeSfx'] as const){
+      const limit=ENTITY_WARNING_BUDGETS[entity];
+      if(counts[entity]>limit)this.telemetry.recordEntityCap(performance.now(),this.screen,entity,counts[entity],limit,0);
+    }
+  }
+
+  private trimTransient<T>(entity: keyof EntityCounts, values: T[], limit: number): void {
+    if(values.length<=limit)return;
+    const count=values.length;const trimmed=count-limit;
+    values.splice(0,trimmed);
+    this.telemetry.recordEntityCap(performance.now(),this.screen,entity,count,limit,trimmed);
   }
 
   private addStyle(amount: number, callout = ''): void {
@@ -1855,6 +1886,7 @@ class DemonGame {
   }
 
   private updatePlayer(dt: number, allowCombat = true): void {
+    const inputAt = performance.now();
     const wasGrounded = this.player.grounded;
     const left = this.isControl('left');
     const right = this.isControl('right');
@@ -1864,6 +1896,10 @@ class DemonGame {
     const fire = this.isControl('fire');
     const special = this.isControl('special');
     const dash = this.isControl('dash');
+    const jumpPressed = jump && !this.inputPrevious.jump;
+    const firePressed = fire && !this.inputPrevious.fire;
+    const specialPressed = special && !this.inputPrevious.special;
+    const dashPressed = dash && !this.inputPrevious.dash;
     const move = Number(right) - Number(left);
     if (move !== 0) this.tutorialAction('move');
     this.playerSnareTime=Math.max(0,this.playerSnareTime-dt);this.snareNoticeCooldown=Math.max(0,this.snareNoticeCooldown-dt);this.dreamDoorCooldown=Math.max(0,this.dreamDoorCooldown-dt);
@@ -1885,25 +1921,32 @@ class DemonGame {
       if (this.player.dashCooldown === 0) this.player.dashCharges = 1 + this.boonStacks.noctissa;
     }
 
-    if (dash && !this.inputPrevious.dash && this.player.dashCharges > 0 && this.player.dashCooldown === 0) {
-      let dashX = move;
-      let dashY = Number(down) - Number(up);
-      if (dashX === 0 && dashY === 0) dashX = this.player.facing;
-      const length = Math.hypot(dashX, dashY) || 1;
-      this.player.dashX = dashX / length;
-      this.player.dashY = dashY / length;
-      this.player.dashTime = .18;
-      this.player.dashCooldown = .09;
-      this.player.dashRecoveryTime = 0;
-      this.player.dashCharges -= 1;
-      this.player.invulnerable = Math.max(this.player.invulnerable, .38);
-      this.shake = 4;
-      this.burst(centerX(this.player), centerY(this.player), this.getArcaneColor(), 14, 240);
-      this.playSound('dash');
-      this.tutorialAction('dash');
+    if (dashPressed) {
+      if (this.player.dashTime > 0) this.telemetry.recordAction(inputAt,this.screen,'dash','ignored','dash-lock');
+      else if (this.player.dashCharges <= 0) this.telemetry.recordAction(inputAt,this.screen,'dash','ignored','no-dash-charge');
+      else if (this.player.dashCooldown > 0) this.telemetry.recordAction(inputAt,this.screen,'dash','ignored','cooldown');
+      else {
+        let dashX = move;
+        let dashY = Number(down) - Number(up);
+        if (dashX === 0 && dashY === 0) dashX = this.player.facing;
+        const length = Math.hypot(dashX, dashY) || 1;
+        this.player.dashX = dashX / length;
+        this.player.dashY = dashY / length;
+        this.player.dashTime = .18;
+        this.player.dashCooldown = .09;
+        this.player.dashRecoveryTime = 0;
+        this.player.dashCharges -= 1;
+        this.player.invulnerable = Math.max(this.player.invulnerable, .38);
+        this.shake = 4;
+        this.burst(centerX(this.player), centerY(this.player), this.getArcaneColor(), 14, 240);
+        this.playSound('dash');
+        this.tutorialAction('dash');
+        this.telemetry.recordAction(inputAt,this.screen,'dash','consumed','activated');
+      }
     }
 
     if (this.player.dashTime > 0) {
+      if (jumpPressed) this.telemetry.recordAction(inputAt,this.screen,'jump','ignored','dash-lock');
       this.player.dashTime = Math.max(0, this.player.dashTime - dt);
       this.player.vx = this.player.dashX * 890;
       this.player.vy = this.player.dashY * 890;
@@ -1934,12 +1977,16 @@ class DemonGame {
     }
 
     const onThinPlatform = this.room.platforms.some((platform) => platform.h <= 25 && Math.abs(this.player.y + this.player.h - platform.y) < 7 && this.player.x + this.player.w > platform.x && this.player.x < platform.x + platform.w);
-    if (jump && !this.inputPrevious.jump && down && onThinPlatform) {
+    if (jumpPressed && down && onThinPlatform) {
       this.player.dropTimer = .24;
       this.player.grounded = false;
       this.player.y += 8;
       this.player.vy = 120;
-    } else if (jump && !this.inputPrevious.jump) this.player.jumpBuffer = .13 + this.save.upgrades.training*.03;
+      this.telemetry.recordAction(inputAt,this.screen,'jump','consumed','drop-through');
+    } else if (jumpPressed) {
+      this.player.jumpBuffer = .13 + this.save.upgrades.training*.03;
+      this.telemetry.recordAction(inputAt,this.screen,'jump','consumed','buffered');
+    }
     this.player.jumpBuffer = Math.max(0, this.player.jumpBuffer - dt);
     this.player.coyote = this.player.grounded ? .11 + this.save.upgrades.training*.03 : Math.max(0, this.player.coyote - dt);
     if (this.player.jumpBuffer > 0 && (this.player.coyote > 0 || this.player.airJumps > 0)) {
@@ -2041,10 +2088,25 @@ class DemonGame {
       }
     }
 
-    if (allowCombat && fire && this.player.fireCooldown === 0 && this.player.dashTime === 0 && this.player.kickTime === 0 && this.player.punchTime === 0) this.firePlayerProjectile();
+    const attackLocked=this.player.dashTime>0||this.player.kickTime>0||this.player.punchTime>0;
+    if (allowCombat && fire && this.player.fireCooldown === 0 && !attackLocked) this.firePlayerProjectile();
+    else if(firePressed){
+      const reason=!allowCombat?'combat-disabled':attackLocked?'attack-lock':'cooldown';
+      this.telemetry.recordAction(inputAt,this.screen,'fire','ignored',reason);
+    }
     const contextualInteraction = (this.isNearWagerShrine() && this.wagerInteractionHeld()) || (this.isNearHubStation() && (this.isControl('interact') || this.touchControls.has('special')));
-    if (allowCombat && special && !contextualInteraction && !this.inputPrevious.special && this.player.specialCooldown === 0 && this.player.dashTime === 0 && this.player.kickTime === 0 && this.player.punchTime === 0) this.useSpecial();
+    if(specialPressed){
+      if(contextualInteraction)this.telemetry.recordAction(inputAt,this.screen,'special','ignored','context-interaction');
+      else if(!allowCombat)this.telemetry.recordAction(inputAt,this.screen,'special','ignored','combat-disabled');
+      else if(attackLocked)this.telemetry.recordAction(inputAt,this.screen,'special','ignored','attack-lock');
+      else if(this.player.specialCooldown>0)this.telemetry.recordAction(inputAt,this.screen,'special','ignored','cooldown');
+      else if(this.player.energy<this.getSpecialCost(this.player.special))this.telemetry.recordAction(inputAt,this.screen,'special','ignored','insufficient-energy');
+      else if(this.useSpecial())this.telemetry.recordAction(inputAt,this.screen,'special','consumed','activated');
+      else this.telemetry.recordAction(inputAt,this.screen,'special','ignored','special-condition');
+    }
+    this.telemetry.recordMovement(inputAt,this.screen,{x:this.player.x,y:this.player.y,vx:this.player.vx,vy:this.player.vy,grounded:this.player.grounded,dashing:this.player.dashTime>0});
     this.inputPrevious.jump = jump;
+    this.inputPrevious.fire = fire;
     this.inputPrevious.special = special;
     this.inputPrevious.dash = dash;
   }
@@ -2152,6 +2214,8 @@ class DemonGame {
     if (this.lunaTurretTimer > 0) this.fireLunaTurretShot(aimX, aimY, color, accentColor);
     this.burst(muzzleX, muzzleY, color, 4, 100);
     this.playArcaneBlastSound();
+    this.telemetry.recordAction(performance.now(),this.screen,'fire','consumed','fired');
+    this.telemetry.recordShot(performance.now(),this.screen,shotCount,this.totalBoonStacks());
     this.tutorialAction('magic');
     if (crit) this.floatingText.push({ x: centerX(this.player), y: this.player.y - 10, text: 'CRIT READY', color: '#ffc75a', life: .5, maxLife: .5, size: 12 });
   }
@@ -2222,19 +2286,19 @@ class DemonGame {
     return `#${mix(r)}${mix(g)}${mix(b)}`;
   }
 
-  private useSpecial(): void {
+  private useSpecial(): boolean {
     const cost = this.getSpecialCost(this.player.special);
     if(this.player.special==='rushState'&&!this.belladonnaEdibleTarget()){
       this.showToast('DEVOUR · NO WEAKENED ENEMY IN FRONT');
-      return;
+      return false;
     }
     if(this.player.special==='drainBurst'&&this.player.health<=Math.max(8,this.player.maxHealth*.14)+1){
       this.showToast('BLOOD PACT · NOT ENOUGH HEALTH TO OFFER');
-      return;
+      return false;
     }
     if (this.player.energy < cost) {
       this.showToast('Not enough demon energy — find coffee');
-      return;
+      return false;
     }
     this.player.energy -= cost;
     this.player.specialCooldown = .3;
@@ -2388,6 +2452,7 @@ class DemonGame {
       this.showToast(`HALO FIELD · ${this.player.shieldCharges} HITS`);
       this.burst(centerX(this.player), this.player.y, BOONS.seraphine.color, 34, 460);
     }
+    return true;
   }
 
   private spawnPlayerProjectile(x: number, y: number, vx: number, vy: number, damage: number, color: string, radius: number, pierce: number, homing = 0): void {
@@ -3726,6 +3791,10 @@ class DemonGame {
   private markRoomCleared(): void {
     if (this.clearedRoomIndices.has(this.roomIndex)) return;
     this.clearedRoomIndices.add(this.roomIndex);
+    this.telemetry.recordRoom(performance.now(),this.screen,'cleared',{
+      depth:this.currentDepth,roomIndex:this.roomIndex,roomType:this.room.type,
+      entry:this.room.entrySide??'left',exit:this.room.exitSide??'right',seed:this.runSeed,
+    });
     this.runMetrics.roomsCleared += 1;
     this.save.lifetimeRooms += 1;
     let xp = DIVE_XP_REWARDS.room;
@@ -4006,6 +4075,7 @@ class DemonGame {
   }
 
   private showDeath(): void {
+    this.telemetry.recordDeath(performance.now(),this.screen,{ depth:this.currentDepth,roomIndex:this.roomIndex,seed:this.runSeed,damageTaken:this.runMetrics.damageTaken });
     const banked = this.bankRun();
     const record = this.recordRun('death',banked);
     this.screen = 'dead';
@@ -4023,8 +4093,8 @@ class DemonGame {
           <button class="btn" id="return-hub">Return to hub</button>
         </div>
       </div>`;
-    mustElement<HTMLButtonElement>('#retry-seed').addEventListener('click', () => this.startRun(1,this.runSeed));
-    mustElement<HTMLButtonElement>('#retry').addEventListener('click', () => this.startRun(1));
+    mustElement<HTMLButtonElement>('#retry-seed').addEventListener('click', () => { const request=sameSeedRetryRequest(this.runSeed); this.startRun(request.depth,request.seed); });
+    mustElement<HTMLButtonElement>('#retry').addEventListener('click', () => { const request=newRunRequest(); this.startRun(request.depth,request.seed); });
     mustElement<HTMLButtonElement>('#return-hub').addEventListener('click', () => this.showHub());
     this.focusFirstMenuButton();
   }

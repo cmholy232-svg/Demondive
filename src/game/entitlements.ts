@@ -13,6 +13,13 @@ export interface AccessContext {
 // The PC/master build always contains and exposes the complete authored game.
 export const PC_MASTER_ACCESS: Readonly<AccessContext> = Object.freeze({ channel:'pc-master', tier:'full', source:'pc-master' });
 export const MOBILE_FREE_ACCESS: Readonly<AccessContext> = Object.freeze({ channel:'mobile', tier:'free', source:'free-default' });
+export const MOBILE_FULL_TEST_ACCESS: Readonly<AccessContext> = Object.freeze({ channel:'mobile', tier:'full', source:'developer' });
+
+export const ENTITLEMENT_TEST_CONTEXTS = Object.freeze({
+  pcMaster:PC_MASTER_ACCESS,
+  mobileFree:MOBILE_FREE_ACCESS,
+  mobileFull:MOBILE_FULL_TEST_ACCESS,
+});
 
 export function tierAllows(required: AccessTier, access: AccessContext): boolean {
   return required === 'free' || access.tier === 'full';

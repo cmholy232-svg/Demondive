@@ -1,0 +1,63 @@
+{
+  "schemaVersion": 1,
+  "baselineId": "A0-alpha75-playable-339f20f",
+  "roadmapPosition": "Alpha 7.4A — Instrumentation, integrity and architecture safety",
+  "sourceCheckpoint": "339f20f41d977b3e07794256d3a5a09618ce1e25",
+  "sourceTag": "alpha-7.5-playable-preserved",
+  "captureStatus": {
+    "automatedData": "captured",
+    "localGameplayVideo": "human-capture-required",
+    "physicalKeyboard": "human-test-required",
+    "physicalController": "human-test-required",
+    "refreshRateMatrix": "human-test-required"
+  },
+  "protectedAdvancedMovement": {
+    "dashSpeed": 890,
+    "dashDurationSeconds": 0.18,
+    "dashCooldownSeconds": 0.09,
+    "wavelandHorizontalSpeed": 780,
+    "wavelandDurationSeconds": 0.3,
+    "dashRecoverySeconds": 0.12
+  },
+  "baselineLocomotion": {
+    "runSpeed": 360,
+    "groundAcceleration": 3500,
+    "airAcceleration": 2050,
+    "groundFriction": 3000,
+    "airFriction": 330,
+    "gravity": 2350,
+    "jumpVelocity": -760,
+    "jumpReleaseGravity": 1750,
+    "fallSpeedCap": 1200,
+    "fastFallSpeedCap": 1450,
+    "coyoteSeconds": 0.11,
+    "jumpBufferSeconds": 0.13
+  },
+  "neutralArcane": {
+    "baseCooldownSeconds": 0.235,
+    "baseDamage": 17,
+    "baseProjectileRadius": 10,
+    "baseProjectileSpeed": 780,
+    "baseLifetimeSeconds": 1.6,
+    "firePoseSeconds": 0.24
+  },
+  "simulation": {
+    "variableStep": true,
+    "maximumDeltaSeconds": 0.03333333333333333,
+    "fixedStepSpikeAuthorized": false,
+    "decisionRule": "Only spike fixed or semi-fixed simulation after measured 30/60/90/120 Hz divergence."
+  },
+  "emergencyCaps": {
+    "particles": 650,
+    "projectiles": 320,
+    "floatingText": 90,
+    "lightning": 80,
+    "lightRays": 12,
+    "gusts": 8
+  },
+  "knownRisks": [
+    "The projectile emergency cap removes oldest live projectiles and can alter earned high-stack power.",
+    "Physical-device latency and refresh-rate evidence cannot be produced in the automated workspace.",
+    "Alpha 7.5 visual approval remains human-review pending even though runtime integrity is verified."
+  ]
+}

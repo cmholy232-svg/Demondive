@@ -1,19 +1,7 @@
-import { createHash } from 'node:crypto';
 import { readdir, readFile } from 'node:fs/promises';
 import path from 'node:path';
 
 const root = process.cwd();
-const expectedBuildHashes = Object.freeze({
-  'dist/index.html': '03647d856f5aa1b5de42886907e6c697d5896d7250b7dd4c3803df9f52c0ace1',
-  'dist/assets/index-BmgJptvb.css': 'bb65aab281488d71c92102aa1c07c4b51d6a304010b84c71eb52a404b5212960',
-  'dist/assets/index-Berm6ySH.js': 'aece117830d8765600c0969037e9e84a146c68127930478565de65e085133542',
-  'dist/assets/index-Berm6ySH.js.map': '1d172c8951b7b10da131dbf44794e7a82f760e2b911280fde97c6f33e94aa366',
-});
-
-async function sha256(relativePath) {
-  const data = await readFile(path.join(root, relativePath));
-  return createHash('sha256').update(data).digest('hex');
-}
 
 async function filesBelow(directory) {
   const output = [];
@@ -28,17 +16,15 @@ async function filesBelow(directory) {
   return output.sort();
 }
 
-for (const [relativePath, expected] of Object.entries(expectedBuildHashes)) {
-  const actual = await sha256(relativePath);
-  if (actual !== expected) {
-    throw new Error(`${relativePath} parity failed: expected ${expected}, received ${actual}`);
-  }
+const builtAssets = await readdir(path.join(root,'dist/assets'));
+const sourceMapName = builtAssets.find((entry) => /^index-.*\.js\.map$/.test(entry));
+if (!sourceMapName) throw new Error('Production build did not emit an indexed JavaScript source map.');
+const sourceMap = JSON.parse(await readFile(path.join(root, 'dist/assets',sourceMapName), 'utf8'));
+if (sourceMap.sources.length !== sourceMap.sourcesContent.length || sourceMap.sources.length < 20) {
+  throw new Error(`Expected the complete Alpha 7.3C foundation plus additive modules; received ${sourceMap.sources.length}.`);
 }
-
-const sourceMap = JSON.parse(await readFile(path.join(root, 'dist/assets/index-Berm6ySH.js.map'), 'utf8'));
-if (sourceMap.sources.length !== 20 || sourceMap.sourcesContent.length !== 20) {
-  throw new Error(`Expected the exact 20-module Alpha 7.3C source corpus; received ${sourceMap.sources.length}.`);
-}
+const requiredSources = ['src/game/content.ts','src/game/generator.ts','src/game/deep-dive.ts','src/game/save.ts','src/main.ts'];
+for (const required of requiredSources) if (!sourceMap.sources.some((source) => source.endsWith(required))) throw new Error(`Missing required foundation module: ${required}`);
 for (let index = 0; index < sourceMap.sources.length; index += 1) {
   const source = sourceMap.sources[index];
   const marker = source.lastIndexOf('src/');
@@ -75,4 +61,4 @@ for (const marker of [
   if (!runtime.includes(marker)) throw new Error(`Missing Alpha 7.3C runtime marker: ${marker}`);
 }
 
-console.log('Alpha 7.3C foundation verified beneath the exact Alpha 7.5 playable integration: 20 modules, 111 baseline assets, Levels 1–9.');
+console.log(`Alpha 7.3C foundation verified beneath additive production work: ${sourceMap.sources.length} mapped modules, 111 baseline assets, Levels 1–9.`);

@@ -2,6 +2,7 @@ import { ENEMY_BODIES, FLOOR_Y, HEIGHT, LEVEL_EIGHT_ENCOUNTERS, LEVEL_FIVE_ENCOU
 import { desiredEnemyCount } from './difficulty';
 import { createRunSeed, SeededRandom } from './rng';
 import type { RandomSource } from './rng';
+import { validateRoomTraversal } from './room-quality';
 import type { EnemySpawn, EnemyType, GateSide, GeneratedRunPlan, Hazard, Rect, RoomDefinition, RoomType, RouteChoice, RouteKind, WagerType } from './types';
 
 const directions: Record<GateSide, { x: number; y: number; opposite: GateSide }> = {
@@ -311,37 +312,8 @@ function emptyRoomType(type: RoomType): boolean {
   return type === 'traversal' || type === 'recovery' || type === 'cache';
 }
 
-function horizontalGap(a: Rect, b: Rect): number {
-  if (a.x + a.w < b.x) return b.x - (a.x + a.w);
-  if (b.x + b.w < a.x) return a.x - (b.x + b.w);
-  return 0;
-}
-
-function canTraverse(from: Rect, to: Rect): boolean {
-  const rise = from.y - to.y; const gap = horizontalGap(from, to);
-  if (rise >= 0) return rise <= 275 && gap <= 340; // Milo's protected base double-jump envelope
-  return -rise <= 560 && gap <= 390; // controlled fall or drop-through
-}
-
 export function roomIsTraversable(room: RoomDefinition): boolean {
-  const surfaces = room.platforms.filter(platform => platform.w >= 70);
-  const groundIndex = surfaces.findIndex(platform => platform.h > 25 && platform.y === FLOOR_Y);
-  if (groundIndex < 0) return false;
-  const entry = room.entrySide ?? 'left', exit = room.exitSide ?? 'right';
-  const startIndices = entry === 'top'
-    ? surfaces.map((platform,index)=>({platform,index})).filter(({platform}) => platform.y >= 130 && platform.y <= 185 && platform.x < 682 && platform.x + platform.w > 598).map(({index})=>index)
-    : [groundIndex];
-  if (!startIndices.length) return false;
-  const targets = exit === 'top'
-    ? surfaces.map((platform,index)=>({platform,index})).filter(({platform}) => platform.y <= 170 && platform.x < 682 && platform.x + platform.w > 598).map(({index})=>index)
-    : [groundIndex];
-  if (!targets.length) return false;
-  const visited = new Set(startIndices); const queue = [...startIndices];
-  while (queue.length) {
-    const current = queue.shift()!; if (targets.includes(current)) return true;
-    for (let next=0; next<surfaces.length; next+=1) if (!visited.has(next) && canTraverse(surfaces[current],surfaces[next])) { visited.add(next); queue.push(next); }
-  }
-  return false;
+  return validateRoomTraversal(room).valid;
 }
 
 function roomIdentity(type: RoomType, stage: number, index: number, count: number): Pick<RoomDefinition, 'name' | 'subtitle' | 'objective' | 'theme'> {

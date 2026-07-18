@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
-    "verify": "npm run verify:alpha73c && npm run verify:a75",
+    "verify": "npm run verify:alpha73c && npm run verify:a75 && npm run verify:alpha74a",
     "verify:alpha73c": "npm run build && node scripts/verify-alpha73c-recovery.mjs",
     "verify:a75": "npm run verify:a75:portraits && npm run verify:a75:environments && npm run verify:a75:sigils && npm run verify:a75:sensory && npm run verify:a75:ui && npm run verify:a75:biomes && npm run verify:a75:combat-cast && npm run verify:a75:milo && npm run verify:a75:batch && npm run verify:a75:batch02 && npm run verify:a75:batch03 && npm run verify:a75:batch04 && npm run verify:a75:batch05 && npm run verify:a75:audit && npm run verify:a75:runtime",
     "build:a75:portraits": "node scripts/build-a75-boon-portraits.mjs",
@@ -32,7 +32,8 @@
     "verify:a75:batch04": "node scripts/verify-a75-asset-batch-04.mjs",
     "verify:a75:batch05": "node scripts/verify-a75-asset-batch-05.mjs",
     "verify:a75:audit": "node scripts/verify-a75-master-audit.mjs",
-    "verify:a75:runtime": "node scripts/verify-a75-runtime-art.mjs"
+    "verify:a75:runtime": "node scripts/verify-a75-runtime-art.mjs",
+    "verify:alpha74a": "esbuild scripts/verify-alpha74a-fixtures.ts --bundle --platform=node --format=esm --outfile=/tmp/demondive-alpha74a-fixtures.mjs --log-level=warning && node /tmp/demondive-alpha74a-fixtures.mjs"
   },
   "devDependencies": {
     "pngjs": "^7.0.0",

@@ -1,4 +1,5 @@
 export type GameAction = 'left' | 'right' | 'up' | 'down' | 'jump' | 'fire' | 'special' | 'dash' | 'interact';
+export type InputDevice = 'keyboard' | 'controller' | 'touch';
 
 export const GAME_ACTIONS: readonly GameAction[] = Object.freeze([
   'left','right','up','down','jump','fire','special','dash','interact',
@@ -15,6 +16,27 @@ export const KEYBOARD_ACTION_BINDINGS: Readonly<Record<GameAction, readonly stri
   dash:['ShiftLeft','ShiftRight','KeyL'],
   interact:['KeyE'],
 });
+
+export const ACTION_PROMPTS: Readonly<Record<InputDevice, Readonly<Record<GameAction, string>>>> = Object.freeze({
+  keyboard:Object.freeze({ left:'A / ←',right:'D / →',up:'W / ↑',down:'S / ↓',jump:'Space',fire:'J',special:'K',dash:'Shift',interact:'E' }),
+  controller:Object.freeze({ left:'Left stick',right:'Left stick',up:'Left stick',down:'Left stick',jump:'A / Cross',fire:'X / Square',special:'Y / Triangle',dash:'B / Circle',interact:'Y / Triangle' }),
+  touch:Object.freeze({ left:'Move pad',right:'Move pad',up:'Move pad',down:'Move pad',jump:'Jump',fire:'Fire',special:'Special',dash:'Dash',interact:'Interact' }),
+});
+
+export interface ActionPromptService {
+  currentDevice(): InputDevice;
+  noteDevice(device: InputDevice): void;
+  prompt(action: GameAction, device?: InputDevice): string;
+}
+
+export class DevicePromptService implements ActionPromptService {
+  private device: InputDevice;
+
+  constructor(initialDevice: InputDevice = 'keyboard') { this.device = initialDevice; }
+  currentDevice(): InputDevice { return this.device; }
+  noteDevice(device: InputDevice): void { this.device = device; }
+  prompt(action: GameAction, device = this.device): string { return ACTION_PROMPTS[device][action]; }
+}
 
 export interface GamepadLike {
   axes: ArrayLike<number>;
