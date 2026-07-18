@@ -1,6 +1,7 @@
 import './style.css';
 import './settings.css';
 import { DevicePromptService, GamepadActionResolver, isGameAction, mappedKeyboardActionActive, type GameAction as ControlName, type InputDevice } from './game/actions';
+import { ARCANE_PROFILES, selectArcaneProfile, type ArcaneProfileId } from './game/arcane-tuning';
 import { arcaneHarmonyLabel, boonNoteLabel } from './game/arcane-audio';
 import { ArcaneAudioDirector } from './game/arcane-audio-director';
 import { chooseSmartBoonOffers } from './game/boon-offers';
@@ -54,11 +55,11 @@ const CURRENT_ALPHA_FINAL_LEVEL = 9;
 // It can return when a production voice performance replaces it.
 const ANNOUNCER_ENABLED = false;
 const alphaCompletionFlag = (level: number) => `alpha_completion_level_${level}_seen`;
-const FIRE_POSE_DURATION = .24;
 // Enemy, pickup, and arcing-projectile physics retain the established world
 // gravity. Milo's gravity is selected independently through the A/B profile.
 const GRAVITY = 2350;
 const MOVEMENT_PROFILE_KEY = 'demondive-movement-profile-v1';
+const ARCANE_PROFILE_KEY = 'demondive-arcane-profile-v1';
 interface GroundWave extends Rect { id: number; vx: number; life: number; damage: number; facing: 1 | -1; hitIds: Set<number>; }
 interface WagerShrine extends Rect { used: boolean; pulse: number; type: WagerType; }
 interface ActiveWager { type: WagerType; failed: boolean; timer: number; }
@@ -98,6 +99,11 @@ function storedMovementProfile(): string | null {
   catch { return null; }
 }
 
+function storedArcaneProfile(): string | null {
+  try { return window.localStorage.getItem(ARCANE_PROFILE_KEY); }
+  catch { return null; }
+}
+
 class DemonGame {
   private readonly canvas = mustElement<HTMLCanvasElement>('#game');
   private readonly ctx = this.canvas.getContext('2d', { alpha: false })!;
@@ -129,6 +135,7 @@ class DemonGame {
   private readonly gamepadActions = new GamepadActionResolver();
   private readonly telemetry = new RuntimeTelemetry('alpha-7.4a-development');
   private movementProfileId: MovementProfileId = selectMovementProfile(window.location.search,storedMovementProfile());
+  private arcaneProfileId: ArcaneProfileId = selectArcaneProfile(window.location.search,storedArcaneProfile());
 
   private screen: GameScreen = 'title';
   private previousScreen: GameScreen = 'playing';
@@ -310,6 +317,7 @@ class DemonGame {
     (window as Window & { __DEMONDIVE_TELEMETRY__?: () => unknown }).__DEMONDIVE_TELEMETRY__ = () => ({
       ...this.telemetry.snapshot(),
       movementProfile:this.movementProfileId,
+      arcaneProfile:this.arcaneProfileId,
       keyboardProfile:this.keyboardBindingState.profile,
     });
     this.bindInput();
@@ -731,6 +739,7 @@ class DemonGame {
         <div class="btn-row settings-toggles">
           <button class="btn" id="cycle-keyboard-profile">Keyboard: ${this.keyboardBindingState.profile==='split-hand'?'Split-Hand':this.keyboardBindingState.profile==='arcade'?'Arcade Z/X/C/V':'Custom'}</button>
           <button class="btn" id="cycle-movement-profile">Movement test: ${MOVEMENT_PROFILES[this.movementProfileId].label}</button>
+          <button class="btn" id="cycle-arcane-profile">Arcane test: ${ARCANE_PROFILES[this.arcaneProfileId].label}</button>
           <button class="btn ghost" id="reset-bindings">Reset keyboard bindings</button>
         </div>
         <div class="binding-grid">${(['left','right','up','down','jump','dash','fire','special','interact'] as ControlName[]).map(bindingButton).join('')}</div>
@@ -773,6 +782,11 @@ class DemonGame {
       this.movementProfileId=this.movementProfileId==='a0-control'?'a1-responsive':'a0-control';
       try{window.localStorage.setItem(MOVEMENT_PROFILE_KEY,this.movementProfileId);}catch{/* A/B selection remains active for this session. */}
       this.showSettings(returnScreen);this.showToast(`MOVEMENT ${MOVEMENT_PROFILES[this.movementProfileId].label.toUpperCase()} · DASH/WAVE VALUES LOCKED`);
+    });
+    mustElement<HTMLButtonElement>('#cycle-arcane-profile').addEventListener('click',()=>{
+      this.arcaneProfileId=this.arcaneProfileId==='a0-control'?'a1-responsive':'a0-control';
+      try{window.localStorage.setItem(ARCANE_PROFILE_KEY,this.arcaneProfileId);}catch{/* A/B selection remains active for this session. */}
+      this.showSettings(returnScreen);this.showToast(`ARCANE ${ARCANE_PROFILES[this.arcaneProfileId].label.toUpperCase()} · DAMAGE/RANGE LOCKED`);
     });
     mustElement<HTMLButtonElement>('#reset-bindings').addEventListener('click',()=>{
       this.keyboardBindingState=profileBindings('split-hand');this.bindingRepository.write(this.keyboardBindingState);this.updateControlPrompts();this.showSettings(returnScreen);
@@ -832,8 +846,10 @@ class DemonGame {
     this.saveRepository.reset();
     this.bindingRepository.reset();
     try{window.localStorage.removeItem(MOVEMENT_PROFILE_KEY);}catch{/* In-memory reset still applies. */}
+    try{window.localStorage.removeItem(ARCANE_PROFILE_KEY);}catch{/* In-memory reset still applies. */}
     this.keyboardBindingState=profileBindings('split-hand');
     this.movementProfileId='a0-control';
+    this.arcaneProfileId='a0-control';
     this.save = cloneDefaultSave();
     this.applyFreshSaveState();
     this.showToast('ALL DATA ERASED · DIVE LEVEL 1 · THE NEON MAW AWAITS');
@@ -2273,6 +2289,7 @@ class DemonGame {
   }
 
   private firePlayerProjectile(): void {
+    const arcane = ARCANE_PROFILES[this.arcaneProfileId];
     const steamPressure = this.hasBoonPair('pyrra','maris');
     const stormfront = this.hasBoonPair('voltara','zephyra');
     const crystalGarden = this.hasBoonPair('flora','crya');
@@ -2283,9 +2300,9 @@ class DemonGame {
     const zephyraPower=this.effectiveBoonStacks('zephyra');
     const floraPower=this.effectiveBoonStacks('flora');
     const fireRateBonus = zephyraPower * .08 + floraPower * .04 + this.styleMeter * .002 + this.save.upgrades.cadence * .04 + (this.rushStateTimer > 0 ? .38 : 0);
-    this.player.fireCooldown = .235 / (1 + fireRateBonus);
-    const size = Math.min(42,10 * (1 + marisPower * .16 + gaiaPower * .3));
-    let damage = 17 * (1 + this.save.upgrades.kindling * .05) * (1 + pyrraPower * .10 + gaiaPower * .16);
+    this.player.fireCooldown = arcane.baseCooldownSeconds / (1 + fireRateBonus);
+    const size = Math.min(42,arcane.baseRadius * (1 + marisPower * .16 + gaiaPower * .3));
+    let damage = arcane.baseDamage * (1 + this.save.upgrades.kindling * .05) * (1 + pyrraPower * .10 + gaiaPower * .16);
     damage *= 1 + this.styleMeter * .0012;
     if (steamPressure) damage*=1.15;
     if (this.boonStacks.calyptra > 0) damage *= calyptraPowerMultiplier(this.boonStacks.calyptra, this.runRng.next());
@@ -2293,7 +2310,7 @@ class DemonGame {
     if (crit) damage *= calyptraCriticalMultiplier(this.boonStacks.calyptra);
     const color = this.getArcaneColor();
     const accentColor = this.getArcaneAccentColor();
-    const projectileSpeed = 780 * (1 + zephyraPower * .14) * Math.max(.62, 1 - gaiaPower * .08);
+    const projectileSpeed = arcane.projectileSpeed * (1 + zephyraPower * .14) * Math.max(.62, 1 - gaiaPower * .08);
     let aimX = Number(this.isControl('right')) - Number(this.isControl('left'));
     let aimY = Number(this.isControl('down')) - Number(this.isControl('up'));
     if (aimY > 0 && this.player.grounded && aimX === 0) aimX = this.player.facing;
@@ -2304,7 +2321,7 @@ class DemonGame {
     if (aimX !== 0) this.player.facing = aimX > 0 ? 1 : -1;
     this.player.lastAimX = aimX;
     this.player.lastAimY = aimY;
-    this.player.firePoseTime = FIRE_POSE_DURATION;
+    this.player.firePoseTime = arcane.firePoseSeconds;
     const hand = this.castingHandWorld();
     const muzzleX = hand.x + aimX * 9;
     // Spawn from the visible charged palm; the forgiving projectile radius
@@ -2320,7 +2337,7 @@ class DemonGame {
       this.projectiles.push({
         id: this.entityId++, owner: 'player', x: muzzleX - size, y: muzzleY - size, w: size * 2, h: size * 2,
         vx: Math.cos(angle) * projectileSpeed, vy: Math.sin(angle) * projectileSpeed,
-        damage: shotDamage, life: 1.6 * (1 + this.boonStacks.isolde * .12), color, radius: size,
+        damage: shotDamage, life: arcane.projectileLifeSeconds * (1 + this.boonStacks.isolde * .12), color, radius: size,
         pierce: Math.min(16,this.boonStacks.gaia + this.boonStacks.solara + Math.floor(this.boonStacks.maris / 2)),
         bounces: Math.min(12,this.boonStacks.isolde+(mirrorDream?1:0)), homing: Math.min(2.4,this.boonStacks.nerissa * .38), explosive: steamPressure&&this.boonStacks.pyrra+this.boonStacks.maris>=4,
         age: 0, baseRadius: size,
@@ -5664,7 +5681,7 @@ class DemonGame {
     if (!p.grounded) return p.lastAimY > .35 ? 5 : p.lastAimY < -.45 ? 3 : 4;
     if (p.lastAimY < -.45) return 3;
     if (Math.abs(p.vx) > 42) return 2;
-    return p.firePoseTime > FIRE_POSE_DURATION * .56 ? 0 : 1;
+    return p.firePoseTime > ARCANE_PROFILES[this.arcaneProfileId].firePoseSeconds * .56 ? 0 : 1;
   }
 
   private drawMiloCastAtlas(frame: number, scale: number): void {

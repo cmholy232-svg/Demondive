@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import { GAME_ACTIONS, DevicePromptService, GamepadActionResolver } from '../src/game/actions';
+import { ARCANE_PROFILES, selectArcaneProfile } from '../src/game/arcane-tuning';
 import { BOONS, BOON_ORDER, FLOOR_Y, WIDTH } from '../src/game/content';
 import { canAccessBoon, canAccessCampaignLevel, ENTITLEMENT_TEST_CONTEXTS } from '../src/game/entitlements';
 import { generateRunPlan, roomIsEmpty } from '../src/game/generator';
@@ -70,6 +71,13 @@ assert.equal(selectMovementProfile('',null),'a0-control');
 for (const field of ['runSpeed','gravity','jumpVelocity','jumpReleaseGravity','fallSpeedCap','fastFallGravity','fastFallSpeedCap','dashSpeed','dashDurationSeconds','dashCooldownSeconds','wavelandSpeed','wavelandDurationSeconds','dashRecoverySeconds'] as const) {
   assert.equal(MOVEMENT_PROFILES['a1-responsive'][field],MOVEMENT_PROFILES['a0-control'][field],`${field} must remain protected across A/B profiles`);
 }
+assert.equal(selectArcaneProfile('?arcaneProfile=a1-responsive',null),'a1-responsive');
+assert.equal(selectArcaneProfile('',null),'a0-control');
+assert.equal(ARCANE_PROFILES['a1-responsive'].baseDamage,ARCANE_PROFILES['a0-control'].baseDamage,'neutral Arcane A/B damage must remain protected');
+assert.equal(ARCANE_PROFILES['a1-responsive'].baseRadius,ARCANE_PROFILES['a0-control'].baseRadius,'neutral Arcane A/B hitbox must remain protected');
+const controlArcaneRange=ARCANE_PROFILES['a0-control'].projectileSpeed*ARCANE_PROFILES['a0-control'].projectileLifeSeconds;
+const candidateArcaneRange=ARCANE_PROFILES['a1-responsive'].projectileSpeed*ARCANE_PROFILES['a1-responsive'].projectileLifeSeconds;
+assert.ok(Math.abs(candidateArcaneRange-controlArcaneRange)<.0001,'neutral Arcane A/B effective range must remain protected');
 
 assert.deepEqual(sameSeedRetryRequest(0xfeedbeef),{ depth:1,seed:0xfeedbeef });
 assert.deepEqual(newRunRequest(),{ depth:1 });
@@ -120,4 +128,4 @@ assert.equal(telemetrySnapshot.actionTotals.ignoredByReason.cooldown,1);
 assert.equal(telemetrySnapshot.frames.clamped,1);
 assert.equal(telemetrySnapshot.peakEntities.projectiles,280);
 
-console.log(`ALPHA 7.4A/7.4B FIXTURES PASSED · save migration/corruption/reset · retry depth 1 · disconnected-room rejection · ${generatedRooms} generated rooms · entitlement contexts · remap conflicts · controller hysteresis · protected movement A/B · prompts · telemetry`);
+console.log(`ALPHA 7.4A/7.4B FIXTURES PASSED · save migration/corruption/reset · retry depth 1 · disconnected-room rejection · ${generatedRooms} generated rooms · entitlement contexts · remap conflicts · controller hysteresis · protected movement/Arcane A/B · prompts · telemetry`);

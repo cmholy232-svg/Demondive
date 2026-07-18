@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "roadmapPosition": "Alpha 7.4B — Baseline locomotion, input and neutral Arcane Bolt",
+  "defaultProfile": "a0-control",
+  "profiles": {
+    "a0-control": {
+      "purpose": "Exact Alpha 7.5 playable neutral Arcane values.",
+      "cooldownSeconds": 0.235,
+      "projectileSpeed": 780,
+      "projectileLifeSeconds": 1.6,
+      "effectiveRange": 1248,
+      "firePoseSeconds": 0.24
+    },
+    "a1-responsive": {
+      "purpose": "Test quicker ordinary firing and earlier visual travel without increasing damage, hitbox or range.",
+      "cooldownSeconds": 0.22,
+      "projectileSpeed": 840,
+      "projectileLifeSeconds": 1.4857142857142858,
+      "effectiveRange": 1248,
+      "firePoseSeconds": 0.2,
+      "expectedPlayerResult": "A tap reads sooner, repeated neutral shots feel less sticky, and airborne firing obscures movement for less time.",
+      "regressionRisks": [
+        "The 6.8% cadence increase raises unmodified sustained damage unless later threat tuning compensates.",
+        "Faster travel reduces the amount of lead required at medium range.",
+        "A shorter fire pose may make the cast animation less readable."
+      ]
+    }
+  },
+  "protectedEqualValues": ["baseDamage", "baseRadius", "effectiveRange", "boonScaling", "specials"],
+  "approvalRule": "A1 cannot replace A0 until input-to-fire captures and casual/expert tests show a clear responsiveness gain without harming cast readability or encounter balance."
+}
