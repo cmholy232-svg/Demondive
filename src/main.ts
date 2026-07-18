@@ -314,6 +314,14 @@ class DemonGame {
   private readonly levelBackdrop = new Image();
   private readonly levelTwoBackdrop = new Image();
   private readonly levelThreeBackdrop = new Image();
+  private readonly lateAssetPaths: Record<number, { backdrop: string; enemies: string; encounters: string; environment: string }> = {
+    4: { backdrop: 'assets/a75/environment/level4/env-thunder-jackpot-background-main-v02.png', enemies: 'assets/a75/enemies/level4/enm-thunder-jackpot-atlas-v01.png', encounters: 'assets/a75/bosses/level4/bos-thunder-jackpot-encounters-v01.png', environment: 'assets/a75/environment/level4/env-thunder-jackpot-construction-atlas-v01.png' },
+    5: { backdrop: 'assets/a75/environment/level5/env-frozen-basilica-background-main-v02.png', enemies: 'assets/a75/enemies/level5/enm-frozen-basilica-atlas-v01.png', encounters: 'assets/a75/bosses/level5/bos-frozen-basilica-encounters-v01.png', environment: 'assets/a75/environment/level5/env-frozen-basilica-construction-atlas-v01.png' },
+    6: { backdrop: 'assets/a75/environment/level6/env-forever-motel-background-main-v02.png', enemies: 'assets/a75/enemies/level6/enm-forever-motel-atlas-v01.png', encounters: 'assets/a75/bosses/level6/bos-forever-motel-encounters-v01.png', environment: 'assets/a75/environment/level6/env-forever-motel-construction-atlas-v01.png' },
+    7: { backdrop: 'assets/a75/environment/level7/env-thousand-faces-background-main-v02.png', enemies: 'assets/a75/enemies/level7/enm-thousand-faces-atlas-v01.png', encounters: 'assets/a75/bosses/level7/bos-thousand-faces-encounters-v01.png', environment: 'assets/a75/environment/level7/env-thousand-faces-construction-atlas-v01.png' },
+    8: { backdrop: 'assets/a75/environment/level8/env-liliths-throne-background-main-v02.png', enemies: 'assets/a75/enemies/level8/enm-liliths-throne-atlas-v01.png', encounters: 'assets/a75/bosses/level8/bos-liliths-throne-encounters-v01.png', environment: 'assets/a75/environment/level8/env-liliths-throne-construction-atlas-v01.png' },
+    9: { backdrop: 'assets/a75/environment/level9/env-self-below-background-main-v02.png', enemies: 'assets/a75/enemies/level9/enm-self-below-atlas-v01.png', encounters: 'assets/a75/bosses/level9/bos-self-below-encounters-v01.png', environment: 'assets/a75/environment/level9/env-self-below-construction-atlas-v01.png' },
+  };
   private readonly lateBackdrops = new Map<number, HTMLImageElement>();
   private readonly lateEnemyAtlases = new Map<number, HTMLImageElement>();
   private readonly lateEncounterAtlases = new Map<number, HTMLImageElement>();
@@ -345,6 +353,7 @@ class DemonGame {
       movementProfile:this.movementProfileId,
       arcaneProfile:this.arcaneProfileId,
       keyboardProfile:this.keyboardBindingState.profile,
+      assetResidency:{lateDepths:[...this.lateBackdrops.keys()],boonPortraits:this.boonPortraits.size,boonSigils:this.boonSigils.size},
     });
     this.bindInput();
     this.updateControlPrompts();
@@ -369,39 +378,14 @@ class DemonGame {
     this.levelBackdrop.src = `${import.meta.env.BASE_URL}assets/a5/environment/env-neonmaw-background-main-v01.png`;
     this.levelTwoBackdrop.src = `${import.meta.env.BASE_URL}assets/a6/environment/env-drownedcourt-background-main-v01.png`;
     this.levelThreeBackdrop.src = `${import.meta.env.BASE_URL}assets/a7/environment/env-thornwild-background-main-v01.png`;
-    const lateAssets: Record<number, { backdrop: string; enemies: string; encounters: string; environment: string }> = {
-      4: { backdrop: 'assets/a75/environment/level4/env-thunder-jackpot-background-main-v02.png', enemies: 'assets/a75/enemies/level4/enm-thunder-jackpot-atlas-v01.png', encounters: 'assets/a75/bosses/level4/bos-thunder-jackpot-encounters-v01.png', environment: 'assets/a75/environment/level4/env-thunder-jackpot-construction-atlas-v01.png' },
-      5: { backdrop: 'assets/a75/environment/level5/env-frozen-basilica-background-main-v02.png', enemies: 'assets/a75/enemies/level5/enm-frozen-basilica-atlas-v01.png', encounters: 'assets/a75/bosses/level5/bos-frozen-basilica-encounters-v01.png', environment: 'assets/a75/environment/level5/env-frozen-basilica-construction-atlas-v01.png' },
-      6: { backdrop: 'assets/a75/environment/level6/env-forever-motel-background-main-v02.png', enemies: 'assets/a75/enemies/level6/enm-forever-motel-atlas-v01.png', encounters: 'assets/a75/bosses/level6/bos-forever-motel-encounters-v01.png', environment: 'assets/a75/environment/level6/env-forever-motel-construction-atlas-v01.png' },
-      7: { backdrop: 'assets/a75/environment/level7/env-thousand-faces-background-main-v02.png', enemies: 'assets/a75/enemies/level7/enm-thousand-faces-atlas-v01.png', encounters: 'assets/a75/bosses/level7/bos-thousand-faces-encounters-v01.png', environment: 'assets/a75/environment/level7/env-thousand-faces-construction-atlas-v01.png' },
-      8: { backdrop: 'assets/a75/environment/level8/env-liliths-throne-background-main-v02.png', enemies: 'assets/a75/enemies/level8/enm-liliths-throne-atlas-v01.png', encounters: 'assets/a75/bosses/level8/bos-liliths-throne-encounters-v01.png', environment: 'assets/a75/environment/level8/env-liliths-throne-construction-atlas-v01.png' },
-      9: { backdrop: 'assets/a75/environment/level9/env-self-below-background-main-v02.png', enemies: 'assets/a75/enemies/level9/enm-self-below-atlas-v01.png', encounters: 'assets/a75/bosses/level9/bos-self-below-encounters-v01.png', environment: 'assets/a75/environment/level9/env-self-below-construction-atlas-v01.png' },
-    };
-    for (const [depthText, assets] of Object.entries(lateAssets)) {
-      const depth = Number(depthText);
-      for (const [registry, path] of [
-        [this.lateBackdrops, assets.backdrop],
-        [this.lateEnemyAtlases, assets.enemies],
-        [this.lateEncounterAtlases, assets.encounters],
-        [this.lateEnvironmentAtlases, assets.environment],
-      ] as const) {
-        const image = new Image();
-        image.src = `${import.meta.env.BASE_URL}${path}`;
-        registry.set(depth, image);
-      }
-    }
     this.levelTiles.src = `${import.meta.env.BASE_URL}assets/v1/environment/neon-maw-tiles-v1.png`;
     this.hubBackdrop.src = `${import.meta.env.BASE_URL}assets/a5/hub/env-hellroom-background-main-v01.png`;
     this.miloPortrait.src = `${import.meta.env.BASE_URL}assets/a5/characters/level1/chr-milo-portrait-v01.png`;
     this.bottomlessPortrait.src = `${import.meta.env.BASE_URL}assets/a5/characters/level1/chr-bottomless-bartender-portrait-v01.png`;
-    for (const id of BOON_ORDER) {
-      const image = new Image();
-      if (BOONS[id].portraitAsset) image.src = `${import.meta.env.BASE_URL}${BOONS[id].portraitAsset}`;
-      this.boonPortraits.set(id, image);
-      const sigil = new Image();
-      sigil.src = `${import.meta.env.BASE_URL}assets/a75/ui/boon-sigils/sigil-${id}-v01.svg`;
-      this.boonSigils.set(id, sigil);
-    }
+    // Only title-critical boon art is resident before play. Remaining boon
+    // visuals and late-biome atlases are loaded at their first actual use.
+    this.ensureBoonPortrait('pyrra');
+    this.ensureBoonPortrait('belladonna');
     this.seedAmbientEmbers();
     this.showTitle();
     if(this.initialSaveLoad.corruptKeys.length>0)this.showToast('SAVE RECOVERY · CORRUPT DATA IGNORED · PROGRESS LOADED FROM THE SAFEST VALID SOURCE');
@@ -477,6 +461,53 @@ class DemonGame {
   private portraitDataUrl(id: BoonId): string | null {
     const asset = BOONS[id].portraitAsset;
     return asset ? `${import.meta.env.BASE_URL}${asset}` : null;
+  }
+
+  private ensureBoonPortrait(id: BoonId): void {
+    if (!this.boonPortraits.has(id)) {
+      const portrait = new Image();
+      portrait.decoding = 'async';
+      const asset = BOONS[id].portraitAsset;
+      if (asset) portrait.src = `${import.meta.env.BASE_URL}${asset}`;
+      this.boonPortraits.set(id, portrait);
+    }
+  }
+
+  private ensureBoonVisual(id: BoonId): void {
+    this.ensureBoonPortrait(id);
+    if (!this.boonSigils.has(id)) {
+      const sigil = new Image();
+      sigil.decoding = 'async';
+      sigil.src = `${import.meta.env.BASE_URL}assets/a75/ui/boon-sigils/sigil-${id}-v01.svg`;
+      this.boonSigils.set(id, sigil);
+    }
+  }
+
+  private releaseLateAssets(): void {
+    for (const registry of [this.lateBackdrops,this.lateEnemyAtlases,this.lateEncounterAtlases,this.lateEnvironmentAtlases]) {
+      for (const image of registry.values()) image.removeAttribute('src');
+      registry.clear();
+    }
+  }
+
+  private ensureLateDepthAssets(depth: number): void {
+    const assets = this.lateAssetPaths[depth];
+    if (!assets || this.lateBackdrops.has(depth)) return;
+    // A late biome is four large raster surfaces. Keeping every Level 4–9
+    // atlas decoded at once creates unnecessary texture pressure, especially
+    // in long Deep Dives and on integrated GPUs. Only one late depth remains.
+    this.releaseLateAssets();
+    for (const [registry,path] of [
+      [this.lateBackdrops,assets.backdrop],
+      [this.lateEnemyAtlases,assets.enemies],
+      [this.lateEncounterAtlases,assets.encounters],
+      [this.lateEnvironmentAtlases,assets.environment],
+    ] as const) {
+      const image = new Image();
+      image.decoding = 'async';
+      image.src = `${import.meta.env.BASE_URL}${path}`;
+      registry.set(depth,image);
+    }
   }
 
   private bindInput(): void {
@@ -703,6 +734,7 @@ class DemonGame {
   }
 
   private showTitle(): void {
+    this.releaseLateAssets();
     const token = ++this.titleToken;
     this.alphaFinaleEnding = false;
     this.titleStartLocked = false;
@@ -1118,6 +1150,7 @@ class DemonGame {
   }
 
   private showHub(): void {
+    this.releaseLateAssets();
     this.isEndless = false;
     this.screen = 'hub';
     this.music.resume();
@@ -1130,6 +1163,8 @@ class DemonGame {
     this.boonStacks = emptyBoonStacks();
     this.boonOfferDrought = emptyBoonStacks();
     if (!this.save.unlocked.includes(this.selectedStartingBoon)) this.selectedStartingBoon = 'pyrra';
+    this.ensureBoonVisual(this.selectedStartingBoon);
+    for (const id of ['maris','gaia','zephyra','belladonna'] as BoonId[]) if (this.save.unlocked.includes(id)) this.ensureBoonVisual(id);
     this.player = this.makePlayer(BOONS[this.selectedStartingBoon].special);
     this.player.x = HUB_ROOM.playerStart.x;
     this.player.y = HUB_ROOM.playerStart.y;
@@ -1598,6 +1633,13 @@ class DemonGame {
     const previousRoomType = this.room?.type;
     this.roomIndex = index;
     this.room = this.runRooms[index];
+    if (this.currentDepth >= 4 && this.currentDepth <= 9) this.ensureLateDepthAssets(this.currentDepth);
+    else {
+      this.releaseLateAssets();
+      const bossPortrait: Partial<Record<number,BoonId>> = {1:'belladonna',2:'nerissa',3:'roxyne'};
+      const portrait = bossPortrait[this.currentDepth];
+      if (portrait) this.ensureBoonVisual(portrait);
+    }
     this.roomCleared = this.room.type === 'traversal' || (this.room.type === 'recovery' && this.room.rewardKind !== 'arcane-cache');
     this.bossDefeated = false;
     this.rewardGranted = false;
@@ -4218,6 +4260,7 @@ class DemonGame {
   }
 
   private applyBoon(id: BoonId, announce = true): void {
+    this.ensureBoonVisual(id);
     this.boonStacks[id] += 1;
     this.runMetrics.boonsAcquired += 1;
     this.runMetrics.rewardChoices.push(id);
@@ -4265,6 +4308,7 @@ class DemonGame {
 
   private spawnBoonChoices(reroll = false): void {
     const choices = this.chooseRewardBoons(2,reroll);
+    for (const id of choices) this.ensureBoonVisual(id);
     this.rewardInspectionLocked = false;
     const spacing=170; const start=WIDTH/2-((choices.length-1)*spacing)/2-30;
     this.boonPickups = choices.map((boonId,index)=>({x:start+index*spacing,y:FLOOR_Y-150,w:60,h:60,boonId,time:index*.22}));

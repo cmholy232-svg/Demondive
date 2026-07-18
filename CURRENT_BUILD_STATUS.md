@@ -6,6 +6,8 @@ Active build: **Alpha 7.7 story and tutorial playtest** on `alpha/7.4-rebuild`.
 
 Next phase: **Alpha 7.8 whole-game polish and Alpha-completion gating**.
 
+Current checkpoint: **Alpha 7.8A packaging identity and asset-residency performance patch**.
+
 ## Preserved implementation
 
 - Alpha 7.3C: mechanically playable Levels 1–9, ending, credits, and Deep Dive registration.
@@ -13,6 +15,7 @@ Next phase: **Alpha 7.8 whole-game polish and Alpha-completion gating**.
 - Alpha 7.5: recovered art-integrated runtime plus source audits and correction registers.
 - Alpha 7.6: code-side audio/feedback hierarchy, procedural fallback SFX, deterministic camera feedback, impact budgets, and final authored-SFX requirements.
 - Alpha 7.7: playable three-room tutorial and full campaign dialogue draft.
+- Alpha 7.8A: truthful build identity, completion-gate ledger, lazy boon visuals, and one-late-biome-at-a-time atlas residency.
 
 ## Open Alpha-completion blockers
 

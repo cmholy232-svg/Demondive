@@ -74,5 +74,9 @@ if (!page.includes('A7.7 · STORY PLAYTEST')) throw new Error('Visible build sta
 if (!runtime.includes('A7.7 · TUTORIAL + STORY PLAYTEST · LEVELS 1–9')) throw new Error('Title-screen build label is stale or missing.');
 if (packageManifest.version !== '1.0.0-alpha.7.7-story-playtest') throw new Error('Package version is not the Alpha 7.7 story playtest.');
 if (packageLock.version !== packageManifest.version || packageLock.packages?.['']?.version !== packageManifest.version) throw new Error('Package-lock version does not match package.json.');
+for (const marker of ['ensureLateDepthAssets','releaseLateAssets','assetResidency','this.ensureBoonPortrait(\'pyrra\')','this.ensureBoonPortrait(\'belladonna\')']) {
+  if (!runtime.includes(marker)) throw new Error(`Missing Alpha 7.8 asset-residency safeguard: ${marker}`);
+}
+if (runtime.includes('for (const [depthText, assets] of Object.entries(lateAssets))')) throw new Error('Late-biome atlases regressed to eager title-screen loading.');
 
 console.log(`Alpha 7.3C foundation verified beneath additive production work: ${mappedSources.size} mapped modules across ${sourceMapNames.length} production chunks, 111 baseline assets, Levels 1–9.`);
