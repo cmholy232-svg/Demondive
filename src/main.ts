@@ -5,6 +5,7 @@ import { ARCANE_PROFILES, selectArcaneProfile, type ArcaneProfileId } from './ga
 import { arcaneHarmonyLabel, boonNoteLabel } from './game/arcane-audio';
 import { ArcaneAudioDirector } from './game/arcane-audio-director';
 import { chooseSmartBoonOffers } from './game/boon-offers';
+import { BOON_PROJECTILE_SHAPES, incomingDamageMultiplier, pickupMagnetRadius, selectAttachedBoons, selectDominantBoon } from './game/boon-runtime';
 import { CombatSfxLimiter, type CombatSfxEvent } from './game/combat-audio';
 import { BOONS, BOON_ORDER, ENEMY_BODIES, FLOOR_Y, HEIGHT, HUB_ROOM, LEVEL_EIGHT_ENCOUNTERS, LEVEL_FIVE_ENCOUNTERS, LEVEL_FOUR_ENCOUNTERS, LEVEL_NINE_ENCOUNTERS, LEVEL_ONE_ENCOUNTERS, LEVEL_SEVEN_ENCOUNTERS, LEVEL_SIX_ENCOUNTERS, LEVEL_THREE_ENCOUNTERS, LEVEL_TWO_ENCOUNTERS, ROOMS, UPGRADE_INFO, WIDTH, upgradeCost } from './game/content';
 import { campaignContent } from './game/content-registry';
@@ -14,7 +15,7 @@ import { DIALOGUE_BEATS, TUTORIAL_STEPS, applyDialogueBeatMutation, type Dialogu
 import { canAccessCampaignLevel, PC_MASTER_ACCESS } from './game/entitlements';
 import { KeyboardBindingRepository, bindingConflicts, profileBindings, rebindAction, type KeyboardBindingState, type KeyboardProfileId } from './game/input-bindings';
 import { buildRoomFrame, generateRunPlan, roomCountBounds } from './game/generator';
-import { calyptraCriticalMultiplier, calyptraPowerMultiplier, jackpotChanceFor, mixedArcaneColor, roomGradeFor, rushChargeForRank, scoreMultiplierForRank, styleRankFor } from './game/feel';
+import { calyptraCriticalMultiplier, calyptraPowerMultiplier, jackpotChanceFor, roomGradeFor, rushChargeForRank, scoreMultiplierForRank, styleRankFor } from './game/feel';
 import { MusicDirector } from './game/music-director';
 import type { MusicState } from './game/music';
 import { MILO_ATLASES, type MiloAtlasDefinition } from './game/milo-animation';
@@ -2290,6 +2291,8 @@ class DemonGame {
 
   private firePlayerProjectile(): void {
     const arcane = ARCANE_PROFILES[this.arcaneProfileId];
+    const primaryBoon=this.getDominantBoon();
+    const attachedBoons=selectAttachedBoons(this.boonStacks,BOON_ORDER,primaryBoon);
     const steamPressure = this.hasBoonPair('pyrra','maris');
     const stormfront = this.hasBoonPair('voltara','zephyra');
     const crystalGarden = this.hasBoonPair('flora','crya');
@@ -2342,7 +2345,7 @@ class DemonGame {
         bounces: Math.min(12,this.boonStacks.isolde+(mirrorDream?1:0)), homing: Math.min(2.4,this.boonStacks.nerissa * .38), explosive: steamPressure&&this.boonStacks.pyrra+this.boonStacks.maris>=4,
         age: 0, baseRadius: size,
         wave: this.boonStacks.maris, boomerang: this.boonStacks.seraphine > 0, returning: false,
-        accentColor,
+        accentColor,primaryBoon:primaryBoon??undefined,attachedBoons,
       });
     }
     if (this.lunaTurretTimer > 0) this.fireLunaTurretShot(aimX, aimY, color, accentColor);
@@ -2355,13 +2358,17 @@ class DemonGame {
   }
 
   private getArcaneColor(): string {
-    return mixedArcaneColor(this.boonStacks);
+    const dominant=this.getDominantBoon();
+    return dominant?BOONS[dominant].color:'#6e3df5';
   }
 
   private getArcaneAccentColor(): string {
-    const active = BOON_ORDER.filter(id => this.boonStacks[id] > 0);
-    if (!active.length) return '#f3eaff';
-    return BOONS[active[(this.entityId + Math.floor(this.time * 5)) % active.length]].color;
+    const dominant=this.getDominantBoon();
+    return dominant?BOONS[dominant].accentColor:'#f3eaff';
+  }
+
+  private getDominantBoon():BoonId|null {
+    return selectDominantBoon(this.boonStacks,BOON_ORDER,this.selectedStartingBoon,this.lastRewardBoon);
   }
 
   private hasBoonPair(first: BoonId, second: BoonId): boolean { return this.boonStacks[first]>0&&this.boonStacks[second]>0; }
@@ -3746,7 +3753,8 @@ class DemonGame {
       this.burst(centerX(this.player), centerY(this.player), '#ffe36b', 22, 360);
       this.showToast(`HALO BLOCK · ${this.player.shieldCharges} LEFT`); this.playSound('boon'); return;
     }
-    amount *= Math.max(.55, 1 - this.boonStacks.crya * .08);
+    const controlledEnemyPresent=this.enemies.some((enemy)=>!enemy.dead&&(enemy.slowTime>0||enemy.rootTime>0||enemy.charmTime>0||enemy.hitStun>.08));
+    amount *= incomingDamageMultiplier(this.boonStacks.gaia,this.boonStacks.crya,controlledEnemyPresent);
     if (this.activeWager?.type === 'perfect') this.failActiveWager('DAMAGE TAKEN');
     this.roomDamageTaken += amount; this.styleMeter = Math.max(0, this.styleMeter - 13); this.updateStyleRank();
     this.runMetrics.damageTaken += amount;
@@ -3775,9 +3783,9 @@ class DemonGame {
     for (const pickup of this.pickups) {
       pickup.life -= dt;
       const pullX = centerX(this.player) - centerX(pickup); const pullY = centerY(this.player) - centerY(pickup); const pullDistance = Math.hypot(pullX, pullY);
-      const magnetRadius = 70 + this.save.upgrades.magnet * 45;
+      const magnetRadius = pickupMagnetRadius(this.save.upgrades.magnet,this.boonStacks.nerissa);
       if (pullDistance > 0 && pullDistance < magnetRadius) {
-        const force = (220 + this.save.upgrades.magnet * 65) * (1 - pullDistance / magnetRadius + .25);
+        const force = (220 + this.save.upgrades.magnet * 65 + this.boonStacks.nerissa*24) * (1 - pullDistance / magnetRadius + .25);
         pickup.vx += pullX / pullDistance * force * dt; pickup.vy += pullY / pullDistance * force * dt;
       }
       pickup.vy += GRAVITY * .65 * dt;
@@ -4568,8 +4576,9 @@ class DemonGame {
       + (activeBoons.length > visiblePips.length ? `<i class="boon-pip boon-more">+${activeBoons.length - visiblePips.length}</i>` : '');
     const arcane = this.getArcaneColor();
     const arcaneAccent = this.getArcaneAccentColor();
+    const dominant=this.getDominantBoon();
     this.modifierPanel.innerHTML = `
-      <div class="modifier-chip flame-chip" style="--boon:${arcane};--flame:${arcane};--flame2:${arcaneAccent}"><span class="glyph">◆</span><b>PRISM ARCANA</b><span>${arcaneHarmonyLabel(this.boonStacks)} · ${arcane.toUpperCase()}</span></div>`;
+      <div class="modifier-chip flame-chip" style="--boon:${arcane};--flame:${arcane};--flame2:${arcaneAccent}"><span class="glyph">${dominant?BOONS[dominant].glyph:'◆'}</span><b>${dominant?`${BOONS[dominant].name.toUpperCase()}-LED ARCANA`:'NEUTRAL ARCANA'}</b><span>${arcaneHarmonyLabel(this.boonStacks)} · ${dominant?`dominant ×${this.boonStacks[dominant]}`:'unbound'}</span></div>`;
     this.updateRoomMap();
   }
 
@@ -6454,23 +6463,9 @@ class DemonGame {
     } else if (projectile.owner === 'player') {
       const angle = Math.atan2(projectile.vy, projectile.vx);
       const radius = projectile.radius;
-      const flicker = Math.sin(this.time * 31 + projectile.id) * radius * .18;
       this.ctx.translate(centerX(projectile), centerY(projectile));
       this.ctx.rotate(angle);
-      this.ctx.fillStyle = projectile.color;
-      this.ctx.beginPath();
-      this.ctx.moveTo(radius * 1.55, 0);
-      this.ctx.quadraticCurveTo(radius * .6, -radius * 1.15, -radius * .7, -radius * .72);
-      this.ctx.quadraticCurveTo(-radius * 1.35, -radius * .45, -radius * 2.25 - flicker, 0);
-      this.ctx.quadraticCurveTo(-radius * 1.2, radius * .35, -radius * .65, radius * .78);
-      this.ctx.quadraticCurveTo(radius * .55, radius * 1.12, radius * 1.55, 0);
-      this.ctx.fill();
-      this.ctx.fillStyle = projectile.accentColor ?? this.arcaneCore(projectile.color);
-      this.ctx.beginPath();
-      this.ctx.ellipse(radius * .25, 0, radius * .78, radius * .5, 0, 0, Math.PI * 2);
-      this.ctx.fill();
-      this.ctx.fillStyle = '#ffffffcc';
-      this.ctx.beginPath(); this.ctx.ellipse(radius * .52, 0, radius * .28, radius * .18, 0, 0, Math.PI * 2); this.ctx.fill();
+      this.drawDominantProjectileShape(projectile,radius);
     } else if (projectile.songNote) {
       const pulse=1+Math.sin(this.time*12+projectile.id)*.12;
       this.ctx.translate(centerX(projectile),centerY(projectile));this.ctx.scale(pulse,pulse);
@@ -6481,6 +6476,36 @@ class DemonGame {
       this.ctx.beginPath(); this.ctx.arc(centerX(projectile), centerY(projectile), projectile.radius, 0, Math.PI * 2); this.ctx.fill();
     }
     this.ctx.restore();
+  }
+
+  private drawDominantProjectileShape(projectile:Projectile,radius:number):void {
+    const shape=projectile.primaryBoon?BOON_PROJECTILE_SHAPES[projectile.primaryBoon]:'flame';
+    const accent=projectile.accentColor??this.arcaneCore(projectile.color);
+    const flicker=Math.sin(this.time*31+projectile.id)*radius*.16;
+    const path=(points:Array<[number,number]>)=>{this.ctx.beginPath();points.forEach(([x,y],index)=>index?this.ctx.lineTo(x*radius,y*radius):this.ctx.moveTo(x*radius,y*radius));this.ctx.closePath();};
+    this.ctx.fillStyle=projectile.color;this.ctx.strokeStyle=accent;this.ctx.lineWidth=Math.max(1.5,radius*.16);
+    if(shape==='orb'){this.ctx.beginPath();this.ctx.arc(0,0,radius,0,Math.PI*2);this.ctx.fill();this.ctx.beginPath();this.ctx.arc(0,0,radius*.64,0,Math.PI*2);this.ctx.stroke();}
+    else if(shape==='boulder'){path([[1.1,0],[.62,.88],[-.4,1],[-1.08,.3],[-.82,-.72],[.2,-1]]);this.ctx.fill();this.ctx.stroke();this.ctx.beginPath();this.ctx.moveTo(-.45*radius,-.7*radius);this.ctx.lineTo(.05*radius,0);this.ctx.lineTo(-.35*radius,.72*radius);this.ctx.stroke();}
+    else if(shape==='needle'){path([[1.85,0],[-.55,.38],[-1.25,0],[-.55,-.38]]);this.ctx.fill();this.ctx.stroke();}
+    else if(shape==='seed'){this.ctx.save();this.ctx.rotate(this.time*5+projectile.id);this.ctx.beginPath();this.ctx.ellipse(0,0,radius*.72,radius,0,0,Math.PI*2);this.ctx.fill();for(let i=0;i<4;i+=1){this.ctx.rotate(Math.PI/2);this.ctx.beginPath();this.ctx.moveTo(0,-radius*.7);this.ctx.lineTo(radius*.42,-radius*1.25);this.ctx.stroke();}this.ctx.restore();}
+    else if(shape==='spark'){this.ctx.lineWidth=Math.max(3,radius*.42);this.ctx.beginPath();this.ctx.moveTo(-radius*1.3,radius*.55);this.ctx.lineTo(-radius*.35,-radius*.22);this.ctx.lineTo(0,radius*.18);this.ctx.lineTo(radius*.65,-radius*.62);this.ctx.lineTo(radius*1.45,-radius*.1);this.ctx.stroke();}
+    else if(shape==='shard'||shape==='crystal'){path(shape==='shard'?[[1.5,0],[0,.72],[-1.05,0],[0,-.72]]:[[1.25,0],[.2,1],[-.85,.35],[-.55,-.72],[.45,-1]]);this.ctx.fill();this.ctx.stroke();}
+    else if(shape==='crescent'){this.ctx.beginPath();this.ctx.arc(0,0,radius,Math.PI*.35,Math.PI*1.65);this.ctx.quadraticCurveTo(radius*.2,0,radius*Math.cos(Math.PI*.35),radius*Math.sin(Math.PI*.35));this.ctx.fill();this.ctx.stroke();}
+    else if(shape==='lance'){path([[1.9,0],[.7,.34],[-1.45,.2],[-1.45,-.2],[.7,-.34]]);this.ctx.fill();this.ctx.stroke();}
+    else if(shape==='maw'){this.ctx.beginPath();this.ctx.moveTo(radius*1.25,0);this.ctx.quadraticCurveTo(0,-radius*1.15,-radius*1.15,-radius*.35);this.ctx.lineTo(-radius*.42,0);this.ctx.lineTo(-radius*1.15,radius*.35);this.ctx.quadraticCurveTo(0,radius*1.15,radius*1.25,0);this.ctx.fill();this.ctx.stroke();}
+    else if(shape==='note'){this.ctx.beginPath();this.ctx.arc(-radius*.15,radius*.28,radius*.55,0,Math.PI*2);this.ctx.fill();this.ctx.fillRect(radius*.25,-radius*1.15,radius*.24,radius*1.45);this.ctx.beginPath();this.ctx.moveTo(radius*.38,-radius*1.05);this.ctx.quadraticCurveTo(radius*1.15,-radius*.75,radius*.85,-radius*.2);this.ctx.stroke();}
+    else if(shape==='fang'){path([[1.55,0],[-.95,.85],[-.35,0],[-.95,-.85]]);this.ctx.fill();this.ctx.stroke();}
+    else if(shape==='die'){this.ctx.save();this.ctx.rotate(Math.PI/4);this.ctx.fillRect(-radius*.72,-radius*.72,radius*1.44,radius*1.44);this.ctx.strokeRect(-radius*.72,-radius*.72,radius*1.44,radius*1.44);this.ctx.fillStyle=accent;for(const [x,y] of [[-.3,-.3],[.3,.3],[0,0]]){this.ctx.beginPath();this.ctx.arc(x*radius,y*radius,radius*.12,0,Math.PI*2);this.ctx.fill();}this.ctx.restore();}
+    else if(shape==='loop'){this.ctx.lineWidth=Math.max(2,radius*.25);for(const y of [-.35,.35]){this.ctx.beginPath();this.ctx.ellipse(0,y*radius,radius*.95,radius*.52,0,0,Math.PI*2);this.ctx.stroke();}}
+    else if(shape==='mirror'){path([[1.18,0],[0,1.05],[-1.18,0],[0,-1.05]]);this.ctx.fill();this.ctx.stroke();this.ctx.fillStyle=accent;path([[.52,0],[0,.47],[-.52,0],[0,-.47]]);this.ctx.fill();}
+    else if(shape==='coin'){this.ctx.beginPath();this.ctx.arc(0,0,radius,0,Math.PI*2);this.ctx.fill();this.ctx.stroke();this.ctx.beginPath();this.ctx.arc(0,0,radius*.55,0,Math.PI*2);this.ctx.stroke();}
+    else if(shape==='spiral'){this.ctx.lineWidth=Math.max(2.5,radius*.28);this.ctx.beginPath();for(let i=0;i<=22;i+=1){const t=i/22*Math.PI*2.2;const r=radius*(.14+i/25);const x=Math.cos(t)*r,y=Math.sin(t)*r;i?this.ctx.lineTo(x,y):this.ctx.moveTo(x,y);}this.ctx.stroke();}
+    else if(shape==='drop'){this.ctx.beginPath();this.ctx.moveTo(radius*1.15,0);this.ctx.bezierCurveTo(radius*.3,-radius*1.2,-radius*.92,-radius*.82,-radius*.92,0);this.ctx.bezierCurveTo(-radius*.92,radius*.82,radius*.3,radius*1.2,radius*1.15,0);this.ctx.fill();this.ctx.stroke();}
+    else if(shape==='halo'){this.ctx.lineWidth=Math.max(2,radius*.3);this.ctx.beginPath();this.ctx.ellipse(0,0,radius*1.15,radius*.68,0,0,Math.PI*2);this.ctx.stroke();this.ctx.fillStyle=accent;this.ctx.beginPath();this.ctx.arc(radius*.35,0,radius*.3,0,Math.PI*2);this.ctx.fill();}
+    else {this.ctx.beginPath();this.ctx.moveTo(radius*1.55,0);this.ctx.quadraticCurveTo(radius*.6,-radius*1.15,-radius*.7,-radius*.72);this.ctx.quadraticCurveTo(-radius*1.35,-radius*.45,-radius*2.25-flicker,0);this.ctx.quadraticCurveTo(-radius*1.2,radius*.35,-radius*.65,radius*.78);this.ctx.quadraticCurveTo(radius*.55,radius*1.12,radius*1.55,0);this.ctx.fill();}
+    for(const [index,id] of (projectile.attachedBoons??[]).slice(0,2).entries()){
+      const side=index===0?-1:1;this.ctx.fillStyle=BOONS[id].color;this.ctx.beginPath();this.ctx.arc(-radius*.25,side*radius*1.05,radius*.2,0,Math.PI*2);this.ctx.fill();
+    }
   }
 
   private drawGroundWave(wave: GroundWave): void {

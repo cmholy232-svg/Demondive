@@ -287,6 +287,8 @@ export interface Projectile extends Rect {
   destructible?: boolean;
   songNote?: boolean;
   mirrorReflected?: boolean;
+  primaryBoon?: BoonId;
+  attachedBoons?: BoonId[];
 }
 
 export type PickupType = 'pizza' | 'coffee' | 'shard';

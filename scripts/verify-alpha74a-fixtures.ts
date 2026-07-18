@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { GAME_ACTIONS, DevicePromptService, GamepadActionResolver } from '../src/game/actions';
 import { ARCANE_PROFILES, selectArcaneProfile } from '../src/game/arcane-tuning';
+import { BOON_PROJECTILE_SHAPES, incomingDamageMultiplier, pickupMagnetRadius, selectAttachedBoons, selectDominantBoon } from '../src/game/boon-runtime';
 import { BOONS, BOON_ORDER, FLOOR_Y, WIDTH } from '../src/game/content';
 import { canAccessBoon, canAccessCampaignLevel, ENTITLEMENT_TEST_CONTEXTS } from '../src/game/entitlements';
 import { generateRunPlan, roomIsEmpty } from '../src/game/generator';
@@ -79,6 +80,17 @@ const controlArcaneRange=ARCANE_PROFILES['a0-control'].projectileSpeed*ARCANE_PR
 const candidateArcaneRange=ARCANE_PROFILES['a1-responsive'].projectileSpeed*ARCANE_PROFILES['a1-responsive'].projectileLifeSeconds;
 assert.ok(Math.abs(candidateArcaneRange-controlArcaneRange)<.0001,'neutral Arcane A/B effective range must remain protected');
 
+const identityStacks=Object.fromEntries(BOON_ORDER.map((id)=>[id,0])) as Record<(typeof BOON_ORDER)[number],number>;
+identityStacks.pyrra=3;identityStacks.maris=3;identityStacks.gaia=2;identityStacks.nerissa=1;
+assert.equal(selectDominantBoon(identityStacks,BOON_ORDER,'pyrra','maris'),'pyrra','starting boon must win a highest-stack tie');
+identityStacks.maris=4;
+assert.equal(selectDominantBoon(identityStacks,BOON_ORDER,'pyrra','maris'),'maris','a strictly higher stack must become dominant');
+assert.deepEqual(selectAttachedBoons(identityStacks,BOON_ORDER,'maris'),['pyrra','gaia'],'attached effects must be stable, bounded, and stack ordered');
+assert.equal(new Set(Object.values(BOON_PROJECTILE_SHAPES)).size,BOON_ORDER.length,'all twenty dominant projectile silhouettes must be distinct');
+assert.equal(pickupMagnetRadius(2,3),325,'Nerissa pickup pull must stack with the permanent magnet upgrade');
+assert.equal(incomingDamageMultiplier(2,4,false),.84,'Crya defense must not apply without a controlled enemy');
+assert.ok(Math.abs(incomingDamageMultiplier(2,4,true)-.5712)<.000001,'Gaia armor and conditional Crya defense must combine predictably');
+
 assert.deepEqual(sameSeedRetryRequest(0xfeedbeef),{ depth:1,seed:0xfeedbeef });
 assert.deepEqual(newRunRequest(),{ depth:1 });
 
@@ -128,4 +140,4 @@ assert.equal(telemetrySnapshot.actionTotals.ignoredByReason.cooldown,1);
 assert.equal(telemetrySnapshot.frames.clamped,1);
 assert.equal(telemetrySnapshot.peakEntities.projectiles,280);
 
-console.log(`ALPHA 7.4A/7.4B FIXTURES PASSED · save migration/corruption/reset · retry depth 1 · disconnected-room rejection · ${generatedRooms} generated rooms · entitlement contexts · remap conflicts · controller hysteresis · protected movement/Arcane A/B · prompts · telemetry`);
+console.log(`ALPHA 7.4A–7.4C FIXTURES PASSED · save migration/corruption/reset · retry depth 1 · disconnected-room rejection · ${generatedRooms} generated rooms · entitlement contexts · remap conflicts · controller hysteresis · protected movement/Arcane A/B · dominant boon identity · passive contracts · prompts · telemetry`);

@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "roadmapPosition": "Alpha 7.4C1 — Twenty boon mechanical contracts",
+  "authorityRule": "src/game/content.ts is the intended player-facing contract; runtime code and tests must be reconciled to it before 7.4C exits.",
+  "recognitionRule": "A single or dominant boon should be identifiable within five seconds by stable silhouette, motion, impact/status and Special identity. Mixed builds show one dominant body plus at most two bounded attachments.",
+  "runtimeIdentity": {
+    "dominantSelection": "highest stack; ties prefer starting boon, then most recently increased boon, then roster order",
+    "secondaryLimit": 2,
+    "highStackRule": "consolidate presentation without deleting simulation damage, targets or proc results"
+  },
+  "contracts": [
+    {"id":"pyrra","status":"aligned","runtime":"damage passive; burn and bloom; Flame Nova"},
+    {"id":"maris","status":"partial","runtime":"max Health, size, wave motion and pierce","open":"explicit hit knockback scaling"},
+    {"id":"gaia","status":"aligned-after-7.4c-fix","runtime":"always-on armor; heavy bolt; Stone Barrier"},
+    {"id":"zephyra","status":"partial","runtime":"fire rate, speed and threshold multishot","open":"smaller needle and advertised pierce"},
+    {"id":"flora","status":"partial","runtime":"critical chance, per-hit area burst and Thorn Bind","open":"true accumulating thorn-mark burst"},
+    {"id":"voltara","status":"aligned","runtime":"energy on hit, chain lightning/stun and Arc Chain"},
+    {"id":"crya","status":"partial-after-7.4c-fix","runtime":"conditional defense, slow and Whiteout","open":"freeze buildup/shatter; remove unrelated projectile growth"},
+    {"id":"luna","status":"mismatch","runtime":"Special discount and opposite-fire Moon Echo","open":"third-hit dream mark and damage echo"},
+    {"id":"solara","status":"partial","runtime":"major-target damage, pierce and Radiant Lance","open":"lance speed/range silhouette behavior"},
+    {"id":"belladonna","status":"mismatch","runtime":"Devour Special","open":"pickup momentum passive and resource-fed Arcane conversion"},
+    {"id":"nerissa","status":"partial-after-7.4c-fix","runtime":"pickup magnet, homing and Siren Call","open":"Arcane charm buildup/death-note threshold"},
+    {"id":"roxyne","status":"aligned","runtime":"isolated-target damage and Predator Pounce"},
+    {"id":"calyptra","status":"aligned","runtime":"visible random shot power, favorable scaling and Loaded Dice"},
+    {"id":"isolde","status":"aligned","runtime":"range, ricochet and Crystal Firing Clone"},
+    {"id":"somnia","status":"mismatch","runtime":"Velvet Feint false-bolt fan","open":"hurt recovery and delayed Arcane echo"},
+    {"id":"vespera","status":"mismatch","runtime":"Mirror Shield reflection","open":"forgiving perfect-dodge window and impact shards"},
+    {"id":"aurelia","status":"mismatch","runtime":"Gilded Veil and pair-gated bonus drop","open":"currency gain and capped wealth-fed power"},
+    {"id":"noctissa","status":"mismatch","runtime":"dash charges/movement, shade damage-over-time and Damage Blink","open":"advertised full-health ambush damage and stable shadow trail"},
+    {"id":"lilith","status":"partial","runtime":"major-target lifesteal and Blood Pact","open":"low-health damage passive"},
+    {"id":"seraphine","status":"mismatch","runtime":"one-time shield, returning bolt and Halo Field","open":"regenerating shield and orbiting firing fragments"}
+  ],
+  "checkpointStatus": "in-progress",
+  "exitBlockers": [
+    "Resolve every partial/mismatch row in code, copy, or an explicitly approved contract change.",
+    "Add single/three/ten/extreme-stack fixtures and human five-second recognition evidence.",
+    "Remove destructive live-projectile trimming before extreme Deep Dive approval."
+  ]
+}
