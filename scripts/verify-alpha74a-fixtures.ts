@@ -2,9 +2,10 @@ import assert from 'node:assert/strict';
 import { GAME_ACTIONS, DevicePromptService, GamepadActionResolver } from '../src/game/actions';
 import { ARCANE_PROFILES, selectArcaneProfile } from '../src/game/arcane-tuning';
 import { BOON_PROJECTILE_SHAPES, buildupThreshold, incomingDamageMultiplier, pickupMagnetRadius, selectAttachedBoons, selectDominantBoon, seraphineMaximumShieldCharges, somniaEchoCount } from '../src/game/boon-runtime';
+import { chooseSmartBoonOffers } from '../src/game/boon-offers';
 import { BOONS, BOON_ORDER, FLOOR_Y, WIDTH } from '../src/game/content';
 import { canAccessBoon, canAccessCampaignLevel, ENTITLEMENT_TEST_CONTEXTS } from '../src/game/entitlements';
-import { generateRunPlan, roomIsEmpty } from '../src/game/generator';
+import { generateRunPlan, roomCountBounds, roomIsEmpty } from '../src/game/generator';
 import { buildHudPriorityView } from '../src/game/hud-view';
 import { KeyboardBindingRepository, bindingConflicts, profileBindings, rebindAction } from '../src/game/input-bindings';
 import { planProjectilePresentation, PROJECTILE_DETAIL_BUDGET, shouldEmitProjectileTrail } from '../src/game/performance-policy';
@@ -14,6 +15,9 @@ import { newRunRequest, sameSeedRetryRequest } from '../src/game/run-retry';
 import { cloneDefaultSave } from '../src/game/save';
 import { BrowserSaveRepository, CURRENT_SAVE_KEY, LEGACY_SAVE_KEYS, type SaveStorage } from '../src/game/save-repository';
 import { RuntimeTelemetry } from '../src/game/telemetry';
+import { SeededRandom } from '../src/game/rng';
+import { campaignThreat, deepDiveThreat } from '../src/game/difficulty';
+import { deepDiveBiome, deepDiveCrossPollination, deepDiveCycle, deepDiveEncounter, deepDiveHasBoonReward, deepDiveHasRouteChoice, deepDiveHasWager, deepDiveIsDoubleBoss, deepDiveMinimumEnemies, deepDivePowers, deepDiveRewardStacks, deepDiveRoute, deepDiveSlot } from '../src/game/deep-dive';
 import type { Projectile, RoomDefinition } from '../src/game/types';
 
 class MemoryStorage implements SaveStorage {
@@ -113,6 +117,51 @@ assert.ok(stressProjectiles.filter(projectile=>projectile.owner==='enemy').every
 const emittedTrails=stressProjectiles.filter(projectile=>shouldEmitProjectileTrail(projectile.id,stressProjectiles.length,true)).length;
 assert.ok(emittedTrails>0&&emittedTrails<=50,'reduced-VFX projectile trail budget failed');
 
+for(let stage=1;stage<=9;stage+=1){
+  const [minimum,maximum]=roomCountBounds(stage);assert.equal(minimum,7+(stage-1)*2);assert.equal(maximum,minimum+1);
+  const start=campaignThreat(stage,0,minimum,'combat');const finish=campaignThreat(stage,minimum-1,minimum,'combat');const challenge=campaignThreat(stage,Math.floor(minimum/2),minimum,'elite');
+  assert.ok(finish.health>start.health&&finish.damage>start.damage&&finish.cadence>start.cadence,`Level ${stage} lacks within-level threat progression`);
+  assert.ok(challenge.health>campaignThreat(stage,Math.floor(minimum/2),minimum,'combat').health,`Level ${stage} elite room lacks challenge pressure`);
+  if(stage>1)assert.ok(start.health>campaignThreat(stage-1,0,roomCountBounds(stage-1)[0],'combat').health,`Level ${stage} does not escalate campaign health pressure`);
+}
+
+const routeSides=new Set<string>();let previousMinimum=0;let previousThreat=deepDiveThreat(1,'combat');
+for(let roomIndex=1;roomIndex<=300;roomIndex+=1){
+  const slot=deepDiveSlot(roomIndex),cycle=deepDiveCycle(roomIndex),encounter=deepDiveEncounter(roomIndex),route=deepDiveRoute(0xD33FD17E,roomIndex);
+  routeSides.add(route.exitSide);
+  assert.equal(encounter,slot===6?'miniboss':slot===10?'boss':'combat',`Deep Dive encounter cadence broke at ${roomIndex}`);
+  assert.equal(deepDiveBiome(0xD33FD17E,roomIndex),deepDiveBiome(0xD33FD17E,(cycle-1)*10+1),`Deep Dive biome changed inside cycle ${cycle}`);
+  const minimum=deepDiveMinimumEnemies(roomIndex);assert.ok(minimum>=previousMinimum,`Deep Dive minimum enemy count regressed at ${roomIndex}`);previousMinimum=minimum;
+  assert.equal(deepDiveIsDoubleBoss(roomIndex),encounter==='boss'&&cycle>=3,`Deep Dive double-boss gate broke at ${roomIndex}`);
+  assert.equal(deepDivePowers(0xD33FD17E,roomIndex).length,encounter==='combat'?0:Math.min(5,cycle),`Deep Dive power stacking broke at ${roomIndex}`);
+  assert.equal(deepDiveCrossPollination(roomIndex),Math.min(3,Math.max(0,cycle-1)));
+  assert.ok(deepDiveRewardStacks(roomIndex)>=1&&deepDiveRewardStacks(roomIndex)<=3);
+  if(encounter!=='combat')assert.equal(deepDiveHasBoonReward(roomIndex),true);
+  if(deepDiveHasWager(roomIndex)||deepDiveHasRouteChoice(roomIndex))assert.equal(encounter,'combat');
+  const baselineThreat=deepDiveThreat(roomIndex,'combat');assert.ok(baselineThreat.health>=previousThreat.health&&baselineThreat.damage>=previousThreat.damage,`Deep Dive baseline threat regressed at ${roomIndex}`);previousThreat=baselineThreat;
+  const encounterThreat=deepDiveThreat(roomIndex,encounter);assert.ok(encounterThreat.health>=baselineThreat.health&&encounterThreat.damage>=baselineThreat.damage,`Deep Dive encounter modifier reduced threat at ${roomIndex}`);
+}
+assert.deepEqual([...routeSides].sort(),['bottom','left','right','top'],'Deep Dive route failed to use all four directions');
+for(let cycle=2;cycle<=9;cycle+=1)assert.notEqual(deepDiveBiome(0xD33FD17E,(cycle-2)*10+1),deepDiveBiome(0xD33FD17E,(cycle-1)*10+1),'adjacent Deep Dive cycles must change biome');
+
+const starterOfferHistogram:number[]=[];let starterOfferTotal=0;let uninvestedOfferTotal=0;
+for(let run=0;run<600;run+=1){
+  const stacks=Object.fromEntries(BOON_ORDER.map(id=>[id,0])) as Record<(typeof BOON_ORDER)[number],number>;stacks.pyrra=1;
+  let lastReward:'pyrra'|'maris'|'gaia'|'zephyra'='pyrra';let drought=Object.fromEntries(BOON_ORDER.map(id=>[id,0])) as Record<(typeof BOON_ORDER)[number],number>;let starterOffers=0;
+  const rng=new SeededRandom(`curated-run-${run}`);const pool=['pyrra','maris','gaia','zephyra'] as const;
+  for(let reward=0;reward<10;reward+=1){
+    const offer=chooseSmartBoonOffers({pool,stacks,startingBoon:'pyrra',lastRewardBoon:lastReward,drought,rng,count:2,reroll:reward===5});drought=offer.drought;
+    if(offer.choices.includes('pyrra'))starterOffers+=1;
+    uninvestedOfferTotal+=offer.choices.filter(id=>stacks[id]===0).length;
+    const selected=offer.choices.includes('pyrra')&&rng.chance(.38)?'pyrra':offer.choices[0];stacks[selected]+=1;lastReward=selected;
+  }
+  starterOfferHistogram.push(starterOffers);starterOfferTotal+=starterOffers;
+}
+const meanStarterOffers=starterOfferTotal/starterOfferHistogram.length;
+assert.ok(meanStarterOffers>=3&&meanStarterOffers<=6.5,`starter affinity mean ${meanStarterOffers.toFixed(2)} escaped the curated middle`);
+assert.ok(starterOfferHistogram.some(count=>count<=3)&&starterOfferHistogram.some(count=>count>=8),'smart curation lost either low-stack variety or rare tall-stack possibility');
+assert.ok(uninvestedOfferTotal>starterOfferTotal,'new-boon discovery must remain stronger than starter repetition across the cohort');
+
 assert.deepEqual(sameSeedRetryRequest(0xfeedbeef),{ depth:1,seed:0xfeedbeef });
 assert.deepEqual(newRunRequest(),{ depth:1 });
 
@@ -127,6 +176,8 @@ let generatedRooms = 0;
 for (let depth = 1; depth <= 9; depth += 1) {
   for (let sample = 0; sample < 96; sample += 1) {
     const plan = generateRunPlan(depth,depth * 100000 + sample * 7919);
+    assert.equal(plan.rooms[Math.floor(plan.rooms.length/2)].type,'miniboss',`depth ${depth} seed ${plan.seed} lost its midpoint mini-boss`);
+    assert.equal(plan.rooms.at(-1)?.type,'boss',`depth ${depth} seed ${plan.seed} lost its final boss`);
     for (const room of plan.rooms) {
       assert.equal(validateRoomTraversal(room).valid,true,`depth ${depth} seed ${plan.seed} generated a disconnected room`);
       assert.ok(room.quality,`depth ${depth} seed ${plan.seed} lacks room-quality metadata`);
@@ -169,4 +220,4 @@ assert.equal(telemetrySnapshot.frames.clamped,1);
 assert.equal(telemetrySnapshot.peakEntities.projectiles,280);
 assert.ok(telemetrySnapshot.events.some(event=>event.kind==='presentation-consolidation'&&event.logicalCount===580));
 
-console.log(`ALPHA 7.4A–7.4D FIXTURES PASSED · save migration/corruption/reset · retry depth 1 · disconnected-room rejection · ${generatedRooms} generated rooms · entitlement contexts · remap conflicts · controller hysteresis · protected movement/Arcane A/B · dominant boon identity · passive contracts · simulation-safe projectile presentation · prompts · telemetry`);
+console.log(`ALPHA 7.4A–7.4D FIXTURES PASSED · save migration/corruption/reset · retry depth 1 · disconnected-room rejection · ${generatedRooms} generated rooms · midpoint/final encounters · 300-room Deep Dive schedule · 600 curated boon runs (${meanStarterOffers.toFixed(2)} starter offers/10 mean) · entitlement contexts · remap conflicts · controller hysteresis · protected movement/Arcane A/B · dominant boon identity · passive contracts · simulation-safe projectile presentation · prompts · telemetry`);

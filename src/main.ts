@@ -17,6 +17,7 @@ import { KeyboardBindingRepository, bindingConflicts, profileBindings, rebindAct
 import { buildRoomFrame, generateRunPlan, roomCountBounds } from './game/generator';
 import { buildHudPriorityView } from './game/hud-view';
 import { planProjectilePresentation, PROJECTILE_DETAIL_BUDGET, shouldEmitProjectileTrail } from './game/performance-policy';
+import { buildRoomQualityMetadata } from './game/room-metadata';
 import { calyptraCriticalMultiplier, calyptraPowerMultiplier, jackpotChanceFor, roomGradeFor, rushChargeForRank, scoreMultiplierForRank, styleRankFor } from './game/feel';
 import { MusicDirector } from './game/music-director';
 import type { MusicState } from './game/music';
@@ -4465,6 +4466,7 @@ class DemonGame {
     if(forcedRecovery){room.name='The Quiet Booth';room.objective='Take the earned reprieve';room.spawns=[];room.hazards=[];room.danger=1;}
     room.rewardKind=forcedRecovery?'none':deepDiveHasBoonReward(index)||roomType==='elite'?'major-boon':'none';
     if(deepDiveHasWager(index)&&!forcedRecovery)room.wagerType=roomRng.pick<WagerType>(['blood','perfect','rush','chaos']);
+    room.quality=buildRoomQualityMetadata(room.type,depth,index+cycle*2+(variant===1?4:0),room.entrySide??'left',room.exitSide??'right',room);
     return room;
   }
 

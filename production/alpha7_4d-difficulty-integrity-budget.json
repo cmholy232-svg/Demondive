@@ -1,0 +1,51 @@
+{
+  "schemaVersion": 1,
+  "roadmapPosition": "Alpha 7.4D — deterministic campaign/Deep Dive integrity",
+  "difficultyPhilosophy": {
+    "campaign": "fresh-save opening remains forgiving; level and room progress increase threat without reading permanent-upgrade state",
+    "challengeRooms": "elite composition and explicit modifiers increase health, damage and cadence without adding unreadable decoration",
+    "deepDive": "starts above tutorial pressure and escalates toward monster-mode difficulty while preserving obscene builds"
+  },
+  "campaignStructure": {
+    "level1Rooms": "7–8",
+    "growthPerLevel": 2,
+    "level9Rooms": "23–24",
+    "miniBoss": "exact midpoint",
+    "boss": "final room",
+    "consecutiveEmptyRooms": "forbidden"
+  },
+  "threatReference": {
+    "level1Start": {"health":1.08,"damage":1.03,"cadence":1.0},
+    "level9Start": {"health":2.52,"damage":1.83,"cadence":1.44},
+    "level9BossEndApprox": {"health":2.817,"damage":1.978,"cadence":1.555},
+    "deepDiveRoom10BossApprox": {"health":2.059,"damage":1.456,"cadence":1.155},
+    "deepDiveRoom30BossApprox": {"health":3.771,"damage":2.18,"cadence":1.315},
+    "deepDiveRoom100BossApprox": {"health":11.905,"damage":5.0,"cadence":1.875},
+    "deepDiveCaps": {"health":12,"damage":5,"cadence":1.9}
+  },
+  "deepDiveSchedule": {
+    "biomeBlockRooms": 10,
+    "miniBossSlot": 6,
+    "bossSlot": 10,
+    "doubleBossFromCycle": 3,
+    "directions": ["left","right","top","bottom"],
+    "bossPowerStackMaximum": 5,
+    "crossPollinationMaximum": 3,
+    "rewardStackMaximum": 3
+  },
+  "curatedBoonFixture": {
+    "runs": 600,
+    "rewardsPerRun": 10,
+    "standardChoices": 2,
+    "observedMeanStartingBoonOffers": 4.88,
+    "expectation": "starter investment is meaningfully favored but new-boon discovery remains stronger across the cohort; rare 8+ starter-offer runs remain possible"
+  },
+  "automatedStatus": "implemented-and-fixture-protected",
+  "humanExitBlockers": [
+    "Rate ordinary campaign rooms against the intended 3–4 difficulty target on fresh and maxed saves.",
+    "Rate challenge rooms and late bosses after boon-contract power changes.",
+    "Complete obscene-build Deep Dive samples at x19/x11 and broader stack distributions.",
+    "Approve fairness and readability at deep milestones approaching difficulty 9–10.",
+    "Tune numeric values only from recorded seed/save/build evidence."
+  ]
+}
