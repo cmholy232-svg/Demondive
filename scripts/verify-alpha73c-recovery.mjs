@@ -67,4 +67,12 @@ for (const marker of [
   if (!runtime.includes(marker)) throw new Error(`Missing Alpha 7.3C runtime marker: ${marker}`);
 }
 
+const page = await readFile(path.join(root, 'index.html'), 'utf8');
+const packageManifest = JSON.parse(await readFile(path.join(root, 'package.json'), 'utf8'));
+const packageLock = JSON.parse(await readFile(path.join(root, 'package-lock.json'), 'utf8'));
+if (!page.includes('A7.7 · STORY PLAYTEST')) throw new Error('Visible build stamp is stale or missing.');
+if (!runtime.includes('A7.7 · TUTORIAL + STORY PLAYTEST · LEVELS 1–9')) throw new Error('Title-screen build label is stale or missing.');
+if (packageManifest.version !== '1.0.0-alpha.7.7-story-playtest') throw new Error('Package version is not the Alpha 7.7 story playtest.');
+if (packageLock.version !== packageManifest.version || packageLock.packages?.['']?.version !== packageManifest.version) throw new Error('Package-lock version does not match package.json.');
+
 console.log(`Alpha 7.3C foundation verified beneath additive production work: ${mappedSources.size} mapped modules across ${sourceMapNames.length} production chunks, 111 baseline assets, Levels 1–9.`);

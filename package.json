@@ -1,7 +1,7 @@
 {
   "name": "demondive",
   "private": true,
-  "version": "1.0.0-alpha.7.5-recovery",
+  "version": "1.0.0-alpha.7.7-story-playtest",
   "type": "module",
   "scripts": {
     "dev": "vite",

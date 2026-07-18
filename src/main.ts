@@ -720,7 +720,7 @@ class DemonGame {
           <p class="title-save">${this.save.storyFlags.includes(DIALOGUE_BEATS.prologue_dive.flag) ? `Continue · Best Rush ${styleRankFor(this.save.bestStyle)} · High Score ${this.save.highScore.toLocaleString()}` : 'New descent · The Neon Maw awaits'}</p>
           <button class="btn primary title-start" id="enter-hub" disabled>DIVE IN</button>
           <button class="title-settings" id="title-settings">Settings</button>
-          <span class="version">A7.5 · ART-INTEGRATED FULL CAMPAIGN · LEVELS 1–9</span>
+          <span class="version">A7.7 · TUTORIAL + STORY PLAYTEST · LEVELS 1–9</span>
         </div>
       </div>`;
     mustElement<HTMLButtonElement>('#enter-hub').addEventListener('click', () => this.activateTitle());
@@ -4476,13 +4476,13 @@ class DemonGame {
     const flag=alphaCompletionFlag(CURRENT_ALPHA_FINAL_LEVEL);
     if(!this.save.storyFlags.includes(flag))this.save.storyFlags.push(flag);
     this.persistSave();
-    this.screen='credits';this.alphaFinaleEnding=true;this.hud.classList.add('hidden');this.roomLabel.textContent='ALPHA 7.3 · CAMPAIGN COMPLETE';
+    this.screen='credits';this.alphaFinaleEnding=true;this.hud.classList.add('hidden');this.roomLabel.textContent='ALPHA 7.7 · CAMPAIGN COMPLETE';
     this.overlay.innerHTML=`<section class="alpha-finale" id="alpha-finale" role="button" tabindex="0" aria-label="Thanks for playing. Press any key or click to return to the title screen.">
       <div class="alpha-finale-art" aria-hidden="true" style="background-image:radial-gradient(circle at 48% 32%,rgba(245,239,255,.3),transparent 22%),linear-gradient(145deg,#080812,#2d1e3c 48%,#14131a)"></div>
       <div class="alpha-finale-copy"><p class="eyebrow">Morning · Milo's apartment · still messy, now inhabited</p><h2>He Wakes Up.</h2><p>The bills and missed messages are still there. Milo looks at the weed, puts it away, and texts: “Sorry I disappeared. That was on me.” He cleans one corner. On the television, the queens argue about who actually saved Hell. Pizza arrives.</p>
         <p><b>The Hollow was not killed.</b> Milo accepted the self he kept avoiding—and chose to move anyway. Lilith's road is broken. Seraphine answers. Deep Dive is unlocked.</p>
         <div class="alpha-finale-stats"><span><b>${record.roomsCleared}</b> rooms</span><span><b>${record.enemiesDefeated}</b> demons</span><span><b>${record.boonsAcquired}</b> boons</span><span><b>${banked}</b> shards banked</span></div>
-        <small>DEMONDIVE · ALPHA 7.3 CAMPAIGN BUILD · CREDITS THEME “ONE MORE DIVE” · CLICK OR PRESS ANY KEY TO RETURN</small></div>
+        <small>DEMONDIVE · ALPHA 7.7 STORY PLAYTEST · CREDITS THEME “ONE MORE DIVE” · CLICK OR PRESS ANY KEY TO RETURN</small></div>
     </section>`;
     const finale=mustElement<HTMLElement>('#alpha-finale');
     finale.addEventListener('pointerup',()=>this.finishAlphaCompletionFinale(),{once:true});
