@@ -1,4 +1,4 @@
-DEMONDIVE — ALPHA 7.7 STORY & TUTORIAL PLAYTEST
+DEMONDIVE — ALPHA 7.8A FULL-CAMPAIGN POLISH PLAYTEST
 
 FASTEST WINDOWS START
 1. Extract the entire ZIP. Do not run it from inside the ZIP viewer.
@@ -6,7 +6,7 @@ FASTEST WINDOWS START
 3. Keep the server window open while playing.
 4. The game opens at http://127.0.0.1:4173/.
 
-This package does not require npm install or esbuild approval. It only needs
+The downloadable package does not require npm install or esbuild approval. It only needs
 Node.js 18 or newer. If Windows blocks the CMD file, right-click
 START_DEMONDIVE.ps1, choose Run with PowerShell, or run `node serve.mjs` in
 this folder and open the address printed in the terminal.

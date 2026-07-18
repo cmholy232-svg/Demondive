@@ -70,9 +70,9 @@ for (const marker of [
 const page = await readFile(path.join(root, 'index.html'), 'utf8');
 const packageManifest = JSON.parse(await readFile(path.join(root, 'package.json'), 'utf8'));
 const packageLock = JSON.parse(await readFile(path.join(root, 'package-lock.json'), 'utf8'));
-if (!page.includes('A7.7 · STORY PLAYTEST')) throw new Error('Visible build stamp is stale or missing.');
-if (!runtime.includes('A7.7 · TUTORIAL + STORY PLAYTEST · LEVELS 1–9')) throw new Error('Title-screen build label is stale or missing.');
-if (packageManifest.version !== '1.0.0-alpha.7.7-story-playtest') throw new Error('Package version is not the Alpha 7.7 story playtest.');
+if (!page.includes('A7.8A · POLISH PLAYTEST')) throw new Error('Visible build stamp is stale or missing.');
+if (!runtime.includes('A7.8A · FULL-CAMPAIGN POLISH PLAYTEST · LEVELS 1–9')) throw new Error('Title-screen build label is stale or missing.');
+if (packageManifest.version !== '1.0.0-alpha.7.8a-playtest') throw new Error('Package version is not the Alpha 7.8A playtest.');
 if (packageLock.version !== packageManifest.version || packageLock.packages?.['']?.version !== packageManifest.version) throw new Error('Package-lock version does not match package.json.');
 for (const marker of ['ensureLateDepthAssets','releaseLateAssets','assetResidency','this.ensureBoonPortrait(\'pyrra\')','this.ensureBoonPortrait(\'belladonna\')']) {
   if (!runtime.includes(marker)) throw new Error(`Missing Alpha 7.8 asset-residency safeguard: ${marker}`);

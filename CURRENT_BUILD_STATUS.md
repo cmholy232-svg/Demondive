@@ -6,7 +6,7 @@ Active build: **Alpha 7.7 story and tutorial playtest** on `alpha/7.4-rebuild`.
 
 Next phase: **Alpha 7.8 whole-game polish and Alpha-completion gating**.
 
-Current checkpoint: **Alpha 7.8A packaging identity and asset-residency performance patch**.
+Current checkpoint: **Alpha 7.8B restore-tested downloadable package and tagged GitHub release**.
 
 ## Preserved implementation
 
@@ -16,6 +16,7 @@ Current checkpoint: **Alpha 7.8A packaging identity and asset-residency performa
 - Alpha 7.6: code-side audio/feedback hierarchy, procedural fallback SFX, deterministic camera feedback, impact budgets, and final authored-SFX requirements.
 - Alpha 7.7: playable three-room tutorial and full campaign dialogue draft.
 - Alpha 7.8A: truthful build identity, completion-gate ledger, lazy boon visuals, and one-late-biome-at-a-time atlas residency.
+- Alpha 7.8B: install-free launchers, hashed playable manifest, ZIP restore gate, and branch-scoped GitHub release package.
 
 ## Open Alpha-completion blockers
 
@@ -27,7 +28,7 @@ Current checkpoint: **Alpha 7.8A packaging identity and asset-residency performa
 6. Alpha 7.5 asset corrections and human visual approval.
 7. Narrative copy approval and dialogue layout review.
 8. P0/P1 bug closure and explicit P2/P3 disposition.
-9. Restore-tested downloadable package and release manifest.
+9. Real-Windows launcher/SmartScreen approval for the restore-tested downloadable package.
 
 ## Evidence boundary
 

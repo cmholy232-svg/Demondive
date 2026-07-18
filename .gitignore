@@ -1,6 +1,7 @@
 node_modules/
 node_modules.failed-install/
 dist/
+artifacts/
 *.zip
 *.bundle
 *.log

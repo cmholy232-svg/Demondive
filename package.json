@@ -1,7 +1,7 @@
 {
   "name": "demondive",
   "private": true,
-  "version": "1.0.0-alpha.7.7-story-playtest",
+  "version": "1.0.0-alpha.7.8a-playtest",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -33,7 +33,8 @@
     "verify:a75:batch05": "node scripts/verify-a75-asset-batch-05.mjs",
     "verify:a75:audit": "node scripts/verify-a75-master-audit.mjs",
     "verify:a75:runtime": "node scripts/verify-a75-runtime-art.mjs",
-    "verify:alpha74a": "esbuild scripts/verify-alpha74a-fixtures.ts --bundle --platform=node --format=esm --outfile=/tmp/demondive-alpha74a-fixtures.mjs --log-level=warning && node /tmp/demondive-alpha74a-fixtures.mjs"
+    "verify:alpha74a": "esbuild scripts/verify-alpha74a-fixtures.ts --bundle --platform=node --format=esm --outfile=/tmp/demondive-alpha74a-fixtures.mjs --log-level=warning && node /tmp/demondive-alpha74a-fixtures.mjs",
+    "package:playable": "npm run verify && node scripts/build-playable-package.mjs && node scripts/verify-playable-package.mjs"
   },
   "devDependencies": {
     "pngjs": "^7.0.0",
