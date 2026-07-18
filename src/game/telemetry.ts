@@ -11,6 +11,7 @@ export type ActionRejectionReason =
   | 'no-dash-charge'
   | 'insufficient-energy'
   | 'special-condition'
+  | 'buffer-expired'
   | 'combat-disabled'
   | 'context-interaction'
   | 'screen-blocked';

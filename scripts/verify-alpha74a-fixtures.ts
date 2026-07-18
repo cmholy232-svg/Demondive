@@ -1,8 +1,10 @@
 import assert from 'node:assert/strict';
-import { GAME_ACTIONS, DevicePromptService } from '../src/game/actions';
+import { GAME_ACTIONS, DevicePromptService, GamepadActionResolver } from '../src/game/actions';
 import { BOONS, BOON_ORDER, FLOOR_Y, WIDTH } from '../src/game/content';
 import { canAccessBoon, canAccessCampaignLevel, ENTITLEMENT_TEST_CONTEXTS } from '../src/game/entitlements';
 import { generateRunPlan, roomIsEmpty } from '../src/game/generator';
+import { KeyboardBindingRepository, bindingConflicts, profileBindings, rebindAction } from '../src/game/input-bindings';
+import { MOVEMENT_PROFILES, selectMovementProfile } from '../src/game/player-tuning';
 import { validateRoomTraversal } from '../src/game/room-quality';
 import { newRunRequest, sameSeedRetryRequest } from '../src/game/run-retry';
 import { cloneDefaultSave } from '../src/game/save';
@@ -48,6 +50,26 @@ const deniedRepository = new BrowserSaveRepository(new DeniedStorage());
 assert.equal(deniedRepository.load().storageAvailable,false);
 assert.equal(deniedRepository.write(save),false);
 assert.equal(deniedRepository.reset(),false);
+
+const bindingStorage = new MemoryStorage();
+const bindingRepository = new KeyboardBindingRepository(bindingStorage);
+const arcadeBindings = profileBindings('arcade');
+assert.equal(bindingRepository.write(arcadeBindings),true);
+assert.deepEqual(bindingRepository.load(),arcadeBindings);
+const conflictingBindings = rebindAction(arcadeBindings,'fire','Space');
+assert.ok(bindingConflicts(conflictingBindings.bindings).some((conflict) => conflict.code === 'Space' && conflict.actions.includes('jump') && conflict.actions.includes('fire')));
+
+const gamepadResolver = new GamepadActionResolver();
+const pad = (x:number) => ({ axes:[x,0],buttons:Array.from({length:8},()=>({pressed:false,value:0})) });
+assert.equal(gamepadResolver.active('right',pad(.43)),true);
+assert.equal(gamepadResolver.active('right',pad(.3)),true,'hysteresis must hold until the release threshold');
+assert.equal(gamepadResolver.active('right',pad(.2)),false);
+
+assert.equal(selectMovementProfile('?movementProfile=a1-responsive',null),'a1-responsive');
+assert.equal(selectMovementProfile('',null),'a0-control');
+for (const field of ['runSpeed','gravity','jumpVelocity','jumpReleaseGravity','fallSpeedCap','fastFallGravity','fastFallSpeedCap','dashSpeed','dashDurationSeconds','dashCooldownSeconds','wavelandSpeed','wavelandDurationSeconds','dashRecoverySeconds'] as const) {
+  assert.equal(MOVEMENT_PROFILES['a1-responsive'][field],MOVEMENT_PROFILES['a0-control'][field],`${field} must remain protected across A/B profiles`);
+}
 
 assert.deepEqual(sameSeedRetryRequest(0xfeedbeef),{ depth:1,seed:0xfeedbeef });
 assert.deepEqual(newRunRequest(),{ depth:1 });
@@ -98,4 +120,4 @@ assert.equal(telemetrySnapshot.actionTotals.ignoredByReason.cooldown,1);
 assert.equal(telemetrySnapshot.frames.clamped,1);
 assert.equal(telemetrySnapshot.peakEntities.projectiles,280);
 
-console.log(`ALPHA 7.4A FIXTURES PASSED · save migration/corruption/reset · retry depth 1 · disconnected-room rejection · ${generatedRooms} generated rooms · entitlement contexts · action prompts · telemetry`);
+console.log(`ALPHA 7.4A/7.4B FIXTURES PASSED · save migration/corruption/reset · retry depth 1 · disconnected-room rejection · ${generatedRooms} generated rooms · entitlement contexts · remap conflicts · controller hysteresis · protected movement A/B · prompts · telemetry`);

@@ -1,5 +1,6 @@
 import './style.css';
-import { gamepadActionActive, isGameAction, keyboardActionActive, type GameAction as ControlName } from './game/actions';
+import './settings.css';
+import { DevicePromptService, GamepadActionResolver, isGameAction, mappedKeyboardActionActive, type GameAction as ControlName, type InputDevice } from './game/actions';
 import { arcaneHarmonyLabel, boonNoteLabel } from './game/arcane-audio';
 import { ArcaneAudioDirector } from './game/arcane-audio-director';
 import { chooseSmartBoonOffers } from './game/boon-offers';
@@ -10,12 +11,14 @@ import { deepDiveBiome, deepDiveCrossPollination, deepDiveCycle, deepDiveEncount
 import { campaignThreat, deepDiveThreat } from './game/difficulty';
 import { DIALOGUE_BEATS, TUTORIAL_STEPS, applyDialogueBeatMutation, type DialogueBeat, type TutorialAction } from './game/dialogue';
 import { canAccessCampaignLevel, PC_MASTER_ACCESS } from './game/entitlements';
+import { KeyboardBindingRepository, bindingConflicts, profileBindings, rebindAction, type KeyboardBindingState, type KeyboardProfileId } from './game/input-bindings';
 import { buildRoomFrame, generateRunPlan, roomCountBounds } from './game/generator';
 import { calyptraCriticalMultiplier, calyptraPowerMultiplier, jackpotChanceFor, mixedArcaneColor, roomGradeFor, rushChargeForRank, scoreMultiplierForRank, styleRankFor } from './game/feel';
 import { MusicDirector } from './game/music-director';
 import type { MusicState } from './game/music';
 import { MILO_ATLASES, type MiloAtlasDefinition } from './game/milo-animation';
 import { awardDiveXp, diveXpRequired, DIVE_XP_REWARDS } from './game/profile-level';
+import { MOVEMENT_PROFILES, selectMovementProfile, type MovementProfileId } from './game/player-tuning';
 import { cloneDefaultSave } from './game/save';
 import { BrowserSaveRepository } from './game/save-repository';
 import { newRunRequest, sameSeedRetryRequest } from './game/run-retry';
@@ -51,8 +54,11 @@ const CURRENT_ALPHA_FINAL_LEVEL = 9;
 // It can return when a production voice performance replaces it.
 const ANNOUNCER_ENABLED = false;
 const alphaCompletionFlag = (level: number) => `alpha_completion_level_${level}_seen`;
-const GRAVITY = 2350;
 const FIRE_POSE_DURATION = .24;
+// Enemy, pickup, and arcing-projectile physics retain the established world
+// gravity. Milo's gravity is selected independently through the A/B profile.
+const GRAVITY = 2350;
+const MOVEMENT_PROFILE_KEY = 'demondive-movement-profile-v1';
 interface GroundWave extends Rect { id: number; vx: number; life: number; damage: number; facing: 1 | -1; hitIds: Set<number>; }
 interface WagerShrine extends Rect { used: boolean; pulse: number; type: WagerType; }
 interface ActiveWager { type: WagerType; failed: boolean; timer: number; }
@@ -87,6 +93,11 @@ function centerY(rect: Rect): number {
   return rect.y + rect.h / 2;
 }
 
+function storedMovementProfile(): string | null {
+  try { return window.localStorage.getItem(MOVEMENT_PROFILE_KEY); }
+  catch { return null; }
+}
+
 class DemonGame {
   private readonly canvas = mustElement<HTMLCanvasElement>('#game');
   private readonly ctx = this.canvas.getContext('2d', { alpha: false })!;
@@ -112,7 +123,12 @@ class DemonGame {
   private readonly arcaneAudio = new ArcaneAudioDirector(import.meta.env.BASE_URL);
   private readonly saveRepository = new BrowserSaveRepository(window.localStorage);
   private readonly initialSaveLoad = this.saveRepository.load();
+  private readonly bindingRepository = new KeyboardBindingRepository(window.localStorage);
+  private keyboardBindingState: KeyboardBindingState = this.bindingRepository.load();
+  private readonly promptService = new DevicePromptService('keyboard');
+  private readonly gamepadActions = new GamepadActionResolver();
   private readonly telemetry = new RuntimeTelemetry('alpha-7.4a-development');
+  private movementProfileId: MovementProfileId = selectMovementProfile(window.location.search,storedMovementProfile());
 
   private screen: GameScreen = 'title';
   private previousScreen: GameScreen = 'playing';
@@ -199,6 +215,8 @@ class DemonGame {
   private loadoutReturnScreen: GameScreen | null = null;
   private alphaFinaleEnding = false;
   private footstepCooldown = 0;
+  private fireBuffer = 0;
+  private fireBufferPending = false;
   private activeSfx = 0;
   private readonly combatSfxLimiter = new CombatSfxLimiter();
 
@@ -243,6 +261,7 @@ class DemonGame {
   private menuNavLatched = false;
   private menuActionLatched = false;
   private menuPauseLatched = false;
+  private rebindingAction: ControlName | null = null;
 
   private readonly miloRunAtlas = new Image();
   private readonly miloMovementAtlas = new Image();
@@ -288,8 +307,13 @@ class DemonGame {
     this.reducedVfx = this.save.settings.reducedVfx;
     this.music.setMasterVolume(this.save.settings.masterVolume);
     this.music.setMusicVolume(this.save.settings.musicVolume);
-    (window as Window & { __DEMONDIVE_TELEMETRY__?: () => unknown }).__DEMONDIVE_TELEMETRY__ = () => this.telemetry.snapshot();
+    (window as Window & { __DEMONDIVE_TELEMETRY__?: () => unknown }).__DEMONDIVE_TELEMETRY__ = () => ({
+      ...this.telemetry.snapshot(),
+      movementProfile:this.movementProfileId,
+      keyboardProfile:this.keyboardBindingState.profile,
+    });
     this.bindInput();
+    this.updateControlPrompts();
     this.modifierToggle.addEventListener('click', () => this.showArcanaLoadout());
     // Production atlases use fixed cells and a shared feet anchor. Canvas art
     // remains the fallback for moves that do not yet have approved raster poses.
@@ -428,34 +452,52 @@ class DemonGame {
     window.addEventListener('keydown', (event) => {
       void this.music.unlock();
       const code = event.code;
+      this.noteInputDevice('keyboard');
+      if(this.rebindingAction){
+        event.preventDefault();
+        if(code==='Escape')this.rebindingAction=null;
+        else{
+          this.keyboardBindingState=rebindAction(this.keyboardBindingState,this.rebindingAction,code);
+          this.bindingRepository.write(this.keyboardBindingState);
+          this.showToast(`${this.rebindingAction.toUpperCase()} · ${this.formatInputCode(code)}`);
+          this.rebindingAction=null;
+        }
+        if(this.settingsReturnScreen)this.showSettings(this.settingsReturnScreen);
+        this.updateControlPrompts();
+        return;
+      }
       // Latch the most recent horizontal intent at keydown time. Even a tap
       // shorter than one simulation frame now turns Milo without changing
       // acceleration, top speed, or any other approved movement constant.
       if (!event.repeat && (this.screen === 'playing' || this.screen === 'hub')) {
-        if (code === 'ArrowLeft' || code === 'KeyA') this.player.facing = -1;
-        else if (code === 'ArrowRight' || code === 'KeyD') this.player.facing = 1;
+        if (this.keyboardBindingState.bindings.left.includes(code)) this.player.facing = -1;
+        else if (this.keyboardBindingState.bindings.right.includes(code)) this.player.facing = 1;
       }
       if (!event.repeat && this.screen === 'credits') {
         event.preventDefault();
         this.finishAlphaCompletionFinale();
         return;
       }
-      if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'KeyW', 'KeyA', 'KeyS', 'KeyD', 'Space', 'KeyJ', 'KeyK', 'KeyX', 'KeyC', 'ShiftLeft', 'ShiftRight'].includes(code)) {
+      const confirmKey=['jump','fire','special'].some((action)=>this.keyboardBindingState.bindings[action as ControlName].includes(code));
+      const mappedKey=Object.values(this.keyboardBindingState.bindings).some((codes)=>codes.includes(code));
+      if (mappedKey) {
         event.preventDefault();
       }
-      if (!event.repeat && this.screen === 'dialogue' && ['Space', 'Enter', 'KeyJ', 'KeyK', 'KeyX', 'KeyC'].includes(code)) {
+      if (!event.repeat && this.screen === 'dialogue' && (code==='Enter'||confirmKey)) {
         event.preventDefault();
         this.advanceDialogue();
         return;
       }
       const overlayMenuOpen=this.overlay.querySelectorAll<HTMLButtonElement>('button:not(:disabled)').length>0&&(this.hubModalOpen||Boolean(this.settingsReturnScreen)||Boolean(this.loadoutReturnScreen)||['reward','route','paused','dead','victory'].includes(this.screen));
-      if (!event.repeat&&overlayMenuOpen&&['ArrowLeft','ArrowUp','ArrowRight','ArrowDown','KeyW','KeyA','KeyS','KeyD'].includes(code)) {
-        event.preventDefault(); this.moveMenuFocus(['ArrowLeft','ArrowUp','KeyW','KeyA'].includes(code)?-1:1); return;
+      const menuPrevious=this.keyboardBindingState.bindings.left.includes(code)||this.keyboardBindingState.bindings.up.includes(code);
+      const menuNext=this.keyboardBindingState.bindings.right.includes(code)||this.keyboardBindingState.bindings.down.includes(code);
+      if (!event.repeat&&overlayMenuOpen&&(menuPrevious||menuNext)) {
+        event.preventDefault(); this.moveMenuFocus(menuPrevious?-1:1); return;
       }
-      if (!event.repeat&&overlayMenuOpen&&['Space','Enter','KeyJ','KeyK','KeyX','KeyC'].includes(code)) {
+      if (!event.repeat&&overlayMenuOpen&&(code==='Enter'||confirmKey)) {
         event.preventDefault(); this.activateFocusedMenuButton(); return;
       }
-      if (!event.repeat && this.screen === 'title' && !this.settingsReturnScreen && ['Space', 'Enter', 'KeyJ', 'KeyK', 'KeyX', 'KeyC'].includes(code)) {
+      if (!event.repeat && this.screen === 'title' && !this.settingsReturnScreen && (code==='Enter'||confirmKey)) {
         event.preventDefault();
         this.activateTitle();
         return;
@@ -485,6 +527,7 @@ class DemonGame {
       const press = (event: PointerEvent) => {
         event.preventDefault();
         void this.music.unlock();
+        this.noteInputDevice('touch');
         button.setPointerCapture(event.pointerId);
         this.touchControls.add(control);
         if (control === 'left') this.player.facing = -1;
@@ -499,6 +542,26 @@ class DemonGame {
       button.addEventListener('pointercancel', release);
       button.addEventListener('pointerleave', release);
     });
+  }
+
+  private formatInputCode(code:string):string {
+    return code.replace(/^Key/,'').replace(/^Digit/,'').replace('Arrow','').replace('ShiftLeft','Left Shift').replace('ShiftRight','Right Shift').replace('Space','Space');
+  }
+
+  private noteInputDevice(device:InputDevice):void {
+    if(this.promptService.currentDevice()===device)return;
+    this.promptService.noteDevice(device);this.updateControlPrompts();
+  }
+
+  private updateControlPrompts():void {
+    const device=this.promptService.currentDevice();
+    document.querySelectorAll<HTMLElement>('[data-prompt-action]').forEach((element)=>{
+      const action=element.dataset.promptAction;
+      if(!action||!isGameAction(action))return;
+      if(device==='keyboard')element.textContent=this.keyboardBindingState.bindings[action].map((code)=>this.formatInputCode(code)).join(' / ');
+      else element.textContent=this.promptService.prompt(action,device);
+    });
+    if(this.tutorialActive)this.updateTutorialPrompt();
   }
 
   private menuButtons(): HTMLButtonElement[] { return [...this.overlay.querySelectorAll<HTMLButtonElement>('button:not(:disabled)')].filter(button=>button.offsetParent!==null); }
@@ -529,6 +592,8 @@ class DemonGame {
   private updateMenuGamepad():void {
     const gamepad=navigator.getGamepads?.()[0];
     if(gamepad){
+      const gamepadActive=[...gamepad.buttons].some(button=>button.pressed)||Math.abs(gamepad.axes[0]??0)>.2||Math.abs(gamepad.axes[1]??0)>.2;
+      if(gamepadActive)this.noteInputDevice('controller');
       const pause=Boolean(gamepad.buttons[9]?.pressed);
       if(pause&&!this.menuPauseLatched&&!this.settingsReturnScreen&&(this.screen==='playing'||this.screen==='paused'))this.togglePause();
       this.menuPauseLatched=pause;
@@ -650,6 +715,8 @@ class DemonGame {
   private showSettings(returnScreen: GameScreen): void {
     this.settingsReturnScreen = returnScreen;
     const setting = this.save.settings;
+    const conflicts=bindingConflicts(this.keyboardBindingState.bindings);
+    const bindingButton=(action:ControlName)=>`<button class="btn binding-button" data-rebind="${action}"><span>${action}</span><b>${this.keyboardBindingState.bindings[action].map((code)=>this.formatInputCode(code)).join(' / ')}</b></button>`;
     const slider = (id: 'masterVolume' | 'musicVolume' | 'sfxVolume', label: string) => `
       <label class="setting-slider" for="setting-${id}"><span>${label}</span><b id="value-${id}">${Math.round(setting[id] * 100)}%</b>
         <input id="setting-${id}" data-volume="${id}" type="range" min="0" max="1" step="0.01" value="${setting[id]}">
@@ -660,6 +727,14 @@ class DemonGame {
         <div class="settings-grid">
           ${slider('masterVolume', 'Master')}${slider('musicVolume', 'Music')}${slider('sfxVolume', 'SFX')}
         </div>
+        <h3>Controls</h3>
+        <div class="btn-row settings-toggles">
+          <button class="btn" id="cycle-keyboard-profile">Keyboard: ${this.keyboardBindingState.profile==='split-hand'?'Split-Hand':this.keyboardBindingState.profile==='arcade'?'Arcade Z/X/C/V':'Custom'}</button>
+          <button class="btn" id="cycle-movement-profile">Movement test: ${MOVEMENT_PROFILES[this.movementProfileId].label}</button>
+          <button class="btn ghost" id="reset-bindings">Reset keyboard bindings</button>
+        </div>
+        <div class="binding-grid">${(['left','right','up','down','jump','dash','fire','special','interact'] as ControlName[]).map(bindingButton).join('')}</div>
+        <p class="binding-warning ${conflicts.length?'active':''}">${conflicts.length?`Conflict: ${conflicts.map((conflict)=>`${this.formatInputCode(conflict.code)} = ${conflict.actions.join(' + ')}`).join(' · ')}`:'No keyboard conflicts detected.'}</p>
         <p class="lede">The placeholder browser announcer is disabled for this build while the production voice direction is developed.</p>
         <div class="btn-row settings-toggles">
           <button class="btn" id="toggle-shake-setting">Screen shake: ${this.shakeEnabled ? 'On' : 'Off'}</button>
@@ -690,6 +765,23 @@ class DemonGame {
     mustElement<HTMLButtonElement>('#toggle-vfx-setting').addEventListener('click', () => {
       this.reducedVfx = !this.reducedVfx; this.save.settings.reducedVfx = this.reducedVfx; this.persistSave(); this.showSettings(returnScreen);
     });
+    mustElement<HTMLButtonElement>('#cycle-keyboard-profile').addEventListener('click',()=>{
+      const next:Exclude<KeyboardProfileId,'custom'>=this.keyboardBindingState.profile==='split-hand'?'arcade':'split-hand';
+      this.keyboardBindingState=profileBindings(next);this.bindingRepository.write(this.keyboardBindingState);this.updateControlPrompts();this.showSettings(returnScreen);
+    });
+    mustElement<HTMLButtonElement>('#cycle-movement-profile').addEventListener('click',()=>{
+      this.movementProfileId=this.movementProfileId==='a0-control'?'a1-responsive':'a0-control';
+      try{window.localStorage.setItem(MOVEMENT_PROFILE_KEY,this.movementProfileId);}catch{/* A/B selection remains active for this session. */}
+      this.showSettings(returnScreen);this.showToast(`MOVEMENT ${MOVEMENT_PROFILES[this.movementProfileId].label.toUpperCase()} · DASH/WAVE VALUES LOCKED`);
+    });
+    mustElement<HTMLButtonElement>('#reset-bindings').addEventListener('click',()=>{
+      this.keyboardBindingState=profileBindings('split-hand');this.bindingRepository.write(this.keyboardBindingState);this.updateControlPrompts();this.showSettings(returnScreen);
+    });
+    this.overlay.querySelectorAll<HTMLButtonElement>('[data-rebind]').forEach((button)=>button.addEventListener('click',()=>{
+      const action=button.dataset.rebind;
+      if(!action||!isGameAction(action))return;
+      this.rebindingAction=action;button.innerHTML=`<span>${action}</span><b>Press a key… · Esc cancels</b>`;this.showToast(`REBIND ${action.toUpperCase()} · PRESS A KEY`);
+    }));
     mustElement<HTMLButtonElement>('#test-arcane-sfx').addEventListener('click',()=>{
       const volume=this.save.settings.masterVolume*this.save.settings.sfxVolume;
       if(volume<=.001){this.showToast('ARCANE TEST MUTED · RAISE MASTER AND SFX');return;}
@@ -738,6 +830,10 @@ class DemonGame {
 
   private resetAllProgress(): void {
     this.saveRepository.reset();
+    this.bindingRepository.reset();
+    try{window.localStorage.removeItem(MOVEMENT_PROFILE_KEY);}catch{/* In-memory reset still applies. */}
+    this.keyboardBindingState=profileBindings('split-hand');
+    this.movementProfileId='a0-control';
     this.save = cloneDefaultSave();
     this.applyFreshSaveState();
     this.showToast('ALL DATA ERASED · DIVE LEVEL 1 · THE NEON MAW AWAITS');
@@ -912,7 +1008,19 @@ class DemonGame {
   private updateTutorialPrompt(): void {
     const step = TUTORIAL_STEPS[this.tutorialStep];
     if (!this.tutorialActive || !step) { this.tutorialPrompt.classList.remove('show'); return; }
-    this.tutorialPrompt.innerHTML = `<span>PYRRA'S CRASH COURSE · ${this.tutorialStep + 1}/${TUTORIAL_STEPS.length}</span><b>${step.text}</b>`;
+    const device=this.promptService.currentDevice();
+    const prompt=(action:ControlName)=>device==='keyboard'?this.keyboardBindingState.bindings[action].map((code)=>this.formatInputCode(code)).join(' / '):this.promptService.prompt(action,device);
+    const contextual:Partial<Record<TutorialAction,string>>={
+      move:`MOVE · ${prompt('left')} / ${prompt('right')}`,
+      jump:`DOUBLE JUMP · ${prompt('jump')} TWICE`,
+      dash:`DASH / WAVEDASH · DIRECTION + ${prompt('dash')}`,
+      magic:`ARCANE MAGIC · AIM + ${prompt('fire')}`,
+      special:`SPECIAL · ${prompt('special')} USES DEMON ENERGY`,
+      altar:`BOON ALTAR · APPROACH + ${prompt('interact')}`,
+      desk:`UPGRADE DESK · APPROACH + ${prompt('interact')}`,
+      portal:`RUN DOOR · APPROACH + ${prompt('interact')}`,
+    };
+    this.tutorialPrompt.innerHTML = `<span>PYRRA'S CRASH COURSE · ${this.tutorialStep + 1}/${TUTORIAL_STEPS.length}</span><b>${contextual[step.action]??step.text}</b>`;
     this.tutorialPrompt.classList.add('show');
   }
 
@@ -1421,6 +1529,7 @@ class DemonGame {
     this.bloodPactAuraTimer = 0;
     this.particles = [];
     this.floatingText = [];
+    this.fireBuffer=0;this.fireBufferPending=false;
     this.enemies = this.room.spawns.map((spawn) => this.createEnemy(spawn.type, spawn.x, spawn.y));
     if (this.currentDepth === 2 && this.room.type === 'miniboss' && !this.isEndless) {
       this.enemies = [];
@@ -1877,11 +1986,11 @@ class DemonGame {
 
   private gamepadControl(name: ControlName): boolean {
     const gamepad = navigator.getGamepads?.()[0];
-    return gamepadActionActive(name,gamepad);
+    return this.gamepadActions.active(name,gamepad);
   }
 
   private isControl(name: ControlName): boolean {
-    return this.touchControls.has(name) || keyboardActionActive(name,this.keys) || this.gamepadControl(name);
+    return this.touchControls.has(name) || mappedKeyboardActionActive(name,this.keys,this.keyboardBindingState.bindings) || this.gamepadControl(name);
   }
 
   private updatePlayer(dt: number, allowCombat = true): void {
@@ -1900,13 +2009,20 @@ class DemonGame {
     const specialPressed = special && !this.inputPrevious.special;
     const dashPressed = dash && !this.inputPrevious.dash;
     const move = Number(right) - Number(left);
+    const movement = MOVEMENT_PROFILES[this.movementProfileId];
+    this.fireBuffer=Math.max(0,this.fireBuffer-dt);
+    if(this.fireBufferPending&&this.fireBuffer===0&&!fire){
+      this.fireBufferPending=false;
+      this.telemetry.recordAction(inputAt,this.screen,'fire','ignored','buffer-expired');
+    }
+    if(firePressed){this.fireBuffer=movement.fireBufferSeconds;this.fireBufferPending=true;}
     if (move !== 0) this.tutorialAction('move');
     this.playerSnareTime=Math.max(0,this.playerSnareTime-dt);this.snareNoticeCooldown=Math.max(0,this.snareNoticeCooldown-dt);this.dreamDoorCooldown=Math.max(0,this.dreamDoorCooldown-dt);
     const snareMultiplier=this.playerSnareTime>0 ? .52 : 1;
     const onControlledIce=this.worldFreezeTimer<=0&&this.room.hazards.some(hazard=>hazard.type==='ice'&&overlap(this.player,hazard));
     const traction = 1 + this.save.upgrades.traction * .025;
-    const speed = 360 * traction * (1 + this.boonStacks.zephyra * .025 + this.boonStacks.noctissa * .03) * (this.rushStateTimer > 0 ? 1.28 : 1) * snareMultiplier;
-    const accel = (this.player.grounded ? 3500 : 2050 * (1 + this.boonStacks.maris * .05)) * traction * (this.playerSnareTime>0 ? .58 : 1) * (onControlledIce?.42:1);
+    const speed = movement.runSpeed * traction * (1 + this.boonStacks.zephyra * .025 + this.boonStacks.noctissa * .03) * (this.rushStateTimer > 0 ? 1.28 : 1) * snareMultiplier;
+    const accel = (this.player.grounded ? movement.groundAcceleration : movement.airAcceleration * (1 + this.boonStacks.maris * .05)) * traction * (this.playerSnareTime>0 ? .58 : 1) * (onControlledIce?.42:1);
 
     this.player.dashCooldown = Math.max(0, this.player.dashCooldown - dt);
     this.player.dashRecoveryTime = Math.max(0, this.player.dashRecoveryTime - dt);
@@ -1931,8 +2047,8 @@ class DemonGame {
         const length = Math.hypot(dashX, dashY) || 1;
         this.player.dashX = dashX / length;
         this.player.dashY = dashY / length;
-        this.player.dashTime = .18;
-        this.player.dashCooldown = .09;
+        this.player.dashTime = movement.dashDurationSeconds;
+        this.player.dashCooldown = movement.dashCooldownSeconds;
         this.player.dashRecoveryTime = 0;
         this.player.dashCharges -= 1;
         this.player.invulnerable = Math.max(this.player.invulnerable, .38);
@@ -1947,18 +2063,18 @@ class DemonGame {
     if (this.player.dashTime > 0) {
       if (jumpPressed) this.telemetry.recordAction(inputAt,this.screen,'jump','ignored','dash-lock');
       this.player.dashTime = Math.max(0, this.player.dashTime - dt);
-      this.player.vx = this.player.dashX * 890;
-      this.player.vy = this.player.dashY * 890;
+      this.player.vx = this.player.dashX * movement.dashSpeed;
+      this.player.vy = this.player.dashY * movement.dashSpeed;
       this.moveWithPlatforms(this.player, dt, true, this.player.dashY < 0);
       this.player.x = clamp(this.player.x, 0, WIDTH - this.player.w);
       this.particles.push({ x: centerX(this.player), y: centerY(this.player), vx: -this.player.dashX * 115, vy: -this.player.dashY * 115, life: .24, maxLife: .24, size: 3 + Math.random() * 5, color: this.getArcaneAccentColor(), gravity: 0 });
       if (this.player.grounded && this.player.dashY > .15) {
         this.player.dashTime = 0;
-        this.player.waveSlideTime = .3;
-        this.player.vx = this.player.dashX * 780;
+        this.player.waveSlideTime = movement.wavelandDurationSeconds;
+        this.player.vx = this.player.dashX * movement.wavelandSpeed;
         this.player.vy = 0;
         this.burst(centerX(this.player), this.player.y + this.player.h, '#eaffff', 10, 220);
-      } else if (this.player.dashTime === 0) this.player.dashRecoveryTime = .12;
+      } else if (this.player.dashTime === 0) this.player.dashRecoveryTime = movement.dashRecoverySeconds;
     } else {
 
     if (this.player.kickTime > 0) {
@@ -1970,7 +2086,7 @@ class DemonGame {
       this.player.vx = clamp(this.player.vx, -momentumCap, momentumCap);
       this.player.facing = move > 0 ? 1 : -1;
     } else {
-      const friction = this.player.waveSlideTime > 0 ? 520 : onControlledIce ? 460 : this.player.grounded ? 3000 : 330;
+      const friction = this.player.waveSlideTime > 0 ? 520 : onControlledIce ? 460 : this.player.grounded ? movement.groundFriction : movement.airFriction;
       if (Math.abs(this.player.vx) <= friction * dt) this.player.vx = 0;
       else this.player.vx -= Math.sign(this.player.vx) * friction * dt;
     }
@@ -1983,14 +2099,14 @@ class DemonGame {
       this.player.vy = 120;
       this.telemetry.recordAction(inputAt,this.screen,'jump','consumed','drop-through');
     } else if (jumpPressed) {
-      this.player.jumpBuffer = .13 + this.save.upgrades.training*.03;
+      this.player.jumpBuffer = movement.jumpBufferSeconds + this.save.upgrades.training*.03;
       this.telemetry.recordAction(inputAt,this.screen,'jump','consumed','buffered');
     }
     this.player.jumpBuffer = Math.max(0, this.player.jumpBuffer - dt);
-    this.player.coyote = this.player.grounded ? .11 + this.save.upgrades.training*.03 : Math.max(0, this.player.coyote - dt);
+    this.player.coyote = this.player.grounded ? movement.coyoteSeconds + this.save.upgrades.training*.03 : Math.max(0, this.player.coyote - dt);
     if (this.player.jumpBuffer > 0 && (this.player.coyote > 0 || this.player.airJumps > 0)) {
       const airJump = this.player.coyote <= 0;
-      this.player.vy = -760;
+      this.player.vy = movement.jumpVelocity;
       this.player.grounded = false;
       this.player.coyote = 0;
       if (airJump) this.player.airJumps -= 1;
@@ -1999,10 +2115,10 @@ class DemonGame {
       this.playSound(airJump ? 'doubleJump' : 'jump');
       this.tutorialAction('jump');
     }
-    if (!jump && this.player.vy < -210) this.player.vy += 1750 * dt;
+    if (!jump && this.player.vy < -210) this.player.vy += movement.jumpReleaseGravity * dt;
 
-    const fastFall = down && this.player.vy > 30 ? 1450 : 0;
-    this.player.vy = Math.min(down ? 1450 : 1200, this.player.vy + (GRAVITY + fastFall) * dt);
+    const fastFall = down && this.player.vy > 30 ? movement.fastFallGravity : 0;
+    this.player.vy = Math.min(down ? movement.fastFallSpeedCap : movement.fallSpeedCap, this.player.vy + (movement.gravity + fastFall) * dt);
     this.moveWithPlatforms(this.player, dt, true, this.player.dropTimer > 0);
     }
     this.player.x = clamp(this.player.x, 0, WIDTH - this.player.w);
@@ -2088,10 +2204,12 @@ class DemonGame {
     }
 
     const attackLocked=this.player.dashTime>0||this.player.kickTime>0||this.player.punchTime>0;
-    if (allowCombat && fire && this.player.fireCooldown === 0 && !attackLocked) this.firePlayerProjectile();
-    else if(firePressed){
-      const reason=!allowCombat?'combat-disabled':attackLocked?'attack-lock':'cooldown';
-      this.telemetry.recordAction(inputAt,this.screen,'fire','ignored',reason);
+    if (allowCombat && (fire||this.fireBuffer>0) && this.player.fireCooldown === 0 && !attackLocked) {
+      this.firePlayerProjectile();this.fireBuffer=0;this.fireBufferPending=false;
+    }
+    else if(firePressed&&!allowCombat){
+      this.fireBuffer=0;this.fireBufferPending=false;
+      this.telemetry.recordAction(inputAt,this.screen,'fire','ignored','combat-disabled');
     }
     const contextualInteraction = (this.isNearWagerShrine() && this.wagerInteractionHeld()) || (this.isNearHubStation() && (this.isControl('interact') || this.touchControls.has('special')));
     if(specialPressed){

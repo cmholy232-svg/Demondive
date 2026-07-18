@@ -51,6 +51,10 @@ export function keyboardActionActive(action: GameAction, pressedCodes: ReadonlyS
   return KEYBOARD_ACTION_BINDINGS[action].some(code => pressedCodes.has(code));
 }
 
+export function mappedKeyboardActionActive(action: GameAction, pressedCodes: ReadonlySet<string>, bindings: Readonly<Record<GameAction,readonly string[]>>): boolean {
+  return bindings[action].some(code => pressedCodes.has(code));
+}
+
 export function gamepadActionActive(action: GameAction, gamepad: GamepadLike | null | undefined): boolean {
   if (!gamepad) return false;
   const x = gamepad.axes[0] ?? 0;
@@ -65,4 +69,35 @@ export function gamepadActionActive(action: GameAction, gamepad: GamepadLike | n
   if (action === 'fire') return pressed(2) || pressed(7);
   if (action === 'special') return pressed(3) || pressed(4);
   return pressed(3);
+}
+
+export class GamepadActionResolver {
+  private horizontal: -1 | 0 | 1 = 0;
+  private vertical: -1 | 0 | 1 = 0;
+
+  constructor(private readonly engageThreshold = .42, private readonly releaseThreshold = .26, private readonly triggerThreshold = .35) {}
+
+  active(action: GameAction, gamepad: GamepadLike | null | undefined): boolean {
+    if (!gamepad) { this.horizontal=0;this.vertical=0;return false; }
+    const x = gamepad.axes[0] ?? 0; const y = gamepad.axes[1] ?? 0;
+    this.horizontal=this.resolveAxis(x,this.horizontal);
+    this.vertical=this.resolveAxis(y,this.vertical);
+    const pressed=(index:number)=>Boolean(gamepad.buttons[index]?.pressed);
+    const analogPressed=(index:number)=>Boolean((gamepad.buttons[index] as { pressed?:boolean;value?:number } | undefined)?.pressed||((gamepad.buttons[index] as { value?:number } | undefined)?.value??0)>=this.triggerThreshold);
+    if(action==='left')return this.horizontal<0;
+    if(action==='right')return this.horizontal>0;
+    if(action==='up')return this.vertical<0;
+    if(action==='down')return this.vertical>0;
+    if(action==='jump')return pressed(0);
+    if(action==='dash')return pressed(1)||pressed(5);
+    if(action==='fire')return pressed(2)||analogPressed(7);
+    if(action==='special')return pressed(3)||pressed(4);
+    return pressed(3);
+  }
+
+  private resolveAxis(value:number,current:-1|0|1):-1|0|1 {
+    if(current===0)return value>=this.engageThreshold?1:value<=-this.engageThreshold?-1:0;
+    if(current>0)return value<=-this.engageThreshold?-1:value<this.releaseThreshold?0:1;
+    return value>=this.engageThreshold?1:value>-this.releaseThreshold?0:-1;
+  }
 }

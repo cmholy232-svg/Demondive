@@ -1,0 +1,38 @@
+.binding-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+  margin: 10px 0;
+}
+
+.binding-button {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  min-width: 0;
+  text-transform: uppercase;
+}
+
+.binding-button span { color: #aaa2b7; }
+.binding-button b {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #fff;
+}
+
+.binding-warning {
+  margin: 7px 0 13px;
+  color: #7dff9e;
+  font: 800 11px/1.35 Barlow Condensed, sans-serif;
+  letter-spacing: .04em;
+}
+
+.binding-warning.active { color: #ffbd69; }
+.settings-panel {
+  max-height: min(92vh, 790px);
+  overflow: auto;
+}
+
+@media (max-width: 700px) {
+  .binding-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}

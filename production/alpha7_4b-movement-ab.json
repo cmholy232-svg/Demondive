@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "roadmapPosition": "Alpha 7.4B — Baseline locomotion, input and neutral Arcane Bolt",
+  "defaultProfile": "a0-control",
+  "profiles": {
+    "a0-control": {
+      "purpose": "Exact Alpha 7.5 playable control values.",
+      "changesFromA0": []
+    },
+    "a1-responsive": {
+      "purpose": "Reduce ordinary walk/reversal mush without changing top speed, jump shape or advanced movement.",
+      "changesFromA0": [
+        { "field": "groundAcceleration", "from": 3500, "to": 4200, "expected": "Faster response to a held direction.", "risk": "Can shorten the timing window before a wavedash setup reaches full horizontal speed." },
+        { "field": "groundFriction", "from": 3000, "to": 3800, "expected": "Faster ordinary stop and cleaner direction reversal.", "risk": "Can reduce retained speed after a player releases direction; waveland friction remains separately protected." },
+        { "field": "airAcceleration", "from": 2050, "to": 2250, "expected": "Slightly clearer low-skill air correction.", "risk": "Could make aerial alignment too forgiving." },
+        { "field": "airFriction", "from": 330, "to": 420, "expected": "Less unintended drift after releasing direction.", "risk": "Could reduce expert air-momentum expression." },
+        { "field": "coyoteSeconds", "from": 0.11, "to": 0.13, "expected": "Fewer edge-jump rejections.", "risk": "Can mask late jump timing." },
+        { "field": "jumpBufferSeconds", "from": 0.13, "to": 0.15, "expected": "Fewer pre-landing jump rejections.", "risk": "Can cause an unintended jump after a very early press." }
+      ]
+    }
+  },
+  "protectedEqualValues": [
+    "runSpeed",
+    "gravity",
+    "jumpVelocity",
+    "jumpReleaseGravity",
+    "fallSpeedCap",
+    "fastFallGravity",
+    "fastFallSpeedCap",
+    "dashSpeed",
+    "dashDurationSeconds",
+    "dashCooldownSeconds",
+    "wavelandSpeed",
+    "wavelandDurationSeconds",
+    "dashRecoverySeconds"
+  ],
+  "approvalRule": "A1 cannot replace A0 until physical keyboard/controller tests reduce ignored-input incidents without regressing expert wave-tech metrics or subjective approval."
+}
