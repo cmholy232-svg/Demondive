@@ -153,8 +153,8 @@ def add_spikes(bm, roots, seed: int, length: float, radius: float, sweep: Vector
         bmesh.ops.translate(bm, vec=center, verts=cone_verts)
 
 
-def add_sphere(bm, center: Vector, radius: float, scale: Vector = Vector((1, 1, 1))) -> None:
-    result = bmesh.ops.create_uvsphere(bm, u_segments=16, v_segments=10, radius=radius)
+def add_sphere(bm, center: Vector, radius: float, scale: Vector = Vector((1, 1, 1)), u: int = 16, v: int = 10) -> None:
+    result = bmesh.ops.create_uvsphere(bm, u_segments=u, v_segments=v, radius=radius)
     for v in result["verts"]:
         v.co = Vector((v.co.x * scale.x, v.co.y * scale.y, v.co.z * scale.z)) + center
 

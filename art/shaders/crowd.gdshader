@@ -22,5 +22,5 @@ void vertex() {
 
 void fragment() {
 	float rim = pow(1.0 - abs(dot(NORMAL, VIEW)), 2.5);
-	ALBEDO = body_color.rgb + rim_color.rgb * rim * 0.55 + rim_color.rgb * smoothstep(1.6, 0.0, v_height) * 0.05;
+	ALBEDO = body_color.rgb + rim_color.rgb * rim * 0.32 + rim_color.rgb * smoothstep(1.6, 0.0, v_height) * 0.05;
 }

@@ -100,7 +100,7 @@ static func _crowd(root: Node3D, data: RoomData, rng: RandomNumberGenerator) -> 
 	multimesh.mesh = _dancer()
 	multimesh.instance_count = spots.size()
 	for i: int in spots.size():
-		var scale: float = rng.randf_range(0.85, 1.1)
+		var scale: float = rng.randf_range(0.72, 0.9)
 		var basis := Basis.from_euler(Vector3(0.0, rng.randf_range(-0.6, 0.6), 0.0)).scaled(Vector3.ONE * scale)
 		multimesh.set_instance_transform(i, Transform3D(basis, spots[i]))
 		var arms_up: float = 1.0 if rng.randf() < 0.3 else 0.0

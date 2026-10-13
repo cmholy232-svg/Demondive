@@ -205,3 +205,91 @@ def build_all(armature) -> None:
     make_action(rig, "land", 0.2, land, 4, False)
     for name, aim in (("cast_forward", 0.0), ("cast_up", 90.0), ("cast_up_forward", 45.0), ("cast_down_forward", -45.0), ("cast_down", -90.0)):
         make_action(rig, name, 0.3, cast(aim), 1, True)
+
+
+# --- Goddesses and Demon Lords ------------------------------------------------
+
+def lady_idle(t: float):
+    """Contrapposto: weight on the right leg, hip cocked, left hand on the hip."""
+    breathe = math.sin(t * math.tau)
+    sway = math.sin(t * math.tau) * 2.0
+    pose = legs(4.0, 4.0, -6.0, 18.0, 0.07)
+    pose["upperleg02.L"] = swing(-2.0, -0.06)
+    pose["lowerleg01.L"] = swing(-6.0, -0.02)
+    pose["upperarm02.L"] = Vector((0.75, 0.15, -0.55))
+    pose["lowerarm01.L"] = Vector((-0.45, 0.2, -0.65))
+    pose["upperarm02.R"] = Vector((-0.22, 0.04, -1.0))
+    pose["lowerarm01.R"] = swing(18.0 + breathe * 3.0, -0.12)
+    pose["root"] = Euler((0.0, deg(5.0 + sway), 0.0))
+    pose["spine05"] = Euler((0.0, deg(-7.0 - sway), 0.0))
+    pose["spine03"] = Euler((deg(-3.0 + breathe * 1.2), deg(5.0), 0.0))
+    pose["neck01"] = Euler((deg(-3.0), deg(5.0), deg(-6.0)))
+    pose["head"] = Euler((deg(-4.0), deg(6.0), deg(-10.0)))
+    return pose, Vector((0.02, 0.0, -0.01 + breathe * 0.003))
+
+
+def lady_walk(t: float):
+    """A runway walk: feet cross the centre line, hips swing, small arm swing."""
+    s = math.sin(t * math.tau)
+    c = math.cos(t * math.tau)
+    knee_l = 12.0 + 40.0 * max(0.0, -c)
+    knee_r = 12.0 + 40.0 * max(0.0, c)
+    pose = legs(26.0 * s, knee_l, -26.0 * s, knee_r, -0.03)
+    pose["upperarm02.L"] = swing(-14.0 * s, 0.22)
+    pose["lowerarm01.L"] = swing(-6.0 * s + 22.0, 0.1)
+    pose["upperarm02.R"] = swing(14.0 * s, -0.22)
+    pose["lowerarm01.R"] = swing(6.0 * s + 22.0, -0.1)
+    pose["spine05"] = Euler((deg(2.0), deg(8.0 * s), deg(-6.0 * s)))
+    pose["spine03"] = Euler((deg(-4.0), deg(-5.0 * s), deg(5.0 * s)))
+    pose["head"] = Euler((deg(-6.0), 0.0, deg(-4.0 * s)))
+    bob = -0.015 + 0.015 * abs(math.cos(t * math.tau))
+    return pose, Vector((0.025 * s, 0.0, bob))
+
+
+def lady_windup(t: float):
+    """Both arms swept up and back, gathering power; chest open, chin up."""
+    shake = math.sin(t * math.tau * 3.0) * 1.5
+    pose = legs(-6.0, 10.0, 8.0, 14.0, 0.12)
+    pose["upperarm02.L"] = Vector((0.55, 0.35, 0.75))
+    pose["lowerarm01.L"] = Vector((0.2, 0.25, 0.95))
+    pose["upperarm02.R"] = Vector((-0.55, 0.35, 0.75))
+    pose["lowerarm01.R"] = Vector((-0.2, 0.25, 0.95))
+    pose["spine05"] = Euler((deg(-10.0), 0.0, 0.0))
+    pose["spine03"] = Euler((deg(-8.0 + shake), 0.0, 0.0))
+    pose["head"] = Euler((deg(-14.0), 0.0, 0.0))
+    return pose, Vector((0.0, 0.0, 0.0))
+
+
+def lady_attack(t: float):
+    """Both hands thrust forward, one step in, hair and hips following."""
+    pose = legs(30.0, 30.0, -20.0, 20.0, 0.1)
+    pose["upperarm02.L"] = Vector((0.15, -1.0, 0.15))
+    pose["lowerarm01.L"] = Vector((0.05, -1.0, 0.2))
+    pose["upperarm02.R"] = Vector((-0.15, -1.0, 0.05))
+    pose["lowerarm01.R"] = Vector((-0.05, -1.0, 0.1))
+    pose["wrist.L"] = Vector((0.0, -0.4, 1.0))
+    pose["wrist.R"] = Vector((0.0, -0.4, 1.0))
+    pose["spine05"] = Euler((deg(16.0), 0.0, 0.0))
+    pose["head"] = Euler((deg(-12.0), 0.0, 0.0))
+    return pose, Vector((0.0, -0.06, -0.04))
+
+
+def lady_hurt(t: float):
+    pose = legs(-10.0, 20.0, 10.0, 25.0, 0.12)
+    pose.update(arms_down(0.6, 0.6, 50.0))
+    pose["spine05"] = Euler((deg(-18.0), 0.0, deg(6.0)))
+    pose["head"] = Euler((deg(-20.0), 0.0, deg(-8.0)))
+    return pose, Vector((0.0, 0.05, 0.0))
+
+
+def build_lady(armature) -> None:
+    rig = Rig(armature)
+    make_action(rig, "idle", 3.0, lady_idle, 8, True)
+    make_action(rig, "walk", 1.0, lady_walk, 8, True)
+    make_action(rig, "windup", 0.6, lady_windup, 4, True)
+    make_action(rig, "attack", 0.4, lady_attack, 1, True)
+    make_action(rig, "hurt", 0.3, lady_hurt, 1, True)
+    make_action(rig, "fall", 0.8, fall, 4, True)
+    make_action(rig, "jump", 0.5, jump, 1, True)
+    make_action(rig, "run", 0.64, run, 8, True)
+    make_action(rig, "cast_forward", 0.3, cast(0.0), 1, True)

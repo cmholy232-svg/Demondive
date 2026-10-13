@@ -133,6 +133,12 @@ func _open_station(station: StringName) -> void:
 			wardrobe.show_wardrobe()
 
 
+## Debug builds only, with the F3 panel open: F9 dives straight away.
+func _unhandled_input(event: InputEvent) -> void:
+	if Debug.enabled and Debug.overlay_visible and event is InputEventKey and event.is_pressed() and (event as InputEventKey).physical_keycode == KEY_F9:
+		_dive()
+
+
 func _tint_orb(boon: StringName) -> void:
 	if HellroomKit.altar_orb != null and is_instance_valid(HellroomKit.altar_orb):
 		HellroomKit.altar_orb.material_override = Kit3D.neon(BoonCatalog.color(boon), 3.0)

@@ -5,6 +5,7 @@ extends Node3D
 ## and flaring eyes on every wind-up, a lunge on the attack, white on hits.
 
 const FLASH_SHADER: String = "shader_type spatial; render_mode unshaded, blend_add; void fragment() { ALBEDO = vec3(1.0); ALPHA = 0.85; }"
+const BOSS_PRESENCE: float = 1.3
 
 var _room: Room
 var _enemies: Dictionary = {}
@@ -51,7 +52,15 @@ func _sync_enemies(delta: float) -> void:
 			continue
 		alive[enemy] = true
 		if not _enemies.has(enemy):
-			var model: Node3D = CreatureModels.make(enemy.kind)
+			var model: Node3D
+			if CharacterModels.has(enemy.kind):
+				# Drawn a little taller than the hitbox so bosses tower over Milo.
+				var tall: float = enemy.size.y / Kit3D.PX_PER_M * BOSS_PRESENCE
+				model = CharacterModels.make(enemy.kind, tall)
+				# Bosses get their own key light so they read against busy rooms.
+				Kit3D.omni(model, Vector3(0.9, tall * 0.75, 2.2), Color(1.0, 0.88, 0.92), 2.4, 6.0)
+			else:
+				model = CreatureModels.make(enemy.kind)
 			add_child(model)
 			_enemies[enemy] = model
 		_pose(_enemies[enemy] as Node3D, enemy, delta)
@@ -67,6 +76,9 @@ func _pose(model: Node3D, enemy: Enemy, delta: float) -> void:
 	model.rotation.y = lerp_angle(model.rotation.y, target_yaw, clampf(14.0 * delta, 0.0, 1.0))
 	var body := model.get_node("Body") as Node3D
 	var pose: String = String(enemy.attack_pose)
+	if model.has_meta("animator"):
+		var moving: bool = absf(enemy.velocity.x) > 30.0 and not pose.begins_with("windup") and not pose.begins_with("attack")
+		CharacterModels.animate(model, "move" if moving and (pose == "idle" or pose == "move") else pose)
 	var squash := Vector3.ONE
 	var lean: float = 0.0
 	var lift: float = 0.0
@@ -97,7 +109,9 @@ func _pose(model: Node3D, enemy: Enemy, delta: float) -> void:
 	body.scale = body.scale.lerp(squash, clampf(18.0 * delta, 0.0, 1.0))
 	body.rotation.z = lerpf(body.rotation.z, -lean, clampf(12.0 * delta, 0.0, 1.0))
 	body.position.y = lift
-	for node: Node in body.get_children():
+	if not model.has_meta("meshes"):
+		model.set_meta("meshes", body.find_children("*", "MeshInstance3D", true, false))
+	for node: Node in model.get_meta("meshes") as Array:
 		var mesh := node as MeshInstance3D
 		if mesh == null:
 			continue

@@ -1,0 +1,84 @@
+{
+	"belladonna": {
+		"build": {
+			"cup": 0.85,
+			"waist": 0.75,
+			"hips": 0.45,
+			"seat": 0.45,
+			"slim": 0.5,
+			"legs": 0.45,
+			"tall": 0.5
+		},
+		"neckline": 0.045,
+		"iris_size": 1.15,
+		"colors": {
+			"skin": "e88da6",
+			"lips": "c4124f",
+			"hair": "ff3d8b",
+			"eye_white": "f4eaee",
+			"iris": "ffd23a",
+			"lash": "1a0710",
+			"outfit_main": "1a0612",
+			"trim": "ffc75a",
+			"skirt": "d0145a",
+			"gloves": "14060c",
+			"boots": "ffc75a",
+			"horn": "2a0d1a",
+			"wing": "3a0c22"
+		},
+		"hair": {
+			"style": "wavy",
+			"bangs": 0.06,
+			"part": 0.45
+		},
+		"outfit": [
+			{
+				"part": "top",
+				"kind": "corset",
+				"mat": "outfit_main",
+				"trim": true
+			},
+			{
+				"part": "skirt",
+				"length": "ankle",
+				"flare": 0.16,
+				"slit": true,
+				"mat": "skirt"
+			},
+			{
+				"part": "gloves",
+				"kind": "opera",
+				"mat": "gloves"
+			},
+			{
+				"part": "legwear",
+				"kind": "stockings",
+				"mat": "outfit_main"
+			},
+			{
+				"part": "shoes",
+				"mat": "boots"
+			},
+			{
+				"part": "choker",
+				"mat": "trim"
+			}
+		],
+		"extras": [
+			{
+				"kind": "horns",
+				"length": 0.17,
+				"curl": 1.2,
+				"mat": "horn"
+			},
+			{
+				"kind": "tail",
+				"mat": "horn"
+			},
+			{
+				"kind": "earrings",
+				"mat": "trim"
+			}
+		]
+	}
+}
