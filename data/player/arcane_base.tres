@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="ArcaneTuning" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scenes/player/arcane_tuning.gd" id="1_script"]
+
+[resource]
+script = ExtResource("1_script")
+cooldown_seconds = 0.235
+fire_buffer_seconds = 0.2
+projectile_speed = 780.0
+projectile_life_seconds = 1.6
+damage = 17.0
+radius = 10.0

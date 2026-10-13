@@ -2,7 +2,10 @@
 	"game.title": "DemonDive",
 	"debug.header": "DEBUG (F3)",
 	"debug.fps": "FPS",
-	"debug.player_position": "Milo position",
 	"debug.player_velocity": "Milo velocity",
-	"debug.on_floor": "On floor"
+	"debug.on_floor": "On floor",
+	"debug.profile": "Movement profile",
+	"debug.last_reversal": "Last full reversal",
+	"combat.ko": "KO",
+	"hint.controls": "Move: WASD / Arrows   Jump: Space (twice for double jump)   Arcane Bolt: J (hold a direction to aim)   Dash: L or Shift   F3: tuning"
 }

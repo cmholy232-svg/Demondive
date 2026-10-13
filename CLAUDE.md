@@ -11,6 +11,7 @@ Design source of truth: docs/design.md. Story, dialogue, character roster and na
 - Autoloads only: Game (run state), Save, Audio, Strings, Debug. Their scripts live in autoload/.
 - data/: boons, enemies and levels as Resource (.tres) files. Gameplay numbers live in data, not in code.
 - art/source/ (layered originals), art/export/<character>/ (parts), audio/music/, audio/sfx/
+- tools/: build scripts. tools/build_web.sh makes the playable web build in build/web.
 - tests/: headless tests. Run: godot --headless --path . -s tests/run_tests.gd (exits 1 on any failure). Each test file extends TestCase; methods named test_* run.
 
 ## Code rules

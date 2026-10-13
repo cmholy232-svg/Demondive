@@ -9,6 +9,14 @@ A fast, funny 2D action roguelite built in Godot 4.4. The design lives in [docs/
 3. Press **F5** (or the play button) to run the test room.
 4. Press **F3** in game to show the debug overlay.
 
+## Web build
+
+```
+tools/build_web.sh path/to/godot
+```
+
+Writes a playable debug build (F3 works) to `build/web`. Serve that folder with any static file server.
+
 ## Tests
 
 ```

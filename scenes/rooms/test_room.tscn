@@ -1,16 +1,31 @@
-[gd_scene load_steps=6 format=3]
+[gd_scene load_steps=13 format=3]
 
 [ext_resource type="Script" path="res://scenes/rooms/test_room.gd" id="1_room"]
 [ext_resource type="PackedScene" path="res://scenes/player/milo.tscn" id="2_milo"]
+[ext_resource type="Script" path="res://scenes/rooms/game_camera.gd" id="3_camera"]
+[ext_resource type="PackedScene" path="res://scenes/enemies/target_dummy.tscn" id="4_dummy"]
+[ext_resource type="Script" path="res://scenes/ui/debug_tuning_panel.gd" id="5_panel"]
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_floor"]
+[sub_resource type="RectangleShape2D" id="Shape_floor"]
 size = Vector2(1280, 64)
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_wall"]
+[sub_resource type="RectangleShape2D" id="Shape_wall"]
 size = Vector2(64, 720)
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_ceiling"]
+[sub_resource type="RectangleShape2D" id="Shape_ceiling"]
 size = Vector2(1280, 32)
+
+[sub_resource type="RectangleShape2D" id="Shape_Block"]
+size = Vector2(240, 136)
+
+[sub_resource type="RectangleShape2D" id="Shape_LedgeLow"]
+size = Vector2(260, 16)
+
+[sub_resource type="RectangleShape2D" id="Shape_LedgeMid"]
+size = Vector2(300, 16)
+
+[sub_resource type="RectangleShape2D" id="Shape_LedgeHigh"]
+size = Vector2(280, 16)
 
 [node name="TestRoom" type="Node2D"]
 script = ExtResource("1_room")
@@ -21,10 +36,10 @@ offset_bottom = 720.0
 color = Color(0.09, 0.06, 0.12, 1)
 
 [node name="Floor" type="StaticBody2D" parent="."]
-position = Vector2(640, 688)
+position = Vector2(640.0, 688.0)
 
 [node name="Shape" type="CollisionShape2D" parent="Floor"]
-shape = SubResource("RectangleShape2D_floor")
+shape = SubResource("Shape_floor")
 
 [node name="Visual" type="ColorRect" parent="Floor"]
 offset_left = -640.0
@@ -34,22 +49,113 @@ offset_bottom = 32.0
 color = Color(0.32, 0.2, 0.36, 1)
 
 [node name="WallLeft" type="StaticBody2D" parent="."]
-position = Vector2(-32, 360)
+position = Vector2(-32.0, 360.0)
 
 [node name="Shape" type="CollisionShape2D" parent="WallLeft"]
-shape = SubResource("RectangleShape2D_wall")
+shape = SubResource("Shape_wall")
 
 [node name="WallRight" type="StaticBody2D" parent="."]
-position = Vector2(1312, 360)
+position = Vector2(1312.0, 360.0)
 
 [node name="Shape" type="CollisionShape2D" parent="WallRight"]
-shape = SubResource("RectangleShape2D_wall")
+shape = SubResource("Shape_wall")
 
 [node name="Ceiling" type="StaticBody2D" parent="."]
-position = Vector2(640, -16)
+position = Vector2(640.0, -16.0)
 
 [node name="Shape" type="CollisionShape2D" parent="Ceiling"]
-shape = SubResource("RectangleShape2D_ceiling")
+shape = SubResource("Shape_ceiling")
+
+[node name="Block" type="StaticBody2D" parent="."]
+position = Vector2(980.0, 588.0)
+
+[node name="Shape" type="CollisionShape2D" parent="Block"]
+shape = SubResource("Shape_Block")
+
+[node name="Visual" type="ColorRect" parent="Block"]
+offset_left = -120.0
+offset_top = -68.0
+offset_right = 120.0
+offset_bottom = 68.0
+color = Color(0.4, 0.26, 0.42, 1)
+
+[node name="LedgeLow" type="StaticBody2D" parent="." groups=["one_way"]]
+position = Vector2(270.0, 564)
+collision_layer = 32
+collision_mask = 0
+
+[node name="Shape" type="CollisionShape2D" parent="LedgeLow"]
+shape = SubResource("Shape_LedgeLow")
+one_way_collision = true
+
+[node name="Visual" type="ColorRect" parent="LedgeLow"]
+offset_left = -130.0
+offset_top = -8.0
+offset_right = 130.0
+offset_bottom = 2.0
+color = Color(0.62, 0.42, 0.78, 1)
+
+[node name="LedgeMid" type="StaticBody2D" parent="." groups=["one_way"]]
+position = Vector2(620.0, 448)
+collision_layer = 32
+collision_mask = 0
+
+[node name="Shape" type="CollisionShape2D" parent="LedgeMid"]
+shape = SubResource("Shape_LedgeMid")
+one_way_collision = true
+
+[node name="Visual" type="ColorRect" parent="LedgeMid"]
+offset_left = -150.0
+offset_top = -8.0
+offset_right = 150.0
+offset_bottom = 2.0
+color = Color(0.62, 0.42, 0.78, 1)
+
+[node name="LedgeHigh" type="StaticBody2D" parent="." groups=["one_way"]]
+position = Vector2(1040.0, 308)
+collision_layer = 32
+collision_mask = 0
+
+[node name="Shape" type="CollisionShape2D" parent="LedgeHigh"]
+shape = SubResource("Shape_LedgeHigh")
+one_way_collision = true
+
+[node name="Visual" type="ColorRect" parent="LedgeHigh"]
+offset_left = -140.0
+offset_top = -8.0
+offset_right = 140.0
+offset_bottom = 2.0
+color = Color(0.62, 0.42, 0.78, 1)
+
+[node name="Camera" type="Camera2D" parent="."]
+process_callback = 0
+position = Vector2(640, 360)
+script = ExtResource("3_camera")
+
+[node name="Target1" parent="." instance=ExtResource("4_dummy")]
+position = Vector2(640, 656)
+
+[node name="Target2" parent="." instance=ExtResource("4_dummy")]
+position = Vector2(1190, 656)
+
+[node name="Target3" parent="." instance=ExtResource("4_dummy")]
+position = Vector2(620, 250)
+
+[node name="Target4" parent="." instance=ExtResource("4_dummy")]
+position = Vector2(1040, 300)
 
 [node name="Milo" parent="." instance=ExtResource("2_milo")]
-position = Vector2(640, 500)
+position = Vector2(260, 656)
+
+[node name="Hud" type="CanvasLayer" parent="."]
+
+[node name="ControlsHint" type="Label" parent="Hud"]
+offset_left = 16.0
+offset_top = 692.0
+offset_right = 1264.0
+offset_bottom = 716.0
+theme_override_colors/font_color = Color(0.85, 0.8, 0.9, 0.85)
+theme_override_font_sizes/font_size = 14
+
+[node name="DebugTuningPanel" type="CanvasLayer" parent="."]
+script = ExtResource("5_panel")
