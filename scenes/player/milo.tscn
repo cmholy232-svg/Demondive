@@ -1,31 +1,29 @@
-[gd_scene load_steps=3 format=3]
+[gd_scene load_steps=7 format=3]
 
 [ext_resource type="Script" path="res://scenes/player/milo.gd" id="1_milo"]
+[ext_resource type="Resource" path="res://data/player/movement_v2.tres" id="2_tuning"]
+[ext_resource type="Script" path="res://scenes/player/arcane_caster.gd" id="3_caster"]
+[ext_resource type="Resource" path="res://data/player/arcane_base.tres" id="4_arcane"]
+[ext_resource type="Script" path="res://scenes/player/milo_feedback.gd" id="5_feedback"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_body"]
-size = Vector2(96, 256)
+size = Vector2(44, 120)
 
 [node name="Milo" type="CharacterBody2D"]
 collision_layer = 2
-collision_mask = 1
+collision_mask = 33
+floor_snap_length = 4.0
 script = ExtResource("1_milo")
+tuning = ExtResource("2_tuning")
 
 [node name="Body" type="CollisionShape2D" parent="."]
-position = Vector2(0, -128)
+position = Vector2(0, -60)
 shape = SubResource("RectangleShape2D_body")
 
-[node name="Placeholder" type="ColorRect" parent="."]
-offset_left = -48.0
-offset_top = -256.0
-offset_right = 48.0
-color = Color(0.36, 0.78, 0.55, 1)
+[node name="ArcaneCaster" type="Node2D" parent="."]
+position = Vector2(48, -76)
+script = ExtResource("3_caster")
+tuning = ExtResource("4_arcane")
 
-[node name="CastingHand" type="Marker2D" parent="."]
-position = Vector2(40, -150)
-
-[node name="HandMarker" type="ColorRect" parent="CastingHand"]
-offset_left = -8.0
-offset_top = -8.0
-offset_right = 8.0
-offset_bottom = 8.0
-color = Color(1, 0.55, 0.2, 1)
+[node name="Feedback" type="Node2D" parent="."]
+script = ExtResource("5_feedback")

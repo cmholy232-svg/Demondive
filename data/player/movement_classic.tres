@@ -1,0 +1,34 @@
+[gd_resource type="Resource" script_class="MovementTuning" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scenes/player/movement_tuning.gd" id="1_script"]
+
+[resource]
+script = ExtResource("1_script")
+profile_name = "Alpha 8.2 Classic"
+run_speed = 360.0
+ground_acceleration = 3500.0
+turnaround_acceleration = 3500.0
+air_acceleration = 2050.0
+ground_friction = 3000.0
+air_friction = 330.0
+gravity = 2350.0
+jump_velocity = -760.0
+jump_release_gravity = 1750.0
+jump_release_min_rise = 210.0
+fall_speed_cap = 1200.0
+fast_fall_gravity = 1450.0
+fast_fall_speed_cap = 1450.0
+air_jumps = 1
+coyote_seconds = 0.11
+jump_buffer_seconds = 0.13
+drop_through_seconds = 0.24
+dash_speed = 890.0
+dash_duration_seconds = 0.18
+dash_cooldown_seconds = 0.09
+dash_charges = 1
+dash_invulnerable_seconds = 0.38
+waveland_speed = 780.0
+waveland_duration_seconds = 0.3
+waveland_min_down = 0.15
+wave_slide_speed_cap = 820.0
+wave_slide_friction = 520.0

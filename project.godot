@@ -14,6 +14,7 @@ config/features=PackedStringArray("4.4", "GL Compatibility")
 
 Strings="*res://autoload/strings.gd"
 Debug="*res://autoload/debug.gd"
+Audio="*res://autoload/audio.gd"
 
 [debug]
 
@@ -51,7 +52,7 @@ jump={
 }
 magic={
 "deadzone": 0.2,
-"events": [Object(InputEventKey,"device":-1,"physical_keycode":74), Object(InputEventMouseButton,"device":-1,"button_index":1,"pressed":true), Object(InputEventJoypadButton,"device":-1,"button_index":2,"pressed":true)]
+"events": [Object(InputEventKey,"device":-1,"physical_keycode":74), Object(InputEventJoypadButton,"device":-1,"button_index":2,"pressed":true)]
 }
 special={
 "deadzone": 0.2,
@@ -81,6 +82,7 @@ debug_toggle={
 2d_physics/layer_3="enemies"
 2d_physics/layer_4="player_shots"
 2d_physics/layer_5="enemy_shots"
+2d_physics/layer_6="one_way_platforms"
 
 [physics]
 
