@@ -3,7 +3,13 @@ extends Node3D
 ## Shows a stand-in 3D character on Milo's 2D position and picks its
 ## animation from Milo's state. Reads Milo; never changes him.
 
-const MODEL_PATH: String = "res://art/export/standin/chr_standin_robot.glb"
+const MODEL_PATH: String = "res://art/export/milo/chr_milo.glb"
+const TOON_SHADER: Shader = preload("res://art/shaders/toon.gdshader")
+const OUTLINE_SHADER: Shader = preload("res://art/shaders/outline.gdshader")
+## Bones the cast pose drives on top of whatever the body is doing.
+const CAST_BONES: PackedStringArray = ["clavicle.R", "shoulder01.R", "upperarm01.R", "upperarm02.R", "lowerarm01.R",
+	"lowerarm02.R", "wrist.R", "spine03", "head"]
+const CAST_ANIMATIONS: Array[String] = ["cast_down", "cast_down_forward", "cast_forward", "cast_up_forward", "cast_up"]
 const TARGET_HEIGHT_M: float = 1.28
 const TURN_SPEED: float = 18.0
 const CAST_POSE_SECONDS: float = 0.3
@@ -11,6 +17,8 @@ const CAST_POSE_SECONDS: float = 0.3
 var milo: Milo
 var _model: Node3D
 var _animation: AnimationPlayer
+var _cast_layer: AnimationPlayer
+var _caster: ArcaneCaster
 var _yaw: float = PI * 0.5
 var _cast_timer: float = 0.0
 var _trail: CPUParticles3D
@@ -22,14 +30,16 @@ func bind(target: Milo) -> void:
 	_model = (load(MODEL_PATH) as PackedScene).instantiate() as Node3D
 	add_child(_model)
 	_fit_height(_model)
+	_apply_toon(_model)
 	_animation = _model.find_child("AnimationPlayer", true, false) as AnimationPlayer
-	for name: String in ["run", "idle", "falling", "shooting", "shooting_standing"]:
+	for name: String in ["run", "idle", "fall", "jump", "dash"]:
 		if _animation != null and _animation.has_animation(name):
 			_animation.get_animation(name).loop_mode = Animation.LOOP_LINEAR
+	_build_cast_layer()
 	_trail = _make_particles(Color(0.5, 0.95, 1.0), 40, 0.25, false)
 	_burst = _make_particles(Color(1.0, 0.7, 0.4), 24, 0.35, true)
-	var caster: ArcaneCaster = milo.get_node("ArcaneCaster") as ArcaneCaster
-	caster.cast.connect(func(_direction: Vector2) -> void: _cast_timer = CAST_POSE_SECONDS)
+	_caster = milo.get_node("ArcaneCaster") as ArcaneCaster
+	_caster.cast.connect(func(_direction: Vector2) -> void: _cast_timer = CAST_POSE_SECONDS)
 	milo.wavelanded.connect(func(_is_wavedash: bool) -> void: _burst.restart())
 	milo.landed.connect(func(speed: float) -> void:
 		if speed > 600.0:
@@ -52,6 +62,44 @@ func _fit_height(model: Node3D) -> void:
 	var height: float = (high - low) * 1.1
 	if height > 0.0:
 		model.scale = Vector3.ONE * (TARGET_HEIGHT_M / height)
+
+
+## Replaces imported materials with cel shading and an ink outline, keeping each part's colour.
+func _apply_toon(model: Node3D) -> void:
+	for node: Node in model.find_children("*", "MeshInstance3D", true, false):
+		var instance := node as MeshInstance3D
+		for surface: int in instance.mesh.get_surface_count():
+			var source := instance.mesh.surface_get_material(surface) as BaseMaterial3D
+			var color: Color = source.albedo_color if source != null else Color.WHITE
+			var toon := ShaderMaterial.new()
+			toon.shader = TOON_SHADER
+			toon.set_shader_parameter("albedo", color)
+			var outline := ShaderMaterial.new()
+			outline.shader = OUTLINE_SHADER
+			outline.set_shader_parameter("width", 0.012 / maxf(0.01, model.scale.x))
+			toon.next_pass = outline
+			instance.set_surface_override_material(surface, toon)
+
+
+## A second player that only drives the right arm, so Milo can cast while running.
+func _build_cast_layer() -> void:
+	if _animation == null:
+		return
+	var library := AnimationLibrary.new()
+	for name: String in CAST_ANIMATIONS:
+		if not _animation.has_animation(name):
+			continue
+		var animation: Animation = _animation.get_animation(name).duplicate() as Animation
+		for track: int in range(animation.get_track_count() - 1, -1, -1):
+			var bone: String = str(animation.track_get_path(track)).get_slice(":", 1)
+			if not CAST_BONES.has(bone):
+				animation.remove_track(track)
+		animation.loop_mode = Animation.LOOP_LINEAR
+		library.add_animation(name, animation)
+	_cast_layer = AnimationPlayer.new()
+	_animation.get_parent().add_child(_cast_layer)
+	_cast_layer.root_node = _cast_layer.get_path_to(_animation.get_node(_animation.root_node))
+	_cast_layer.add_animation_library("", library)
 
 
 func _make_particles(color: Color, amount: int, lifetime: float, one_shot: bool) -> CPUParticles3D:
@@ -90,6 +138,7 @@ func _process(delta: float) -> void:
 	_trail.position = Vector3(0.0, 0.6, 0.0)
 	_burst.position = Vector3.ZERO
 	_play(_pick_animation())
+	_update_cast_layer()
 	# Lean into dashes so they read as a burst, not a slide.
 	var lean: float = 0.0
 	if milo.is_dashing():
@@ -99,12 +148,27 @@ func _process(delta: float) -> void:
 
 
 func _pick_animation() -> String:
-	var running: bool = absf(milo.velocity.x) > 40.0
+	if milo.is_dashing():
+		return "dash"
 	if not milo.is_on_floor():
-		return "jump" if milo.velocity.y < 0.0 else "falling"
-	if _cast_timer > 0.0:
-		return "shooting" if running else "shooting_standing"
-	return "run" if running else "idle"
+		return "jump" if milo.velocity.y < -150.0 else "fall"
+	return "run" if absf(milo.velocity.x) > 40.0 else "idle"
+
+
+func _update_cast_layer() -> void:
+	if _cast_layer == null:
+		return
+	if _cast_timer <= 0.0:
+		if _cast_layer.is_playing():
+			_cast_layer.stop()
+		return
+	var aim: Vector2 = _caster.aim
+	var index: int = clampi(roundi(-aim.y * 2.0 / maxf(0.001, aim.length())) + 2, 0, 4)
+	if absf(aim.x) > 0.3 and absf(aim.y) > 0.3:
+		index = 3 if aim.y < 0.0 else 1
+	var name: String = CAST_ANIMATIONS[index]
+	if _cast_layer.current_animation != name:
+		_cast_layer.play(name, 0.05)
 
 
 func _play(name: String) -> void:
@@ -112,7 +176,7 @@ func _play(name: String) -> void:
 		return
 	if _animation.current_animation != name:
 		_animation.play(name, 0.12)
-	if name == "run" or name == "shooting":
+	if name == "run":
 		_animation.speed_scale = clampf(absf(milo.velocity.x) / 360.0, 0.6, 2.0)
 	else:
 		_animation.speed_scale = 1.0

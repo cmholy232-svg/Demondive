@@ -90,8 +90,9 @@ static func add_ledge(root: Node3D, center: Vector2, size: Vector2, depth: float
 	var c: Vector3 = RoomView3D.to_3d(center)
 	var w: float = size.x / RoomView3D.PX_PER_M
 	var top_y: float = c.y + size.y * 0.5 / RoomView3D.PX_PER_M
-	add_box(root, Vector3(c.x, top_y - 0.09, -depth * 0.5 + 0.4), Vector3(w, 0.18, depth), material(STONE_LIGHT, 0.5))
-	add_box(root, Vector3(c.x, top_y - 0.17, 0.41), Vector3(w, 0.03, 0.03), material(Color.BLACK, 0.5, NEON_AMBER, 5.0))
+	# The front edge sits just behind Milo so a ledge never hides him when he walks under it.
+	add_box(root, Vector3(c.x, top_y - 0.09, -depth * 0.5 - 0.12), Vector3(w, 0.18, depth), material(STONE_LIGHT, 0.5))
+	add_box(root, Vector3(c.x, top_y - 0.17, -0.11), Vector3(w, 0.03, 0.03), material(Color.BLACK, 0.5, NEON_AMBER, 5.0))
 
 
 static func add_block(root: Node3D, center: Vector2, size: Vector2, depth: float) -> void:
