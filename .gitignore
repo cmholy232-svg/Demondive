@@ -4,3 +4,4 @@
 *.translation
 # Builds
 /build/
+__pycache__/
