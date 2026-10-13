@@ -1,0 +1,30 @@
+{
+	"1": {
+		"dir": "neon_maw",
+		"slots": [
+			"entry",
+			"combat",
+			"recovery",
+			"miniboss",
+			"combat",
+			"combat",
+			"recovery",
+			"boss"
+		],
+		"cages": [
+			"maris",
+			"gaia",
+			"zephyra"
+		],
+		"boss_boon": "belladonna",
+		"entrance_beat": "level_one_entrance",
+		"miniboss_beat": "bartender_intro",
+		"boss_beat": "belladonna_intro",
+		"aftermath_beat": "level_one_revelation",
+		"music": {
+			"explore": "neon_explore",
+			"miniboss": "neon_miniboss",
+			"boss": "neon_boss"
+		}
+	}
+}

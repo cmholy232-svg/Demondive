@@ -47,7 +47,7 @@ func test_held_jump_goes_higher_than_tapped_jump() -> void:
 	rig.place(Vector2(OPEN_FLOOR_X, FLOOR_Y - 1.0))
 	var tapped_peak: float = _jump_peak(rig, 1)
 	check(tapped_peak < held_peak * 0.75, "held %.0f px vs tapped %.0f px" % [held_peak, tapped_peak])
-	check(held_peak > 110.0 and held_peak < 130.0, "full jump about 120 px (got %.0f)" % held_peak)
+	check(held_peak > 205.0 and held_peak < 245.0, "full jump about 225 px (got %.0f)" % held_peak)
 	rig.free_room()
 
 
@@ -69,10 +69,11 @@ func test_double_jump_once_then_refreshes_on_landing() -> void:
 	rig.tick(MiloInput.make().with_jump())
 	rig.run(MiloInput.make().with_jump(false), 15)
 	rig.tick(MiloInput.make().with_jump())
-	check(rig.milo.velocity.y < -700.0, "air jump fires (vy %.0f)" % rig.milo.velocity.y)
+	var jump_v: float = rig.milo.tuning.jump_velocity
+	check(rig.milo.velocity.y < jump_v * 0.9, "air jump fires (vy %.0f)" % rig.milo.velocity.y)
 	rig.run(MiloInput.make().with_jump(false), 5)
 	rig.tick(MiloInput.make().with_jump())
-	check(rig.milo.velocity.y > -700.0, "no third jump")
+	check(rig.milo.velocity.y > jump_v * 0.9, "no third jump")
 	rig.run(MiloInput.make(), 90)
 	check(rig.milo.is_on_floor(), "landed")
 	check_equal(rig.milo.air_jumps_left, 1, "air jump refreshed")

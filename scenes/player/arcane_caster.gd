@@ -9,6 +9,7 @@ signal cast(direction: Vector2)
 const HAND_ORIGIN: Vector2 = Vector2(18.0, -76.0)
 const HAND_REACH: float = 30.0
 const MUZZLE_OFFSET: float = 9.0
+const SPLIT_ANGLE: float = 0.16
 
 @export var tuning: ArcaneTuning
 @export var bolt_scene: PackedScene
@@ -63,11 +64,21 @@ func fire(direction: Vector2) -> ArcaneBolt:
 	if direction.x != 0.0:
 		milo.facing = 1 if direction.x > 0.0 else -1
 		position = hand_position(direction, milo.facing)
-	cooldown_timer = tuning.cooldown_seconds
+	cooldown_timer = BoonEffects.cast_cooldown(tuning)
 	buffer_timer = 0.0
+	var stats: BoltStats = BoonEffects.bolt_stats(tuning)
+	var bolt: ArcaneBolt = _spawn_bolt(direction, stats)
+	for i: int in stats.split:
+		var angle: float = SPLIT_ANGLE * (1 + i / 2) * (1.0 if i % 2 == 0 else -1.0)
+		_spawn_bolt(direction.rotated(angle), stats)
+	cast.emit(direction)
+	Audio.play_sfx(&"arcane_cast", -8.0, 0.1)
+	return bolt
+
+
+func _spawn_bolt(direction: Vector2, stats: BoltStats) -> ArcaneBolt:
 	var bolt: ArcaneBolt = bolt_scene.instantiate() as ArcaneBolt
-	bolt.setup(direction * tuning.projectile_speed, tuning.damage, tuning.radius, tuning.projectile_life_seconds)
+	bolt.setup_stats(direction, stats)
 	bolt.global_position = global_position + direction * MUZZLE_OFFSET
 	milo.get_parent().add_child(bolt)
-	cast.emit(direction)
 	return bolt

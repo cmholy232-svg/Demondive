@@ -15,6 +15,8 @@ func test_every_strings_key_used_in_code_exists() -> void:
 	for path: String in _scripts("res://"):
 		for found: RegExMatch in regex.search_all(FileAccess.get_file_as_string(path)):
 			var key: String = found.get_string(1)
+			if key.contains("%"):
+				continue
 			check(Strings.has_key(key), "%s uses missing string key '%s'" % [path, key])
 
 

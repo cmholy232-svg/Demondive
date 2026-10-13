@@ -6,15 +6,17 @@ config_version=5
 [application]
 
 config/name="DemonDive"
-config/description="2D action roguelite. Design: docs/design.md"
-run/main_scene="res://scenes/rooms/test_room.tscn"
+config/description="Action roguelite. Design: docs/design.md"
+run/main_scene="res://scenes/main/main.tscn"
 config/features=PackedStringArray("4.4", "GL Compatibility")
 
 [autoload]
 
 Strings="*res://autoload/strings.gd"
 Debug="*res://autoload/debug.gd"
+Save="*res://autoload/save.gd"
 Audio="*res://autoload/audio.gd"
+Game="*res://autoload/game.gd"
 
 [debug]
 
@@ -27,6 +29,10 @@ window/size/viewport_width=1280
 window/size/viewport_height=720
 window/stretch/mode="canvas_items"
 window/stretch/aspect="keep"
+
+[gui]
+
+theme/custom_font="res://art/fonts/Barlow-SemiBold.ttf"
 
 [input]
 

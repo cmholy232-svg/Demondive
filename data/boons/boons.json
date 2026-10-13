@@ -1,0 +1,369 @@
+{
+	"pyrra": {
+		"color": "#ff4f76",
+		"accent": "#ffd2a8",
+		"special": "flameNova",
+		"special_cost": 24,
+		"unlock_level": 0,
+		"thresholds": [
+			1,
+			2,
+			4,
+			7
+		],
+		"tags": [
+			"fire",
+			"dot",
+			"offense"
+		]
+	},
+	"maris": {
+		"color": "#19c8e8",
+		"accent": "#b9f6ff",
+		"special": "groundWave",
+		"special_cost": 24,
+		"unlock_level": 1,
+		"thresholds": [
+			1,
+			2,
+			4,
+			7
+		],
+		"tags": [
+			"water",
+			"health",
+			"control"
+		]
+	},
+	"gaia": {
+		"color": "#b77b4a",
+		"accent": "#f1d095",
+		"special": "stoneBarrier",
+		"special_cost": 30,
+		"unlock_level": 1,
+		"thresholds": [
+			1,
+			2,
+			4,
+			7
+		],
+		"tags": [
+			"earth",
+			"armor",
+			"heavy"
+		]
+	},
+	"zephyra": {
+		"color": "#77e8cf",
+		"accent": "#ecfff8",
+		"special": "reflectingGust",
+		"special_cost": 18,
+		"unlock_level": 1,
+		"thresholds": [
+			1,
+			2,
+			4,
+			7
+		],
+		"tags": [
+			"wind",
+			"rapid",
+			"pierce"
+		]
+	},
+	"flora": {
+		"color": "#64d879",
+		"accent": "#ff8fbd",
+		"special": "vineLash",
+		"special_cost": 22,
+		"unlock_level": 2,
+		"thresholds": [
+			1,
+			2,
+			4,
+			7
+		],
+		"tags": [
+			"nature",
+			"mark",
+			"critical"
+		]
+	},
+	"voltara": {
+		"color": "#f6df45",
+		"accent": "#fff9bd",
+		"special": "chainBurst",
+		"special_cost": 30,
+		"unlock_level": 2,
+		"thresholds": [
+			1,
+			2,
+			4,
+			7
+		],
+		"tags": [
+			"lightning",
+			"chain",
+			"energy"
+		]
+	},
+	"crya": {
+		"color": "#82baff",
+		"accent": "#e8f5ff",
+		"special": "freezeCone",
+		"special_cost": 28,
+		"unlock_level": 3,
+		"thresholds": [
+			1,
+			2,
+			4,
+			7
+		],
+		"tags": [
+			"ice",
+			"freeze",
+			"control"
+		]
+	},
+	"luna": {
+		"color": "#a78bfa",
+		"accent": "#f4e9ff",
+		"special": "dreamPulse",
+		"special_cost": 22,
+		"unlock_level": 4,
+		"thresholds": [
+			1,
+			2,
+			4,
+			7
+		],
+		"tags": [
+			"dream",
+			"mark",
+			"economy"
+		]
+	},
+	"solara": {
+		"color": "#fff06a",
+		"accent": "#ffffff",
+		"special": "lightColumn",
+		"special_cost": 32,
+		"unlock_level": 5,
+		"thresholds": [
+			1,
+			2,
+			4,
+			7
+		],
+		"tags": [
+			"light",
+			"boss",
+			"pierce"
+		]
+	},
+	"belladonna": {
+		"color": "#ff5ba7",
+		"accent": "#ffe0b2",
+		"special": "rushState",
+		"special_cost": 26,
+		"unlock_level": 1,
+		"thresholds": [
+			1,
+			2,
+			4,
+			7
+		],
+		"tags": [
+			"appetite",
+			"pickup",
+			"momentum",
+			"demon-lord"
+		]
+	},
+	"nerissa": {
+		"color": "#36c9ff",
+		"accent": "#ff9be6",
+		"special": "charmNote",
+		"special_cost": 22,
+		"unlock_level": 2,
+		"thresholds": [
+			1,
+			2,
+			4,
+			7
+		],
+		"tags": [
+			"siren",
+			"homing",
+			"charm",
+			"demon-lord"
+		]
+	},
+	"roxyne": {
+		"color": "#e35b58",
+		"accent": "#ffc7a5",
+		"special": "pounceAura",
+		"special_cost": 26,
+		"unlock_level": 3,
+		"thresholds": [
+			1,
+			2,
+			4,
+			7
+		],
+		"tags": [
+			"hunt",
+			"duelist",
+			"ambush",
+			"demon-lord"
+		]
+	},
+	"calyptra": {
+		"color": "#e97cff",
+		"accent": "#ffe36e",
+		"special": "rouletteBurst",
+		"special_cost": 24,
+		"unlock_level": 4,
+		"thresholds": [
+			1,
+			2,
+			4,
+			7
+		],
+		"tags": [
+			"chance",
+			"critical",
+			"jackpot",
+			"demon-lord"
+		]
+	},
+	"isolde": {
+		"color": "#8ee7ff",
+		"accent": "#f5fdff",
+		"special": "crystalEcho",
+		"special_cost": 28,
+		"unlock_level": 5,
+		"thresholds": [
+			1,
+			2,
+			4,
+			7
+		],
+		"tags": [
+			"ice",
+			"ricochet",
+			"echo",
+			"demon-lord"
+		]
+	},
+	"somnia": {
+		"color": "#bc7cff",
+		"accent": "#ffd8f5",
+		"special": "illusionDecoy",
+		"special_cost": 25,
+		"unlock_level": 6,
+		"thresholds": [
+			1,
+			2,
+			4,
+			7
+		],
+		"tags": [
+			"dream",
+			"echo",
+			"decoy",
+			"demon-lord"
+		]
+	},
+	"vespera": {
+		"color": "#d7b7ff",
+		"accent": "#ffffff",
+		"special": "mirrorShield",
+		"special_cost": 26,
+		"unlock_level": 7,
+		"thresholds": [
+			1,
+			2,
+			4,
+			7
+		],
+		"tags": [
+			"mirror",
+			"reflect",
+			"counter",
+			"demon-lord"
+		]
+	},
+	"aurelia": {
+		"color": "#f7be3e",
+		"accent": "#fff2a8",
+		"special": "extractionBurst",
+		"special_cost": 30,
+		"unlock_level": 6,
+		"thresholds": [
+			1,
+			2,
+			4,
+			7
+		],
+		"tags": [
+			"gold",
+			"currency",
+			"economy"
+		]
+	},
+	"noctissa": {
+		"color": "#5c5be8",
+		"accent": "#d9d5ff",
+		"special": "damageBlink",
+		"special_cost": 20,
+		"unlock_level": 7,
+		"thresholds": [
+			1,
+			2,
+			4,
+			7
+		],
+		"tags": [
+			"shadow",
+			"blink",
+			"ambush"
+		]
+	},
+	"lilith": {
+		"color": "#b90f4a",
+		"accent": "#ff9aa9",
+		"special": "drainBurst",
+		"special_cost": 34,
+		"unlock_level": 8,
+		"thresholds": [
+			1,
+			2,
+			4,
+			7
+		],
+		"tags": [
+			"blood",
+			"risk",
+			"lifesteal"
+		]
+	},
+	"seraphine": {
+		"color": "#fff19a",
+		"accent": "#ffffff",
+		"special": "haloField",
+		"special_cost": 30,
+		"unlock_level": 9,
+		"thresholds": [
+			1,
+			2,
+			4,
+			7
+		],
+		"tags": [
+			"angel",
+			"shield",
+			"orbit"
+		]
+	}
+}

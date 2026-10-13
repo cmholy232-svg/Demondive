@@ -30,9 +30,11 @@ func is_broken() -> bool:
 	return _respawn_timer > 0.0
 
 
-func take_hit(amount: float, direction: Vector2) -> void:
+func take_hit(incoming: Hit) -> void:
 	if is_broken():
 		return
+	var amount: float = incoming.damage
+	var direction: Vector2 = incoming.direction
 	health -= amount
 	_flash_timer = FLASH_SECONDS
 	_wobble = 6.0 * signf(direction.x if direction.x != 0.0 else 1.0)

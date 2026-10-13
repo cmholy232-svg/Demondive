@@ -10,10 +10,14 @@ signal dashed(direction: Vector2)
 signal wavelanded(is_wavedash: bool)
 signal landed(impact_speed: float)
 signal dropped_through
+signal hurt(amount: float)
+signal perfect_dodged
 
 ## Milo's placeholder is 128 px tall; see docs/design.md (art pipeline) for the final size.
 const HEIGHT: float = 128.0
 const ONE_WAY_LAYER: int = 6
+const HURT_KNOCKBACK: Vector2 = Vector2(420.0, -520.0)
+const PERFECT_DODGE_COOLDOWN: float = 0.7
 
 @export var tuning: MovementTuning
 
@@ -36,9 +40,15 @@ var drop_timer: float = 0.0
 var standing_on_one_way: bool = false
 ## True from the moment input opposes velocity on the ground until full speed the other way.
 var turning_around: bool = false
+## Seconds of hit stun after taking damage, during which input is ignored.
+var hurt_timer: float = 0.0
+var perfect_dodge_cooldown: float = 0.0
+## False while a cutscene, menu or death animation owns Milo.
+var controllable: bool = true
 
 
 func _ready() -> void:
+	add_to_group(&"milo")
 	if tuning == null:
 		tuning = load("res://data/player/movement_v2.tres") as MovementTuning
 	air_jumps_left = tuning.air_jumps
@@ -47,6 +57,8 @@ func _ready() -> void:
 
 func _physics_process(delta: float) -> void:
 	current_input = input_override if input_override != null else MiloInput.from_actions()
+	if not controllable or hurt_timer > 0.0:
+		current_input = MiloInput.make()
 	step(current_input, delta)
 
 
@@ -60,6 +72,33 @@ func is_invulnerable() -> bool:
 
 func is_wave_sliding() -> bool:
 	return wave_slide_timer > 0.0
+
+
+## Milo's damageable box in world space.
+func hurt_rect() -> Rect2:
+	return Rect2(global_position + Vector2(-18.0, -112.0), Vector2(36.0, 104.0))
+
+
+## Returns true if the damage landed. Dashing through an attack is a Perfect Dodge.
+func take_damage(amount: float, source_x: float) -> bool:
+	if Game.health <= 0.0 or not controllable:
+		return false
+	if is_invulnerable():
+		if is_dashing() and perfect_dodge_cooldown <= 0.0:
+			perfect_dodge_cooldown = PERFECT_DODGE_COOLDOWN
+			Game.add_energy(8.0)
+			perfect_dodged.emit()
+			CombatFeedback.perfect_dodge(self)
+		return false
+	var taken: float = Game.hurt(amount)
+	invulnerable_timer = Game.HURT_INVULNERABLE_SECONDS
+	hurt_timer = 0.18
+	dash_timer = 0.0
+	var away: float = signf(global_position.x - source_x) if global_position.x != source_x else float(-facing)
+	velocity = Vector2(HURT_KNOCKBACK.x * away, HURT_KNOCKBACK.y)
+	hurt.emit(taken)
+	CombatFeedback.milo_hurt(self, taken)
+	return true
 
 
 ## Advances Milo by one tick. Public so tests can step deterministically.
@@ -88,6 +127,8 @@ func _tick_timers(delta: float) -> void:
 	dash_cooldown_timer = maxf(0.0, dash_cooldown_timer - delta)
 	wave_slide_timer = maxf(0.0, wave_slide_timer - delta)
 	invulnerable_timer = maxf(0.0, invulnerable_timer - delta)
+	hurt_timer = maxf(0.0, hurt_timer - delta)
+	perfect_dodge_cooldown = maxf(0.0, perfect_dodge_cooldown - delta)
 	jump_buffer_timer = maxf(0.0, jump_buffer_timer - delta)
 	if drop_timer > 0.0:
 		drop_timer = maxf(0.0, drop_timer - delta)
@@ -137,7 +178,7 @@ func _run(input: MiloInput, delta: float, on_floor: bool) -> void:
 		if turning_around:
 			acceleration = tuning.turnaround_acceleration
 		velocity.x += move_x * acceleration * delta
-		var cap: float = tuning.wave_slide_speed_cap if is_wave_sliding() else tuning.run_speed
+		var cap: float = tuning.wave_slide_speed_cap if is_wave_sliding() else tuning.run_speed * BoonEffects.move_speed_multiplier()
 		velocity.x = clampf(velocity.x, -cap, cap)
 		facing = move_x
 		return

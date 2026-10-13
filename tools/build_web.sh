@@ -20,4 +20,7 @@ PY
 gzip -9 -c build/web/index.wasm > build/web/engine-gz.wasm
 gzip -9 -c build/web/index.pck > build/web/game-gz.wasm
 rm build/web/index.wasm build/web/index.pck
+# Music streams in from a folder next to the page instead of the game pack.
+mkdir -p build/web/music
+cp audio/music/*.ogg build/web/music/
 ls -la build/web

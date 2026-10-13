@@ -12,6 +12,9 @@ var jump_pressed: bool = false
 var dash_pressed: bool = false
 var magic_held: bool = false
 var magic_pressed: bool = false
+var special_pressed: bool = false
+var interact_pressed: bool = false
+var up_pressed: bool = false
 
 
 static func from_actions() -> MiloInput:
@@ -24,6 +27,9 @@ static func from_actions() -> MiloInput:
 	input.dash_pressed = Input.is_action_just_pressed("dash")
 	input.magic_held = Input.is_action_pressed("magic")
 	input.magic_pressed = Input.is_action_just_pressed("magic")
+	input.special_pressed = Input.is_action_just_pressed("special")
+	input.interact_pressed = Input.is_action_just_pressed("interact")
+	input.up_pressed = Input.is_action_just_pressed("move_up")
 	return input
 
 

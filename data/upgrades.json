@@ -1,0 +1,13 @@
+{
+	"vitality": {"per_level": 5, "max": 5, "base_cost": 5, "step_cost": 4, "category": "body"},
+	"reservoir": {"per_level": 6, "max": 5, "base_cost": 5, "step_cost": 4, "category": "body"},
+	"traction": {"per_level": 0.025, "max": 5, "base_cost": 7, "step_cost": 4, "category": "body"},
+	"kindling": {"per_level": 0.05, "max": 5, "base_cost": 7, "step_cost": 4, "category": "arcane"},
+	"cadence": {"per_level": 0.04, "max": 5, "base_cost": 8, "step_cost": 4, "category": "arcane"},
+	"ritual": {"per_level": 0.04, "max": 5, "base_cost": 8, "step_cost": 4, "category": "arcane"},
+	"magnet": {"per_level": 45, "max": 5, "base_cost": 6, "step_cost": 4, "category": "fortune"},
+	"reroll": {"per_level": 1, "max": 3, "base_cost": 12, "step_cost": 6, "category": "fate"},
+	"boon_choice": {"per_level": 0.03, "max": 3, "base_cost": 15, "step_cost": 6, "category": "fate"},
+	"pizza_quality": {"per_level": 0.08, "max": 5, "base_cost": 7, "step_cost": 4, "category": "hellroom"},
+	"training": {"per_level": 0.03, "max": 1, "base_cost": 10, "step_cost": 0, "category": "hellroom"}
+}
