@@ -144,6 +144,7 @@ func _unhandled_input(event: InputEvent) -> void:
 	if not visible or _input_delay > 0.0:
 		return
 	if _equip_box.visible:
+		_equip_input(event)
 		return
 	if event.is_action_pressed("move_left"):
 		_focus = (_focus - 1 + _options.size()) % _options.size()
@@ -158,6 +159,24 @@ func _unhandled_input(event: InputEvent) -> void:
 	elif event.is_action_pressed("special") and Game.rerolls > 0:
 		Game.rerolls -= 1
 		offer(roll(Game.rng, _forced), _forced)
+	else:
+		return
+	get_viewport().set_input_as_handled()
+
+
+## The equip question answers to the game's own buttons too, not only the UI keys.
+func _equip_input(event: InputEvent) -> void:
+	var buttons: Array[Node] = _equip_box.get_children().filter(func(n: Node) -> bool: return n is Button and not n.is_queued_for_deletion())
+	if buttons.is_empty():
+		return
+	var focused: int = maxi(0, buttons.find(get_viewport().gui_get_focus_owner()))
+	if event.is_action_pressed("move_left") or event.is_action_pressed("move_right"):
+		(buttons[(focused + 1) % buttons.size()] as Button).grab_focus()
+		Audio.play_sfx(&"ui_move", -4.0)
+	elif event.is_action_pressed("jump") or event.is_action_pressed("interact") or event.is_action_pressed("magic"):
+		(buttons[focused] as Button).pressed.emit()
+	elif event.is_action_pressed("ui_cancel") or event.is_action_pressed("pause"):
+		(buttons[buttons.size() - 1] as Button).pressed.emit()
 	else:
 		return
 	get_viewport().set_input_as_handled()
@@ -200,6 +219,9 @@ func _ask_equip(id: StringName, current: StringName) -> void:
 
 
 func _close(id: StringName) -> void:
+	if not visible:
+		return
+	_equip_box.visible = false
 	visible = false
 	_title.text = Strings.text("boon.offer_title")
 	get_tree().paused = false

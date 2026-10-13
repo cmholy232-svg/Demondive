@@ -98,6 +98,7 @@ func _enter_room(index: int) -> void:
 	add_child(room)
 	move_child(room, 0)
 	milo.global_position = data.player_start
+	milo.safe_position = data.player_start
 	milo.velocity = Vector2.ZERO
 	camera.set_room_bounds(Rect2(Vector2.ZERO, data.size_px()))
 	camera.snap()
@@ -220,6 +221,9 @@ func _on_boss_defeated(boss: Boss) -> void:
 
 ## Shows the boon offer and waits for the pick.
 func offer_boons(forced: StringName = &"") -> void:
+	# One offer at a time: a cage rescue can land while a room reward is open.
+	while boon_choice.visible:
+		await boon_choice.chosen
 	var options: Array[StringName] = BoonChoice.roll(Game.rng, forced)
 	if options.is_empty():
 		return
@@ -267,9 +271,9 @@ func _end(won: bool) -> void:
 
 
 func _rescue_fall() -> void:
-	milo.take_damage(10.0, milo.global_position.x)
-	milo.global_position = room.data.player_start
-	milo.velocity = Vector2.ZERO
+	if milo.safe_position == Vector2.INF:
+		milo.safe_position = room.data.player_start
+	milo.hazard_respawn(10.0)
 
 
 func _clear_leftovers() -> void:

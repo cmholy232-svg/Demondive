@@ -93,6 +93,22 @@ func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("ui_cancel") or event.is_action_pressed("pause"):
 		close()
 		get_viewport().set_input_as_handled()
+		return
+	# The game's own keys (WASD, E, J) work here too, not only arrows and Enter.
+	var focus: Control = get_viewport().gui_get_focus_owner()
+	if focus == null:
+		return
+	var sides: Dictionary = {&"move_left": SIDE_LEFT, &"move_right": SIDE_RIGHT, &"move_up": SIDE_TOP, &"move_down": SIDE_BOTTOM}
+	for action: StringName in sides:
+		if event.is_action_pressed(action) and not event.is_action_pressed(StringName("ui_" + str(action).trim_prefix("move_"))):
+			var next: Control = focus.find_valid_focus_neighbor(sides[action])
+			if next != null:
+				next.grab_focus()
+			get_viewport().set_input_as_handled()
+			return
+	if (event.is_action_pressed("interact") or event.is_action_pressed("magic")) and focus is BaseButton and not (focus as BaseButton).disabled and not event.is_action_pressed("ui_accept"):
+		(focus as BaseButton).pressed.emit()
+		get_viewport().set_input_as_handled()
 
 
 ## A focusable row button in the panel's style.

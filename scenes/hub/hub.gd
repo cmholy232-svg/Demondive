@@ -24,6 +24,8 @@ var _shards: Label
 var _near: StringName = &""
 var _leaving: bool = false
 var _time: float = 0.0
+## Seconds after a menu closes before a station can open again.
+var _station_cooldown: float = 0.0
 
 
 func _ready() -> void:
@@ -55,11 +57,12 @@ func _ready() -> void:
 	altar.boon_selected.connect(func(boon: StringName) -> void: _tint_orb(boon))
 	desk = DeskPanel.new()
 	add_child(desk)
-	desk.closed.connect(_refresh_overlay)
+	desk.closed.connect(_on_panel_closed)
+	altar.closed.connect(_on_panel_closed)
 	wardrobe = WardrobePanel.new()
 	add_child(wardrobe)
 	wardrobe.preview.connect(func(outfit: StringName) -> void: view.milo_view().apply_outfit(outfit))
-	wardrobe.closed.connect(_refresh_overlay)
+	wardrobe.closed.connect(_on_panel_closed)
 	fade = ScreenFade.new()
 	add_child(fade)
 	room.start()
@@ -103,7 +106,13 @@ func _process(delta: float) -> void:
 		HellroomKit.altar_orb.position.y = float(HellroomKit.altar_orb.get_meta("bob")) + sin(_time * 2.0) * 0.08
 
 
-func _physics_process(_delta: float) -> void:
+func _on_panel_closed() -> void:
+	_station_cooldown = 0.3
+	_refresh_overlay()
+
+
+func _physics_process(delta: float) -> void:
+	_station_cooldown = maxf(0.0, _station_cooldown - delta)
 	if _leaving or get_tree().paused:
 		return
 	_near = &""
@@ -114,7 +123,7 @@ func _physics_process(_delta: float) -> void:
 	var text: String = ""
 	if _near != &"":
 		text = Strings.text("hub.prompt.%s" % _near)
-		if not dialogue.visible and (milo.current_input.interact_pressed or milo.current_input.up_pressed):
+		if not dialogue.visible and _station_cooldown <= 0.0 and milo.controllable and (milo.current_input.interact_pressed or milo.current_input.up_pressed):
 			_open_station(_near)
 	else:
 		for door: ExitDoor in room.exits:

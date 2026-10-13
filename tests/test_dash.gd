@@ -76,3 +76,28 @@ func test_waveland_keeps_momentum_into_a_jump() -> void:
 	rig.tick(MiloInput.make(1).with_jump())
 	check(rig.milo.velocity.x > rig.milo.tuning.run_speed + 100.0, "jump out of a wave slide keeps speed (%.0f)" % rig.milo.velocity.x)
 	rig.free_room()
+
+
+func test_dash_has_a_cooldown_on_the_ground() -> void:
+	var rig := MiloRig.create(tree)
+	rig.place(Vector2(200.0, FLOOR_Y - 1.0))
+	rig.tick(MiloInput.make(1).with_dash())
+	while rig.milo.is_dashing():
+		rig.tick(MiloInput.make(1))
+	rig.tick(MiloInput.make(-1).with_dash())
+	check(not rig.milo.is_dashing(), "a second dash right after the first is refused")
+	rig.run(MiloInput.make(), int(rig.milo.tuning.dash_cooldown_seconds * 60.0) + 2)
+	rig.tick(MiloInput.make(-1).with_dash())
+	check(rig.milo.is_dashing(), "dash is back once the cooldown ends")
+	rig.free_room()
+
+
+func test_wavedash_skips_the_cooldown() -> void:
+	var rig := MiloRig.create(tree)
+	rig.place(Vector2(200.0, FLOOR_Y - 1.0))
+	rig.tick(MiloInput.make(1, 1).with_dash())
+	rig.tick(MiloInput.make(1, 1))
+	check(rig.milo.is_wave_sliding(), "wavedash landed")
+	rig.tick(MiloInput.make(1).with_dash())
+	check(rig.milo.is_dashing(), "a clean wavedash lets Milo dash again at once")
+	rig.free_room()

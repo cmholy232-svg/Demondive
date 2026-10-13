@@ -44,6 +44,11 @@ func _ready() -> void:
 	add_child(shape)
 
 
+## Room lava and spikes: touching them sends Milo back to safe ground.
+func is_pit() -> bool:
+	return (kind == &"lava" or kind == &"spikes") and active_seconds < 0.0 and cycle_on <= 0.0
+
+
 func is_warning() -> bool:
 	if cycle_on > 0.0:
 		var t: float = _cycle_time()
@@ -79,6 +84,7 @@ func _physics_process(delta: float) -> void:
 		var target := body as Milo
 		if target == null:
 			continue
-		if kind == &"lava" and target.velocity.y > 0.0:
-			target.velocity.y = -1000.0
+		if is_pit():
+			target.hazard_respawn(damage)
+			continue
 		target.take_damage(damage, global_position.x)

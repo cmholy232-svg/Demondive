@@ -55,6 +55,9 @@ var on_ice: bool = false
 var shield_check: Callable = Callable()
 ## Seconds since the last dash ended (Vespera widens the Perfect Dodge after it).
 var since_dash: float = INF
+## Last solid ground Milo stood on; lava and spike pits put him back here.
+var safe_position: Vector2 = Vector2.INF
+var _safe_timer: float = 0.0
 ## Dash speed for a Special's pounce (0 = the normal dash).
 var _dash_speed_override: float = 0.0
 
@@ -72,6 +75,13 @@ func _physics_process(delta: float) -> void:
 	if not controllable or hurt_timer > 0.0:
 		current_input = MiloInput.make()
 	step(current_input, delta)
+
+
+## A menu or dialogue paused the game: drop the last tick's presses so the
+## press that opened it can't fire again the moment it closes.
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_PAUSED or what == NOTIFICATION_UNPAUSED:
+		current_input = MiloInput.make()
 
 
 func is_dashing() -> bool:
@@ -201,6 +211,9 @@ func _dash_step(delta: float) -> void:
 		dash_timer = 0.0
 		wave_slide_timer = tuning.waveland_duration_seconds
 		velocity = Vector2(dash_direction.x * tuning.waveland_speed, 0.0)
+		# A clean wavedash or waveland is the one way to skip the dash cooldown.
+		dash_cooldown_timer = 0.0
+		dash_charges_left = tuning.dash_charges
 		wavelanded.emit(absf(dash_direction.x) > 0.35)
 
 
@@ -284,3 +297,40 @@ func _move() -> void:
 			iced = iced or collider.is_in_group("ice")
 	if is_on_floor():
 		on_ice = iced
+		_remember_safe_ground()
+
+
+func _remember_safe_ground() -> void:
+	var floor_body: Object = null
+	for i: int in get_slide_collision_count():
+		var collision: KinematicCollision2D = get_slide_collision(i)
+		if collision.get_normal().y < -0.7:
+			floor_body = collision.get_collider()
+	if not floor_body is StaticBody2D or floor_body is AnimatableBody2D or hurt_timer > 0.0:
+		return
+	var space: PhysicsDirectSpaceState2D = get_world_2d().direct_space_state
+	for side: float in [-26.0, 26.0]:
+		var from: Vector2 = global_position + Vector2(side, -8.0)
+		var query := PhysicsRayQueryParameters2D.create(from, from + Vector2(0.0, 40.0), PhysicsLayers.WORLD)
+		if space.intersect_ray(query).is_empty():
+			return
+	safe_position = global_position
+
+
+## Lava and spike pits: hurt, then put Milo back on the last safe ground.
+func hazard_respawn(damage: float) -> void:
+	if not controllable or Game.health <= 0.0:
+		return
+	var from: Vector2 = global_position
+	invulnerable_timer = 0.0
+	take_damage(damage, global_position.x)
+	if Game.health <= 0.0:
+		return
+	if safe_position != Vector2.INF:
+		global_position = safe_position
+	velocity = Vector2.ZERO
+	hurt_timer = 0.25
+	dash_timer = 0.0
+	air_jumps_left = tuning.air_jumps
+	reset_physics_interpolation()
+	Game.fx(&"spark", from + Vector2(0.0, -40.0), Color(1.0, 0.45, 0.15), 1.2)
