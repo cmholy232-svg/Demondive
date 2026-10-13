@@ -22,6 +22,10 @@ func _ready() -> void:
 	add_to_group("hurtbox")
 
 
+func is_flashing() -> bool:
+	return _flash_timer > 0.0
+
+
 func is_broken() -> bool:
 	return _respawn_timer > 0.0
 

@@ -7,5 +7,5 @@
 	"debug.profile": "Movement profile",
 	"debug.last_reversal": "Last full reversal",
 	"combat.ko": "KO",
-	"hint.controls": "Move: WASD / Arrows   Jump: Space (twice for double jump)   Arcane Bolt: J (hold a direction to aim)   Dash: L or Shift   F3: tuning"
+	"hint.controls": "Move: WASD / Arrows   Jump: Space (twice for double jump)   Bolt: J (hold a direction to aim)   Dash: L or Shift   F2: 2D/3D look   F3: tuning"
 }

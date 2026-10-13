@@ -20,6 +20,8 @@ func setup(new_velocity: Vector2, new_damage: float, new_radius: float, new_life
 
 
 func _ready() -> void:
+	add_to_group("arcane_bolt")
+	visible = not RoomView3D.active
 	(shape.shape as CircleShape2D).radius = radius
 	area_entered.connect(_on_area_entered)
 	body_entered.connect(_on_body_entered)

@@ -2,7 +2,7 @@ extends TestCase
 
 const ACTIONS: PackedStringArray = [
 	"move_left", "move_right", "move_up", "move_down",
-	"jump", "magic", "special", "dash", "interact", "pause", "debug_toggle",
+	"jump", "magic", "special", "dash", "interact", "pause", "debug_toggle", "look_toggle",
 ]
 
 
