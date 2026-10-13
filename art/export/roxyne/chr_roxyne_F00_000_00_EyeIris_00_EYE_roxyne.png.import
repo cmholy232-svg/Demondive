@@ -1,0 +1,37 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://vly2i7dp0770"
+path="res://.godot/imported/chr_roxyne_F00_000_00_EyeIris_00_EYE_roxyne.png-e7b12bcf8486ef3a1867e2fd250f54bf.ctex"
+metadata={
+"vram_texture": false
+}
+generator_parameters={
+"md5": "5a1e791179c6c2bc479500baaf22badb"
+}
+
+[deps]
+
+source_file="res://art/export/roxyne/chr_roxyne_F00_000_00_EyeIris_00_EYE_roxyne.png"
+dest_files=["res://.godot/imported/chr_roxyne_F00_000_00_EyeIris_00_EYE_roxyne.png-e7b12bcf8486ef3a1867e2fd250f54bf.ctex"]
+
+[params]
+
+compress/mode=1
+compress/high_quality=false
+compress/lossy_quality=0.82
+compress/hdr_compression=1
+compress/normal_map=0
+compress/channel_pack=0
+mipmaps/generate=true
+mipmaps/limit=-1
+roughness/mode=0
+roughness/src_normal=""
+process/fix_alpha_border=true
+process/premult_alpha=false
+process/normal_map_invert_y=false
+process/hdr_as_srgb=false
+process/hdr_clamp_exposure=false
+process/size_limit=0
+detect_3d/compress_to=0

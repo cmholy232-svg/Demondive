@@ -1,0 +1,241 @@
+"""Builds one DemonDive character from the VRoid kit.
+
+    ~/bvenv/bin/python tools/characters/build_vroid.py <id> [preview.png]
+
+The recipe in vroid_cast.json picks a base model (body, outfit, face), can
+borrow hair or a face from another model, recolours every texture to the
+character's palette, adds horns, crowns, skirts and the like, retargets the
+Mixamo clips in ~/ext/anims, and writes art/export/<id>/chr_<id>.glb.
+"""
+import json
+import math
+import os
+import sys
+
+import bpy
+from mathutils import Quaternion, Vector
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, os.path.join(HERE, "vroid"))
+import extras  # noqa: E402
+import kit  # noqa: E402
+import paint  # noqa: E402
+import retarget  # noqa: E402
+
+ROOT = os.path.dirname(os.path.dirname(HERE))
+ANIM_DIR = os.environ.get("ANIM_DIR", os.path.expanduser("~/ext/anims"))
+TEXTURE_SIZE = {"SKIN": 512, "CLOTH": 1024, "HAIR": 512, "FACE": 512, "EYE": 256, "OTHER": 512}
+# name -> (clip, first frame, last frame, playback speed, keep travel)
+CLIPS = {
+    "idle": ("Idle", 1, 240, 1.0, False),
+    "run": ("Medium_Run", 1, 18, 1.0, False),
+    "walk": ("StrutWalking", 1, 44, 1.0, False),
+    "jump": ("JumpingDown", 22, 30, 1.0, False),
+    "fall": ("JumpingDown", 38, 46, 1.0, False),
+    "land": ("JumpingDown", 52, 60, 1.0, False),
+    "dash": ("Running", 1, 20, 1.6, False),
+    "flip": ("Backflip", 30, 80, 2.0, False),
+    "hurt": ("Shoved", 1, 28, 1.4, False),
+    "windup": ("Threatening", 1, 60, 1.0, False),
+    "attack": ("Punching", 11, 30, 1.2, False),
+    "taunt": ("Taunt", 1, 86, 1.0, False),
+    "wave": ("Waving", 1, 143, 1.0, False),
+    "cheer": ("Cheering", 1, 88, 1.0, False),
+    "dance": ("Dancing", 1, 116, 1.0, False),
+}
+CAST_AIMS = {"cast_down": -90.0, "cast_down_forward": -45.0, "cast_forward": 0.0, "cast_up_forward": 45.0, "cast_up": 90.0}
+
+
+def recolor(part, recipe: dict, tex_dir: str) -> None:
+    mat = part.data.materials[0]
+    kind = kit.material_kind(mat.name)
+    upper = mat.name.upper()
+    img = paint.own_image(mat, recipe["id"])
+    if img is None:
+        return
+    paint.shrink(img, TEXTURE_SIZE.get(kind, 512))
+    if kind == "SKIN" and "skin" in recipe:
+        paint.tint(img, recipe["skin"], q=60.0)
+    elif kind == "HAIR" and "hair_color" in recipe:
+        paint.tint(img, recipe["hair_color"], q=75.0)
+    elif kind == "FACE" and "SKIN" not in upper:
+        if "BROW" in upper and "hair_color" in recipe:
+            paint.tint(img, recipe.get("brow", recipe["hair_color"]), q=50.0, lift=0.7)
+        elif "MOUTH" in upper and "lips" in recipe:
+            paint.tint(img, recipe["lips"], keep=0.35, q=80.0)
+    elif kind == "EYE" and "IRIS" in upper and "iris" in recipe:
+        paint.tint(img, recipe["iris"], keep=0.15, q=85.0)
+    elif kind == "CLOTH":
+        ramp = None
+        for key, colors in recipe.get("cloth", {}).items():
+            if key != "*" and key.upper() in upper:
+                ramp = colors
+        ramp = ramp or recipe.get("cloth", {}).get("*")
+        if ramp:
+            paint.ramp(img, *ramp[:3], keep=float(recipe.get("cloth_keep", 0.0)), pivot=float(ramp[3]) if len(ramp) > 3 else 0.8)
+    paint.save(img, tex_dir)
+    for key, name in recipe.get("names", {}).items():
+        if key.upper() in upper:
+            mat.name = name
+            return
+    mat.name = f"{kind.lower()}_{part.name.split(':')[-1][:28]}"
+
+
+def assemble(recipe: dict):
+    arm, meshes = kit.load(recipe["base"])
+    pieces = kit.parts(meshes)
+    for donor_key, kinds in (("hair", ("HAIR",)), ("face", ("FACE", "EYE"))):
+        donor = recipe.get(donor_key)
+        if not donor:
+            continue
+        for p in [p for p in pieces if kit.kind_of(p) in kinds or (donor_key == "face" and "Face" in p.name and kit.kind_of(p) == "SKIN" and "FACE" in p.data.materials[0].name.upper())]:
+            pieces.remove(p)
+            bpy.data.objects.remove(p)
+        d_arm, d_meshes = kit.load(donor)
+        keep = []
+        # Donor heads sit at a different height (models differ in stature):
+        # move the donor's hair/face onto the base model's head.
+        base_head = arm.matrix_world @ arm.data.bones["J_Bip_C_Head"].head_local
+        donor_head = d_arm.matrix_world @ d_arm.data.bones["J_Bip_C_Head"].head_local
+        for p in kit.parts(d_meshes):
+            k = kit.kind_of(p)
+            name = p.data.materials[0].name.upper() if p.data.materials else ""
+            wanted = k in kinds or (donor_key == "face" and k == "SKIN" and "_FACE_" in name)
+            if wanted:
+                inv = p.matrix_world.inverted()
+                for v in p.data.vertices:
+                    w = p.matrix_world @ v.co
+                    w = base_head + (w - donor_head) * (1.015 if k == "HAIR" else 1.0)
+                    v.co = inv @ w
+                kit.transplant(p, d_arm, arm)
+                keep.append(p)
+        kit.remove_rig(d_arm, keep)
+        pieces.extend(keep)
+    for drop in recipe.get("drop", []):
+        for p in [p for p in pieces if drop.upper() in p.name.upper()]:
+            pieces.remove(p)
+            bpy.data.objects.remove(p)
+    return arm, pieces
+
+
+def add_extras(arm, pieces, recipe: dict) -> list:
+    head = extras.head_box(arm, pieces)
+    body = [p for p in pieces if kit.kind_of(p) in ("SKIN", "CLOTH")]
+    made = []
+    for e in recipe.get("extras", []):
+        kind = e["kind"]
+        mat = extras.material(e.get("mat", kind), e.get("color", "d4a83a"), e.get("glow", 0.0), e.get("metal", 0.0))
+        if kind == "horns":
+            made.append(extras.horns(arm, head, mat, e.get("style", "curved"), e.get("size", 1.0)))
+        elif kind == "crown":
+            made.append(extras.crown(arm, head, mat, e.get("spikes", 9), e.get("height", 0.07), e.get("lift", 0.62)))
+        elif kind == "halo":
+            made.append(extras.halo(arm, head, mat, e.get("radius", 0.13)))
+        elif kind == "tail":
+            made.append(extras.tail(arm, mat, e.get("length", 0.75)))
+        elif kind == "wings":
+            made.append(extras.wings(arm, mat, e.get("span", 0.55), e.get("feathered", False)))
+        elif kind == "skirt":
+            slits = [math.radians(a) for a in e.get("slits", [90, -90])]
+            made.append(extras.skirt(arm, body, mat, e.get("top", 0.0), e.get("length", 0.95), e.get("flare", 0.25), slits, e.get("slit_height", 0.75)))
+        elif kind == "cape":
+            made.append(extras.cape(arm, body, mat, e.get("length", 0.85), e.get("width", 0.5)))
+        elif kind == "band":
+            made.append(extras.ring_around(arm, e["bone"], mat, e.get("radius", 0.05), offset=e.get("offset", 0.5)))
+        elif kind == "weapon":
+            glow = extras.material("glow_" + e.get("kind2", "spear"), e.get("glow_color", "ff6a1a"), 4.0)
+            made.extend(extras.back_weapon(arm, mat, glow, e.get("kind2", "spear"), e.get("length", 1.5)))
+    return made
+
+
+def animate(arm, recipe: dict) -> None:
+    wanted = recipe.get("clips", list(CLIPS))
+    for name in wanted:
+        clip, first, last, speed, travel = CLIPS[name]
+        path = os.path.join(ANIM_DIR, clip + ".fbx")
+        src, src_action = retarget.load_clip(path)
+        retarget.retarget(src, arm, name, (first, last), in_place=not travel, speed=speed, step=2 if last - first > 40 else 1)
+        bpy.data.objects.remove(src)
+        bpy.data.actions.remove(src_action)
+    if recipe.get("cast"):
+        for name, deg in CAST_AIMS.items():
+            cast_pose(arm, name, deg)
+
+
+def cast_pose(arm, name: str, degrees: float) -> None:
+    """Right arm straight out along the aim (model faces +Y, up is +Z)."""
+    a = math.radians(degrees)
+    aim = Vector((0.0, math.cos(a), math.sin(a)))
+    act = bpy.data.actions.new(name)
+    act.use_fake_user = True
+    arm.animation_data_create()
+    arm.animation_data.action = act
+    # glTF import guesses bone tails, so measure each segment joint to joint.
+    chain = {"J_Bip_R_UpperArm": "J_Bip_R_LowerArm", "J_Bip_R_LowerArm": "J_Bip_R_Hand", "J_Bip_R_Hand": "J_Bip_R_Middle1"}
+    for bname, child in chain.items():
+        pb = arm.pose.bones[bname]
+        b = pb.bone
+        rest_dir = (arm.data.bones[child].head_local - b.head_local).normalized()
+        world_rot = rest_dir.rotation_difference(aim)
+        rest_q = b.matrix_local.to_quaternion()
+        parent_q = Quaternion()
+        if b.parent is not None:
+            parent_q = arm.pose.bones[b.parent.name].matrix.to_quaternion()
+            rel = b.parent.matrix_local.to_quaternion().inverted() @ rest_q
+        else:
+            rel = rest_q
+        target = world_rot @ rest_q
+        basis = rel.inverted() @ parent_q.inverted() @ target
+        pb.rotation_mode = "QUATERNION"
+        pb.rotation_quaternion = basis
+        bpy.context.view_layer.update()
+        pb.keyframe_insert("rotation_quaternion", frame=1)
+        pb.keyframe_insert("rotation_quaternion", frame=2)
+    arm.animation_data.action = None
+    for pb in arm.pose.bones:
+        pb.rotation_quaternion = Quaternion()
+
+
+def export(path: str) -> None:
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    bpy.ops.export_scene.gltf(filepath=path, export_format="GLB", export_animations=True,
+                              export_animation_mode="ACTIONS", export_skins=True, export_apply=False,
+                              export_force_sampling=False, export_yup=True, export_morph=True,
+                              export_image_format="AUTO", export_extras=False, export_cameras=False, export_lights=False)
+
+
+def main() -> None:
+    args = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else sys.argv[1:]
+    cid = args[0]
+    preview = args[1] if len(args) > 1 else None
+    recipes = json.load(open(os.path.join(HERE, "vroid_cast.json")))
+    recipe = dict(recipes[cid])
+    recipe["id"] = cid
+    bpy.ops.wm.read_factory_settings(use_empty=True)
+    arm, pieces = assemble(recipe)
+    tex_dir = f"/tmp/vroid_tex/{cid}"
+    for p in pieces:
+        if p.data.materials:
+            recolor(p, recipe, tex_dir)
+    # Facial expressions aren't used in play; dropping them saves most of the file.
+    for p in pieces:
+        if p.data.shape_keys:
+            p.shape_key_clear()
+    made = add_extras(arm, pieces, recipe)
+    arm.name = "rig"
+    arm.data.name = "rig"
+    if os.environ.get("NO_ANIM") != "1":
+        animate(arm, recipe)
+    if preview:
+        import preview_render
+        preview_render.render(arm, preview, os.environ.get("PREVIEW_ACTION", "idle"), int(os.environ.get("PREVIEW_FRAME", "1")))
+    # VRoid faces +Y; the game's characters face -Y in Blender (+Z in Godot).
+    arm.rotation_euler = (0.0, 0.0, math.pi)
+    out = os.path.join(ROOT, "art", "export", cid, f"chr_{cid}.glb")
+    if os.environ.get("NO_EXPORT") != "1":
+        export(out)
+        print("WROTE", out, os.path.getsize(out))
+
+
+if __name__ == "__main__":
+    main()

@@ -1,0 +1,37 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://dptqruoqre60i"
+path="res://.godot/imported/chr_dream_girl_F00_002_02_Body_00_SKIN_dream_girl.png-125c7cba8295181332a7f071db3b9979.ctex"
+metadata={
+"vram_texture": false
+}
+generator_parameters={
+"md5": "664a470903a26dcfeedac59f7b00f6e6"
+}
+
+[deps]
+
+source_file="res://art/export/dream_girl/chr_dream_girl_F00_002_02_Body_00_SKIN_dream_girl.png"
+dest_files=["res://.godot/imported/chr_dream_girl_F00_002_02_Body_00_SKIN_dream_girl.png-125c7cba8295181332a7f071db3b9979.ctex"]
+
+[params]
+
+compress/mode=1
+compress/high_quality=false
+compress/lossy_quality=0.82
+compress/hdr_compression=1
+compress/normal_map=0
+compress/channel_pack=0
+mipmaps/generate=true
+mipmaps/limit=-1
+roughness/mode=0
+roughness/src_normal=""
+process/fix_alpha_border=true
+process/premult_alpha=false
+process/normal_map_invert_y=false
+process/hdr_as_srgb=false
+process/hdr_clamp_exposure=false
+process/size_limit=0
+detect_3d/compress_to=0

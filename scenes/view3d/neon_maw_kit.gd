@@ -13,6 +13,10 @@ const CHROME: Color = Color(0.55, 0.5, 0.62)
 const FRONT_Z: float = 0.7
 const BACK_Z: float = -3.2
 const WALL_Z: float = -3.6
+const LOOK: Dictionary = {"sky_top": Color(0.03, 0.005, 0.05), "sky_low": Color(0.28, 0.03, 0.2), "horizon": Color(1.0, 0.25, 0.6),
+	"silhouette": Color(0.015, 0.005, 0.02), "accent": Color(1.0, 0.55, 0.15)}
+const STONE_LOOK: Dictionary = {"base": Color(0.11, 0.07, 0.14), "top": Color(0.2, 0.12, 0.24), "seam": Color(0.02, 0.01, 0.03),
+	"edge": Color(0.42, 0.26, 0.5), "glow": Color(1.0, 0.18, 0.62), "pattern": 2, "glow_amount": 0.35, "roughness": 0.4, "metal": 0.15}
 const SIGN_KEYS: Array[String] = ["sign.maw", "sign.open", "sign.free", "sign.last_call", "sign.vip", "sign.tab"]
 
 static var _dance_shader: Shader = preload("res://art/shaders/dance_floor.gdshader")
@@ -63,6 +67,7 @@ static func build(root: Node3D, room: Room) -> void:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = hash(data.id) + 7
 	ClubSet3D.build(root, room, WALL_Z, rng)
+	Backdrop3D.build(root, size, LOOK, hash(data.id) + 3)
 	for rect: Rect2 in room.builder.solids:
 		_solid(root, rect, data)
 	for rect: Rect2 in room.builder.ledges:
@@ -78,14 +83,14 @@ static func _solid(root: Node3D, rect: Rect2, data: RoomData) -> void:
 	var c: Vector3 = Kit3D.rect_center(rect)
 	var s := Vector3(rect.size.x, rect.size.y, 0.0) / Kit3D.PX_PER_M
 	var depth: float = FRONT_Z - BACK_Z
-	Kit3D.box(root, Vector3(c.x, c.y, (FRONT_Z + BACK_Z) * 0.5), Vector3(s.x, s.y, depth), Kit3D.material(STONE, 0.85))
+	var size := Vector3(s.x, s.y, depth)
+	Kit3D.box(root, Vector3(c.x, c.y, (FRONT_Z + BACK_Z) * 0.5), size, Kit3D.surface(STONE_LOOK, size))
 	var top_y: float = c.y + s.y * 0.5
 	var tile_x: int = int(rect.position.x / RoomData.TILE)
 	var tile_y: int = int(rect.position.y / RoomData.TILE)
 	if data.is_solid(tile_x, tile_y - 1):
 		return
-	# Walkable top: glossy cap, neon lip on the front edge, a faint strip at the back.
-	Kit3D.box(root, Vector3(c.x, top_y - 0.03, (FRONT_Z + BACK_Z) * 0.5), Vector3(s.x + 0.02, 0.06, depth + 0.02), Kit3D.material(STONE_TOP, 0.18, Color.BLACK, 0.0, 0.35))
+	# Walkable top: neon lip on the front edge, a faint strip at the back.
 	Kit3D.box(root, Vector3(c.x, top_y - 0.07, FRONT_Z + 0.01), Vector3(s.x, 0.045, 0.03), Kit3D.neon(MAGENTA, 4.5))
 	Kit3D.box(root, Vector3(c.x, top_y + 0.005, BACK_Z + 0.35), Vector3(s.x, 0.012, 0.05), Kit3D.neon(CYAN, 1.6))
 
@@ -142,9 +147,12 @@ static func _set_dressing(root: Node3D, room: Room, size: Vector2) -> void:
 	var sign_index: int = rng.randi_range(0, SIGN_KEYS.size() - 1)
 	var next_sign_x: float = 0.0
 	while x < w:
+		if Backdrop3D.in_opening(x):
+			x = Backdrop3D.after_opening(x) + rng.randf_range(0.0, 1.0)
+			continue
 		var pick: int = rng.randi_range(0, 3)
 		var y: float = rng.randf_range(floor_y + 4.6, minf(floor_y + 8.0, top_y - 2.0))
-		if pick == 0 and x < next_sign_x:
+		if pick == 0 and (x < next_sign_x or Backdrop3D.in_opening(x + 3.0)):
 			pick = 1
 		if pick == 0:
 			next_sign_x = x + 11.0

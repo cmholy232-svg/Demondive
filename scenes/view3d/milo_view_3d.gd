@@ -4,20 +4,17 @@ extends Node3D
 ## animation from Milo's state. Reads Milo; never changes him.
 
 const MODEL_PATH: String = "res://art/export/milo/chr_milo.glb"
-const TOON_SHADER: Shader = preload("res://art/shaders/toon.gdshader")
-const OUTLINE_SHADER: Shader = preload("res://art/shaders/outline.gdshader")
-## Bones the cast pose drives on top of whatever the body is doing.
-const CAST_BONES: PackedStringArray = ["clavicle.R", "shoulder01.R", "upperarm01.R", "upperarm02.R", "lowerarm01.R",
-	"lowerarm02.R", "wrist.R", "spine03", "head"]
 const CAST_ANIMATIONS: Array[String] = ["cast_down", "cast_down_forward", "cast_forward", "cast_up_forward", "cast_up"]
 const TARGET_HEIGHT_M: float = 1.28
+## Ground speed (px/s) at which the run clip's feet match the floor.
+const RUN_ANIMATION_SPEED: float = 520.0
 const TURN_SPEED: float = 18.0
 const CAST_POSE_SECONDS: float = 0.3
 
 var milo: Milo
 var _model: Node3D
 var _animation: AnimationPlayer
-var _cast_layer: AnimationPlayer
+var _cast_arm: CastArmModifier
 var _caster: ArcaneCaster
 var _yaw: float = PI * 0.5
 var _cast_timer: float = 0.0
@@ -70,55 +67,35 @@ func _fit_height(model: Node3D) -> void:
 		model.scale = Vector3.ONE * (TARGET_HEIGHT_M / height)
 
 
-## Replaces imported materials with cel shading and an ink outline, keeping each part's colour.
+## Cel shading and ink outline from CharacterModels, then the equipped outfit.
 func _apply_toon(model: Node3D) -> void:
-	for node: Node in model.find_children("*", "MeshInstance3D", true, false):
-		var instance := node as MeshInstance3D
-		for surface: int in instance.mesh.get_surface_count():
-			var source := instance.mesh.surface_get_material(surface) as BaseMaterial3D
-			var color: Color = source.albedo_color if source != null else Color.WHITE
-			if source != null:
-				toon_targets.append([instance, surface, color, source.resource_name])
-			var toon := ShaderMaterial.new()
-			toon.shader = TOON_SHADER
-			toon.set_shader_parameter("albedo", color)
-			var outline := ShaderMaterial.new()
-			outline.shader = OUTLINE_SHADER
-			outline.set_shader_parameter("width", 0.012 / maxf(0.01, model.scale.x))
-			toon.next_pass = outline
-			instance.set_surface_override_material(surface, toon)
+	toon_targets = CharacterModels.toonify(model)
 	apply_outfit(Cosmetics.equipped())
 
 
-## Recolours Milo's clothes for an outfit; materials it doesn't name keep their colour.
+## Recolours Milo's clothes for an outfit; materials it doesn't name keep their texture colours.
 func apply_outfit(id: StringName) -> void:
 	var colors: Dictionary = Cosmetics.colors(id)
 	for target: Array in toon_targets:
 		var instance := target[0] as MeshInstance3D
 		var toon := instance.get_surface_override_material(int(target[1])) as ShaderMaterial
-		if toon != null:
-			toon.set_shader_parameter("albedo", colors.get(target[3], target[2]))
+		if toon == null:
+			continue
+		var name: String = str(target[3])
+		toon.set_shader_parameter("luma_tint", colors.has(name))
+		toon.set_shader_parameter("albedo", colors.get(name, target[2]))
 
 
-## A second player that only drives the right arm, so Milo can cast while running.
+## A skeleton modifier that only drives the right arm, so Milo can cast while running.
 func _build_cast_layer() -> void:
 	if _animation == null:
 		return
-	var library := AnimationLibrary.new()
-	for name: String in CAST_ANIMATIONS:
-		if not _animation.has_animation(name):
-			continue
-		var animation: Animation = _animation.get_animation(name).duplicate() as Animation
-		for track: int in range(animation.get_track_count() - 1, -1, -1):
-			var bone: String = str(animation.track_get_path(track)).get_slice(":", 1)
-			if not CAST_BONES.has(bone):
-				animation.remove_track(track)
-		animation.loop_mode = Animation.LOOP_LINEAR
-		library.add_animation(name, animation)
-	_cast_layer = AnimationPlayer.new()
-	_animation.get_parent().add_child(_cast_layer)
-	_cast_layer.root_node = _cast_layer.get_path_to(_animation.get_node(_animation.root_node))
-	_cast_layer.add_animation_library("", library)
+	var skeleton := _model.find_child("Skeleton3D", true, false) as Skeleton3D
+	if skeleton == null:
+		return
+	_cast_arm = CastArmModifier.new()
+	skeleton.add_child(_cast_arm)
+	_cast_arm.load_poses(_animation, CAST_ANIMATIONS, skeleton)
 
 
 func _make_particles(color: Color, amount: int, lifetime: float, one_shot: bool) -> CPUParticles3D:
@@ -175,19 +152,13 @@ func _pick_animation() -> String:
 
 
 func _update_cast_layer() -> void:
-	if _cast_layer == null:
-		return
-	if _cast_timer <= 0.0:
-		if _cast_layer.is_playing():
-			_cast_layer.stop()
+	if _cast_arm == null:
 		return
 	var aim: Vector2 = _caster.aim
 	var index: int = clampi(roundi(-aim.y * 2.0 / maxf(0.001, aim.length())) + 2, 0, 4)
 	if absf(aim.x) > 0.3 and absf(aim.y) > 0.3:
 		index = 3 if aim.y < 0.0 else 1
-	var name: String = CAST_ANIMATIONS[index]
-	if _cast_layer.current_animation != name:
-		_cast_layer.play(name, 0.05)
+	_cast_arm.aim(index, _cast_timer > 0.0)
 
 
 func _play(name: String) -> void:
@@ -196,6 +167,6 @@ func _play(name: String) -> void:
 	if _animation.current_animation != name:
 		_animation.play(name, 0.12)
 	if name == "run":
-		_animation.speed_scale = clampf(absf(milo.velocity.x) / 360.0, 0.6, 2.0)
+		_animation.speed_scale = clampf(absf(milo.velocity.x) / RUN_ANIMATION_SPEED, 0.6, 1.8)
 	else:
 		_animation.speed_scale = 1.0

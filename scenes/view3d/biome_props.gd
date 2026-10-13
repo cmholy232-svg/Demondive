@@ -17,7 +17,10 @@ static func dress(root: Node3D, room: Room, t: Dictionary, rng: RandomNumberGene
 	var next_sign: float = rng.randf_range(4.0, 9.0)
 	var sign_index: int = rng.randi_range(0, 8)
 	while x < w:
-		if not signs.is_empty() and x >= next_sign:
+		if Backdrop3D.in_opening(x):
+			x = Backdrop3D.after_opening(x) + rng.randf_range(0.0, 1.0)
+			continue
+		if not signs.is_empty() and x >= next_sign and not Backdrop3D.in_opening(x + 3.0):
 			var y: float = rng.randf_range(floor_y + 4.6, minf(floor_y + 8.0, -2.0))
 			Kit3D.sign_text(root, Strings.text(str(signs[sign_index % signs.size()])), Vector3(x + 1.5, y, WALL_Z + 0.25), sign_colors[sign_index % sign_colors.size()], 0.0075, 128)
 			sign_index += 1

@@ -100,8 +100,11 @@ static func fit_height(model: Node3D, height_m: float) -> void:
 		model.scale = Vector3.ONE * (height_m / height)
 
 
-## Cel shading with an outline for every surface; materials named "glow*" shine instead.
-static func toonify(model: Node3D, tint: Dictionary = {}) -> void:
+## Cel shading with an outline for every surface; materials named "glow*" shine
+## instead. Textured parts keep their texture; faces and eyes get no outline.
+## Returns [mesh, surface, colour, material name] for each recolourable surface.
+static func toonify(model: Node3D, tint: Dictionary = {}) -> Array:
+	var targets: Array = []
 	for node: Node in model.find_children("*", "MeshInstance3D", true, false):
 		var instance := node as MeshInstance3D
 		for surface: int in instance.mesh.get_surface_count():
@@ -112,14 +115,33 @@ static func toonify(model: Node3D, tint: Dictionary = {}) -> void:
 				color = Color.html(str(tint[mat_name]))
 			elif tint.has("*") and not mat_name.begins_with("glow"):
 				color = Color.html(str(tint["*"]))
-			if source != null and source.resource_name.begins_with("glow"):
-				instance.set_surface_override_material(surface, Kit3D.neon(color, 3.0))
+			if mat_name.begins_with("glow"):
+				var glow_color: Color = color
+				if source != null and source.emission_enabled:
+					glow_color = source.emission
+				instance.set_surface_override_material(surface, Kit3D.neon(glow_color, 2.5))
 				continue
 			var toon := ShaderMaterial.new()
 			toon.shader = TOON_SHADER
 			toon.set_shader_parameter("albedo", color)
-			var outline := ShaderMaterial.new()
-			outline.shader = OUTLINE_SHADER
-			outline.set_shader_parameter("width", OUTLINE_M / maxf(0.01, model.scale.x))
-			toon.next_pass = outline
+			var texture: Texture2D = source.albedo_texture if source != null else null
+			if texture != null:
+				toon.set_shader_parameter("albedo_texture", texture)
+				toon.set_shader_parameter("use_texture", true)
+				if source.transparency != BaseMaterial3D.TRANSPARENCY_DISABLED:
+					toon.set_shader_parameter("alpha_cut", 0.5)
+			var lower: String = mat_name.to_lower()
+			var detail: bool = lower.begins_with("eye") or lower.begins_with("face")
+			if detail:
+				toon.set_shader_parameter("rim_strength", 0.0)
+				toon.set_shader_parameter("shade_amount", 0.2)
+			elif lower.contains("_face_"):
+				toon.set_shader_parameter("shade_amount", 0.25)
+			if not detail:
+				var outline := ShaderMaterial.new()
+				outline.shader = OUTLINE_SHADER
+				outline.set_shader_parameter("width", OUTLINE_M / maxf(0.01, model.scale.x))
+				toon.next_pass = outline
 			instance.set_surface_override_material(surface, toon)
+			targets.append([instance, surface, color, mat_name])
+	return targets

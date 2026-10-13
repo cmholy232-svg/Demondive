@@ -85,7 +85,10 @@ static func build(root: Node3D, room: Room, biome: String) -> void:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = hash(data.id) + 11
 	var floor_y: float = ClubSet3D._floor_top(data, data.width / 2)
-	ClubSet3D._wall(root, size, WALL_Z, floor_y, t.get("wall", {}) as Dictionary)
+	var wall_look: Dictionary = (t.get("wall", {}) as Dictionary).duplicate()
+	wall_look["rim"] = str(t.get("lip", "#ffffff"))
+	ClubSet3D._wall(root, size, WALL_Z, floor_y, wall_look)
+	Backdrop3D.build(root, size, Backdrop3D.look_from_theme(t), hash(data.id) + 3)
 	var rims: Array[Color] = colors(t, "crowd")
 	if not rims.is_empty():
 		ClubSet3D._crowd(root, data, rng, rims, float(t.get("crowd_density", 0.4)))
@@ -112,17 +115,25 @@ static func _solid(root: Node3D, rect: Rect2, data: RoomData, t: Dictionary, fro
 	var center: Vector3 = Kit3D.rect_center(rect)
 	var s := Vector3(rect.size.x, rect.size.y, 0.0) / Kit3D.PX_PER_M
 	var depth: float = FRONT_Z - BACK_Z
-	var body: Color = c(t, "stone").lerp(Color(0.7, 0.85, 1.0), 0.55) if frozen else c(t, "stone")
-	Kit3D.box(root, Vector3(center.x, center.y, (FRONT_Z + BACK_Z) * 0.5), Vector3(s.x, s.y, depth), Kit3D.material(body, 0.2 if frozen else 0.85, Color.BLACK, 0.0, 0.3 if frozen else 0.0))
+	var size := Vector3(s.x, s.y, depth)
+	Kit3D.box(root, Vector3(center.x, center.y, (FRONT_Z + BACK_Z) * 0.5), size, Kit3D.surface(_stone_look(t, frozen), size))
 	var tile_x: int = int(rect.position.x / RoomData.TILE)
 	var tile_y: int = int(rect.position.y / RoomData.TILE)
 	if data.is_solid(tile_x, tile_y - 1):
 		return
 	var top_y: float = center.y + s.y * 0.5
-	var cap: Color = Color(0.85, 0.95, 1.0) if frozen else c(t, "stone_top")
-	Kit3D.box(root, Vector3(center.x, top_y - 0.03, (FRONT_Z + BACK_Z) * 0.5), Vector3(s.x + 0.02, 0.06, depth + 0.02), Kit3D.material(cap, 0.08 if frozen else 0.3, Color.BLACK, 0.0, 0.5 if frozen else 0.2))
 	Kit3D.box(root, Vector3(center.x, top_y - 0.07, FRONT_Z + 0.01), Vector3(s.x, 0.045, 0.03), Kit3D.neon(Color(0.7, 0.95, 1.0) if frozen else c(t, "lip"), 4.0))
 	Kit3D.box(root, Vector3(center.x, top_y + 0.005, BACK_Z + 0.35), Vector3(s.x, 0.012, 0.05), Kit3D.neon(c(t, "strip"), 1.5))
+
+
+static func _stone_look(t: Dictionary, frozen: bool) -> Dictionary:
+	var stone: Color = c(t, "stone")
+	var top: Color = c(t, "stone_top")
+	if frozen:
+		return {"base": stone.lerp(Color(0.7, 0.85, 1.0), 0.55), "top": Color(0.85, 0.95, 1.0), "seam": Color(0.3, 0.45, 0.6),
+			"edge": Color(0.9, 0.97, 1.0), "glow": Color(0.6, 0.9, 1.0), "pattern": 3, "glow_amount": 0.4, "roughness": 0.15, "metal": 0.3}
+	return {"base": stone, "top": top, "seam": stone.darkened(0.7), "edge": top.lightened(0.25), "glow": c(t, "lip"),
+		"pattern": int(t.get("pattern", 1)), "glow_amount": float(t.get("joint_glow", 0.0)), "roughness": 0.75}
 
 
 static func _ledge(root: Node3D, rect: Rect2, t: Dictionary) -> void:

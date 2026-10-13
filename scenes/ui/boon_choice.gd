@@ -101,6 +101,14 @@ func _make_card(id: StringName) -> PanelContainer:
 	var col := VBoxContainer.new()
 	col.add_theme_constant_override("separation", 8)
 	card.add_child(col)
+	var face: Texture2D = Portraits.bust(id)
+	if face != null:
+		var art := TextureRect.new()
+		art.texture = face
+		art.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		art.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		art.custom_minimum_size = Vector2(300.0, 150.0)
+		col.add_child(art)
 	var stacks: int = Game.stacks(id)
 	var level_text: String = Strings.text("boon.new") if stacks == 0 else Strings.text("boon.level_up") % [stacks, stacks + 1]
 	col.add_child(UiStyle.label(level_text, 14, UiStyle.GOLD))

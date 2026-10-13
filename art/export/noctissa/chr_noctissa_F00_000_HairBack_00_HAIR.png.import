@@ -1,0 +1,37 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://bd5re7vknwuk0"
+path="res://.godot/imported/chr_noctissa_F00_000_HairBack_00_HAIR.png-33831f5ab39b6d7da34c9951e432b74f.ctex"
+metadata={
+"vram_texture": false
+}
+generator_parameters={
+"md5": "795edae2b63006e51179470b162e2a3a"
+}
+
+[deps]
+
+source_file="res://art/export/noctissa/chr_noctissa_F00_000_HairBack_00_HAIR.png"
+dest_files=["res://.godot/imported/chr_noctissa_F00_000_HairBack_00_HAIR.png-33831f5ab39b6d7da34c9951e432b74f.ctex"]
+
+[params]
+
+compress/mode=1
+compress/high_quality=false
+compress/lossy_quality=0.82
+compress/hdr_compression=1
+compress/normal_map=0
+compress/channel_pack=0
+mipmaps/generate=true
+mipmaps/limit=-1
+roughness/mode=0
+roughness/src_normal=""
+process/fix_alpha_border=true
+process/premult_alpha=false
+process/normal_map_invert_y=false
+process/hdr_as_srgb=false
+process/hdr_clamp_exposure=false
+process/size_limit=0
+detect_3d/compress_to=0

@@ -1,0 +1,37 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://blna1y2eggfsy"
+path="res://.godot/imported/chr_vespera_F00_002_02_Body_00_SKIN_vespera.png-2d88d421bf9d84ec99cec8f85ffc3f25.ctex"
+metadata={
+"vram_texture": false
+}
+generator_parameters={
+"md5": "2d34e3b7b953b03a3881de6906d6e259"
+}
+
+[deps]
+
+source_file="res://art/export/vespera/chr_vespera_F00_002_02_Body_00_SKIN_vespera.png"
+dest_files=["res://.godot/imported/chr_vespera_F00_002_02_Body_00_SKIN_vespera.png-2d88d421bf9d84ec99cec8f85ffc3f25.ctex"]
+
+[params]
+
+compress/mode=1
+compress/high_quality=false
+compress/lossy_quality=0.82
+compress/hdr_compression=1
+compress/normal_map=0
+compress/channel_pack=0
+mipmaps/generate=true
+mipmaps/limit=-1
+roughness/mode=0
+roughness/src_normal=""
+process/fix_alpha_border=true
+process/premult_alpha=false
+process/normal_map_invert_y=false
+process/hdr_as_srgb=false
+process/hdr_clamp_exposure=false
+process/size_limit=0
+detect_3d/compress_to=0

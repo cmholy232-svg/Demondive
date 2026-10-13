@@ -7,9 +7,11 @@ extends RefCounted
 const PX_PER_M: float = 100.0
 const TOON_SHADER: Shader = preload("res://art/shaders/toon.gdshader")
 const OUTLINE_SHADER: Shader = preload("res://art/shaders/outline.gdshader")
+const SURFACE_SHADER: Shader = preload("res://art/shaders/surface.gdshader")
 
 static var _toon_cache: Dictionary = {}
 static var _mat_cache: Dictionary = {}
+static var _surface_cache: Dictionary = {}
 
 
 static func to_3d(point: Vector2, z: float = 0.0) -> Vector3:
@@ -55,6 +57,24 @@ static func toon(color: Color, outline_width: float = 0.018, rim: float = 0.45) 
 		outline.set_shader_parameter("width", outline_width)
 		mat.next_pass = outline
 	_toon_cache[key] = mat
+	return mat
+
+
+## Procedural stone for a block of the given size (metres). Keys of look:
+## base, top, seam, edge, glow (Colors), pattern (int), glow_amount, roughness, metal.
+static func surface(look: Dictionary, size: Vector3) -> ShaderMaterial:
+	var key: String = "%s|%.2f|%.2f|%.2f" % [str(look), size.x, size.y, size.z]
+	if _surface_cache.has(key):
+		return _surface_cache[key] as ShaderMaterial
+	var mat := ShaderMaterial.new()
+	mat.shader = SURFACE_SHADER
+	mat.set_shader_parameter("half_size", size * 0.5)
+	var names: Dictionary = {"base": "base_color", "top": "top_color", "seam": "seam_color", "edge": "edge_color", "glow": "glow_color",
+		"pattern": "pattern", "glow_amount": "glow_amount", "roughness": "roughness_base", "metal": "metal", "scale": "pattern_scale"}
+	for field: String in names:
+		if look.has(field):
+			mat.set_shader_parameter(names[field], look[field])
+	_surface_cache[key] = mat
 	return mat
 
 

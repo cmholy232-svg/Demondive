@@ -12,8 +12,8 @@ const HIT_PAUSE: Array[float] = [0.0, 0.0, 0.03, 0.06, 0.09]
 const KICK: Array[float] = [0.0, 1.5, 3.0, 7.0, 13.0]
 const KICK_DECAY: float = 18.0
 ## How much of the world is visible vertically in follow mode, in pixels.
-const VIEW_HEIGHT: float = 880.0
-const LOOK_AHEAD: float = 150.0
+const VIEW_HEIGHT: float = 640.0
+const LOOK_AHEAD: float = 170.0
 const FOLLOW_SPEED: float = 6.0
 
 static var shake_enabled: bool = true

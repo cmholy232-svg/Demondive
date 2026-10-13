@@ -43,6 +43,8 @@ static func _wall(root: Node3D, size: Vector2, wall_z: float, floor_y: float, lo
 	for key: String in ["base_color", "seam_color", "wash_color"]:
 		if look.has(key):
 			mat.set_shader_parameter(key, Color.html(str(look[key])))
+	if look.has("rim"):
+		mat.set_shader_parameter("rim_color", Color.html(str(look["rim"])))
 	if look.has("panel"):
 		var panel: Array = look["panel"] as Array
 		mat.set_shader_parameter("panel", Vector2(float(panel[0]), float(panel[1])))

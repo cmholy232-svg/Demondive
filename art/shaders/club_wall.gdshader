@@ -8,11 +8,41 @@ uniform vec4 wash_color : source_color = vec4(0.9, 0.15, 0.55, 1.0);
 uniform vec2 panel = vec2(2.4, 1.6);
 uniform float floor_y = -10.0;
 uniform float wash_height = 4.0;
+// Great arched openings onto the far hellscape (Backdrop3D), repeating
+// along the wall and up tall rooms. Keep in step with Backdrop3D.opening().
+uniform bool openings = true;
+uniform float opening_period = 18.0;
+uniform float opening_start = 6.0;
+uniform float opening_width = 9.0;
+uniform float opening_rect = 7.0;
+uniform float opening_row = 16.0;
+uniform float opening_floor = 1.2;
+uniform vec4 rim_color : source_color = vec4(1.0, 0.3, 0.6, 1.0);
 
 float hash(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
 
 void fragment() {
 	vec3 world = (INV_VIEW_MATRIX * vec4(VERTEX, 1.0)).xyz;
+	float rim = 0.0;
+	if (openings) {
+		float px = mod(world.x - opening_start, opening_period);
+		float py = mod(world.y - floor_y - opening_floor, opening_row);
+		float r = opening_width * 0.5;
+		float u = px - r;
+		float d;
+		if (py < opening_rect) {
+			d = max(abs(u) - r, -py);
+		} else {
+			d = length(vec2(u, py - opening_rect)) - r;
+		}
+		if (px > opening_width + 0.5) {
+			d = 1.0;
+		}
+		if (d < 0.0) {
+			discard;
+		}
+		rim = 1.0 - smoothstep(0.0, 0.35, d);
+	}
 	vec2 p = world.xy / panel;
 	vec2 id = floor(p);
 	vec2 f = fract(p);
@@ -23,5 +53,5 @@ void fragment() {
 	ALBEDO = base_color.rgb * (0.75 + 0.5 * h);
 	ROUGHNESS = 0.35;
 	METALLIC = 0.2;
-	EMISSION = seam_color.rgb * seam * 0.05 + seam_color.rgb * lit * 0.06 + wash_color.rgb * wash * 0.09;
+	EMISSION = seam_color.rgb * seam * 0.05 + seam_color.rgb * lit * 0.06 + wash_color.rgb * wash * 0.09 + rim_color.rgb * rim * 1.6;
 }

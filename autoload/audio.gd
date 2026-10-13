@@ -40,7 +40,7 @@ func _ready() -> void:
 func apply_settings() -> void:
 	var master: float = float(Save.setting("master"))
 	sfx_volume_db = linear_to_db(maxf(0.001, master * float(Save.setting("sfx")))) - 2.0
-	music_volume_db = linear_to_db(maxf(0.001, master * float(Save.setting("music")))) - 6.0
+	music_volume_db = linear_to_db(maxf(0.001, master * float(Save.setting("music")))) - 2.0
 	if _music_id != &"":
 		_music[_music_index].volume_db = music_volume_db
 

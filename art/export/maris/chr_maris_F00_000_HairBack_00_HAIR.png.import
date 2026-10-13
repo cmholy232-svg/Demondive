@@ -1,0 +1,37 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://ch5auxth2wbhk"
+path="res://.godot/imported/chr_maris_F00_000_HairBack_00_HAIR.png-263abe5eb539d50ac1fef13be7edf77b.ctex"
+metadata={
+"vram_texture": false
+}
+generator_parameters={
+"md5": "f7c081e4402832df5651e97961877f5d"
+}
+
+[deps]
+
+source_file="res://art/export/maris/chr_maris_F00_000_HairBack_00_HAIR.png"
+dest_files=["res://.godot/imported/chr_maris_F00_000_HairBack_00_HAIR.png-263abe5eb539d50ac1fef13be7edf77b.ctex"]
+
+[params]
+
+compress/mode=1
+compress/high_quality=false
+compress/lossy_quality=0.82
+compress/hdr_compression=1
+compress/normal_map=0
+compress/channel_pack=0
+mipmaps/generate=true
+mipmaps/limit=-1
+roughness/mode=0
+roughness/src_normal=""
+process/fix_alpha_border=true
+process/premult_alpha=false
+process/normal_map_invert_y=false
+process/hdr_as_srgb=false
+process/hdr_clamp_exposure=false
+process/size_limit=0
+detect_3d/compress_to=0

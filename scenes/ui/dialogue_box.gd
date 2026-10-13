@@ -8,6 +8,7 @@ signal finished(beat_id: StringName)
 
 const PATH: String = "res://data/dialogue/beats.json"
 const CHARS_PER_SECOND: float = 55.0
+const PORTRAIT_POS: Vector2 = Vector2(-10.0, 280.0)
 
 static var _beats: Dictionary = {}
 
@@ -20,6 +21,9 @@ var _speaker: Label
 var _text: Label
 var _location: Label
 var _hint: Label
+var _portrait: TextureRect
+var _portrait_id: StringName = &""
+var _portrait_slide: float = 1.0
 
 
 static func beats() -> Dictionary:
@@ -40,12 +44,19 @@ func _ready() -> void:
 	root.set_anchors_preset(Control.PRESET_FULL_RECT)
 	root.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(root)
+	_portrait = TextureRect.new()
+	_portrait.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	_portrait.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	_portrait.position = PORTRAIT_POS
+	_portrait.size = Vector2(330.0, 440.0)
+	_portrait.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	root.add_child(_portrait)
 	_panel = PanelContainer.new()
 	_panel.add_theme_stylebox_override("panel", UiStyle.panel(Color(0.07, 0.04, 0.1, 0.94), UiStyle.ARCANE, 14))
 	root.add_child(_panel)
 	_panel.set_anchors_and_offsets_preset(Control.PRESET_CENTER_BOTTOM, Control.PRESET_MODE_KEEP_SIZE)
 	_panel.custom_minimum_size = Vector2(900.0, 170.0)
-	_panel.position = Vector2(190.0, 520.0)
+	_panel.position = Vector2(310.0, 520.0)
 	_panel.size = Vector2(900.0, 170.0)
 	var col := VBoxContainer.new()
 	col.add_theme_constant_override("separation", 6)
@@ -77,6 +88,7 @@ func play(id: StringName) -> bool:
 	_beat_id = id
 	_lines = beat["lines"] as Array
 	_index = 0
+	_portrait_id = &""
 	_location.text = str(beat.get("location", ""))
 	_apply_mutation(beat)
 	Save.mark_scene_seen(id)
@@ -99,6 +111,11 @@ func _show_line() -> void:
 	_speaker.text = str(line["speaker"])
 	_speaker.add_theme_color_override("font_color", Color.html(str(line.get("color", "#ffffff"))))
 	_text.text = str(line["text"])
+	var id: StringName = Portraits.id_for_speaker(str(line["speaker"]))
+	if id != _portrait_id:
+		_portrait_id = id
+		_portrait.texture = Portraits.full(id)
+		_portrait_slide = 0.0
 	_text.visible_characters = 0
 	_shown = 0.0
 
@@ -108,6 +125,10 @@ func _process(delta: float) -> void:
 		return
 	_shown += delta * CHARS_PER_SECOND
 	_text.visible_characters = int(_shown)
+	_portrait_slide = minf(_portrait_slide + delta * 6.0, 1.0)
+	var ease_in: float = 1.0 - pow(1.0 - _portrait_slide, 3.0)
+	_portrait.position = PORTRAIT_POS + Vector2(-60.0 * (1.0 - ease_in), 0.0)
+	_portrait.modulate.a = ease_in
 
 
 func _unhandled_input(event: InputEvent) -> void:

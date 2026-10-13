@@ -1,0 +1,37 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://b7pc8m6qrwala"
+path="res://.godot/imported/chr_seraphine_F00_000_00_FaceBrow_00_FACE_seraphine.png-0b0d48657c9c18d3fd0c9066e8acfee7.ctex"
+metadata={
+"vram_texture": false
+}
+generator_parameters={
+"md5": "a71dcfa52da1084a240ad4b2e0865569"
+}
+
+[deps]
+
+source_file="res://art/export/seraphine/chr_seraphine_F00_000_00_FaceBrow_00_FACE_seraphine.png"
+dest_files=["res://.godot/imported/chr_seraphine_F00_000_00_FaceBrow_00_FACE_seraphine.png-0b0d48657c9c18d3fd0c9066e8acfee7.ctex"]
+
+[params]
+
+compress/mode=1
+compress/high_quality=false
+compress/lossy_quality=0.82
+compress/hdr_compression=1
+compress/normal_map=0
+compress/channel_pack=0
+mipmaps/generate=true
+mipmaps/limit=-1
+roughness/mode=0
+roughness/src_normal=""
+process/fix_alpha_border=true
+process/premult_alpha=false
+process/normal_map_invert_y=false
+process/hdr_as_srgb=false
+process/hdr_clamp_exposure=false
+process/size_limit=0
+detect_3d/compress_to=0

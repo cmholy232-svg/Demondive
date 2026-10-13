@@ -56,7 +56,12 @@
   "sign_colors": [
    "#36c9ff",
    "#ff9be6"
-  ]
+  ],
+  "pattern": 1,
+  "joint_glow": 0.15,
+  "sky_top": "#02121e",
+  "sky_low": "#0a3a4a",
+  "horizon": "#36c9ff"
  },
  "thornwild": {
   "bg": "#030a04",
@@ -106,7 +111,12 @@
   "signs": [],
   "sign_colors": [
    "#c8ff5a"
-  ]
+  ],
+  "pattern": 0,
+  "joint_glow": 0.0,
+  "sky_top": "#030a04",
+  "sky_low": "#1a2a0a",
+  "horizon": "#9be05a"
  },
  "thunder_jackpot": {
   "bg": "#08040e",
@@ -168,7 +178,12 @@
    "#ffe36e",
    "#e97cff",
    "#5ff0ff"
-  ]
+  ],
+  "pattern": 2,
+  "joint_glow": 0.25,
+  "sky_top": "#0a0418",
+  "sky_low": "#2a0a3a",
+  "horizon": "#ffe36e"
  },
  "frozen_basilica": {
   "bg": "#060a12",
@@ -218,7 +233,12 @@
   "signs": [],
   "sign_colors": [
    "#aef0ff"
-  ]
+  ],
+  "pattern": 3,
+  "joint_glow": 0.1,
+  "sky_top": "#0a1220",
+  "sky_low": "#3a5a7a",
+  "horizon": "#cfeeff"
  },
  "forever_motel": {
   "bg": "#08040a",
@@ -274,7 +294,12 @@
    "#ff5a8a",
    "#bc7cff",
    "#ffd8a0"
-  ]
+  ],
+  "pattern": 1,
+  "joint_glow": 0.0,
+  "sky_top": "#0a040c",
+  "sky_low": "#3a1a2a",
+  "horizon": "#ff8ad8"
  },
  "thousand_faces": {
   "bg": "#06060c",
@@ -333,7 +358,12 @@
   "sign_colors": [
    "#d7b7ff",
    "#e0f0ff"
-  ]
+  ],
+  "pattern": 2,
+  "joint_glow": 0.15,
+  "sky_top": "#06060e",
+  "sky_low": "#24243a",
+  "horizon": "#d7b7ff"
  },
  "lilith_throne": {
   "bg": "#0a0204",
@@ -387,7 +417,12 @@
   "signs": [],
   "sign_colors": [
    "#ff2a3a"
-  ]
+  ],
+  "pattern": 1,
+  "joint_glow": 0.35,
+  "sky_top": "#0c0204",
+  "sky_low": "#4a0a0e",
+  "horizon": "#ff5a3a"
  },
  "self_below": {
   "bg": "#030208",
@@ -439,6 +474,11 @@
   "signs": [],
   "sign_colors": [
    "#9a8aff"
-  ]
+  ],
+  "pattern": 0,
+  "joint_glow": 0.28,
+  "sky_top": "#020108",
+  "sky_low": "#14103a",
+  "horizon": "#9a8aff"
  }
 }

@@ -1,0 +1,37 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://rgry6s67pkm8"
+path="res://.godot/imported/chr_lilith_daughters_F00_000_00_EyeIris_00_EYE_lilith_daughters.png-9cb17b0a08a6fa403190b6a4c1a16e86.ctex"
+metadata={
+"vram_texture": false
+}
+generator_parameters={
+"md5": "1d54fa21d1f9d90e8b332d2432d3c5e8"
+}
+
+[deps]
+
+source_file="res://art/export/lilith_daughters/chr_lilith_daughters_F00_000_00_EyeIris_00_EYE_lilith_daughters.png"
+dest_files=["res://.godot/imported/chr_lilith_daughters_F00_000_00_EyeIris_00_EYE_lilith_daughters.png-9cb17b0a08a6fa403190b6a4c1a16e86.ctex"]
+
+[params]
+
+compress/mode=1
+compress/high_quality=false
+compress/lossy_quality=0.82
+compress/hdr_compression=1
+compress/normal_map=0
+compress/channel_pack=0
+mipmaps/generate=true
+mipmaps/limit=-1
+roughness/mode=0
+roughness/src_normal=""
+process/fix_alpha_border=true
+process/premult_alpha=false
+process/normal_map_invert_y=false
+process/hdr_as_srgb=false
+process/hdr_clamp_exposure=false
+process/size_limit=0
+detect_3d/compress_to=0

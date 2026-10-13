@@ -1,0 +1,37 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://cr1y7ycfgpsp6"
+path="res://.godot/imported/chr_vespera_F00_002_01_Tops_01_CLOTH_vespera.png-f69881e3b1c0087b94655937a82bb2fd.ctex"
+metadata={
+"vram_texture": false
+}
+generator_parameters={
+"md5": "aa22761a0132fa743f57dd50ae124e50"
+}
+
+[deps]
+
+source_file="res://art/export/vespera/chr_vespera_F00_002_01_Tops_01_CLOTH_vespera.png"
+dest_files=["res://.godot/imported/chr_vespera_F00_002_01_Tops_01_CLOTH_vespera.png-f69881e3b1c0087b94655937a82bb2fd.ctex"]
+
+[params]
+
+compress/mode=1
+compress/high_quality=false
+compress/lossy_quality=0.82
+compress/hdr_compression=1
+compress/normal_map=0
+compress/channel_pack=0
+mipmaps/generate=true
+mipmaps/limit=-1
+roughness/mode=0
+roughness/src_normal=""
+process/fix_alpha_border=true
+process/premult_alpha=false
+process/normal_map_invert_y=false
+process/hdr_as_srgb=false
+process/hdr_clamp_exposure=false
+process/size_limit=0
+detect_3d/compress_to=0

@@ -1,0 +1,37 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://d3i5ve0thh2h"
+path="res://.godot/imported/chr_zephyra_F00_000_HairBack_00_HAIR_zephyra.png-1d481abc04ba69a4b49d2422b226aaba.ctex"
+metadata={
+"vram_texture": false
+}
+generator_parameters={
+"md5": "04efda7c94910c9d89fb146510171368"
+}
+
+[deps]
+
+source_file="res://art/export/zephyra/chr_zephyra_F00_000_HairBack_00_HAIR_zephyra.png"
+dest_files=["res://.godot/imported/chr_zephyra_F00_000_HairBack_00_HAIR_zephyra.png-1d481abc04ba69a4b49d2422b226aaba.ctex"]
+
+[params]
+
+compress/mode=1
+compress/high_quality=false
+compress/lossy_quality=0.82
+compress/hdr_compression=1
+compress/normal_map=0
+compress/channel_pack=0
+mipmaps/generate=true
+mipmaps/limit=-1
+roughness/mode=0
+roughness/src_normal=""
+process/fix_alpha_border=true
+process/premult_alpha=false
+process/normal_map_invert_y=false
+process/hdr_as_srgb=false
+process/hdr_clamp_exposure=false
+process/size_limit=0
+detect_3d/compress_to=0

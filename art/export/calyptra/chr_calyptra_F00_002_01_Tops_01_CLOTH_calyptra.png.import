@@ -1,0 +1,37 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://b3ncgqdwarcg0"
+path="res://.godot/imported/chr_calyptra_F00_002_01_Tops_01_CLOTH_calyptra.png-07a2861d5f59f9a955512f04ecef0dee.ctex"
+metadata={
+"vram_texture": false
+}
+generator_parameters={
+"md5": "03acc97d4d57d3dda156fdff25867cc2"
+}
+
+[deps]
+
+source_file="res://art/export/calyptra/chr_calyptra_F00_002_01_Tops_01_CLOTH_calyptra.png"
+dest_files=["res://.godot/imported/chr_calyptra_F00_002_01_Tops_01_CLOTH_calyptra.png-07a2861d5f59f9a955512f04ecef0dee.ctex"]
+
+[params]
+
+compress/mode=1
+compress/high_quality=false
+compress/lossy_quality=0.82
+compress/hdr_compression=1
+compress/normal_map=0
+compress/channel_pack=0
+mipmaps/generate=true
+mipmaps/limit=-1
+roughness/mode=0
+roughness/src_normal=""
+process/fix_alpha_border=true
+process/premult_alpha=false
+process/normal_map_invert_y=false
+process/hdr_as_srgb=false
+process/hdr_clamp_exposure=false
+process/size_limit=0
+detect_3d/compress_to=0

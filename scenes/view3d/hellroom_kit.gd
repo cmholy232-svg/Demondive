@@ -18,6 +18,11 @@ static var altar_orb: MeshInstance3D
 static var _wall_shader: Shader = preload("res://art/shaders/club_wall.gdshader")
 
 
+## Old hellstone brick under the floorboards, with a little magma in the joints.
+const FOUNDATION: Dictionary = {"base": Color(0.2, 0.08, 0.06), "top": Color(0.3, 0.16, 0.1), "seam": Color(0.04, 0.01, 0.01),
+	"edge": Color(0.45, 0.22, 0.14), "glow": Color(1.0, 0.35, 0.08), "pattern": 1, "glow_amount": 0.3, "roughness": 0.85}
+
+
 static func environment(root: Node3D) -> void:
 	var env := Environment.new()
 	env.background_mode = Environment.BG_COLOR
@@ -103,7 +108,8 @@ static func _solid(root: Node3D, rect: Rect2, data: RoomData) -> void:
 	if is_bed:
 		_bed(root, c, s)
 		return
-	Kit3D.box(root, Vector3(c.x, c.y, (0.7 + BACK_Z) * 0.5), Vector3(s.x, s.y, depth), Kit3D.material(WOOD_DARK, 0.85))
+	var size := Vector3(s.x, s.y, depth)
+	Kit3D.box(root, Vector3(c.x, c.y, (0.7 + BACK_Z) * 0.5), size, Kit3D.surface(FOUNDATION, size))
 	if data.is_solid(tile_x, tile_y - 1):
 		return
 	# Floorboards: a lighter top with plank seams running into the room.
