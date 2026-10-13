@@ -1,0 +1,8 @@
+{
+	"game.title": "DemonDive",
+	"debug.header": "DEBUG (F3)",
+	"debug.fps": "FPS",
+	"debug.player_position": "Milo position",
+	"debug.player_velocity": "Milo velocity",
+	"debug.on_floor": "On floor"
+}
