@@ -8,10 +8,12 @@ extends RefCounted
 ##   V  moving ledge (up and down, between : markers in its column)
 ##   P  Milo's start   E  exit door         B  boss          G  caged boon-giver
 ##   $  tempting pickup over danger         +  pizza          o  coffee
+##   Hellroom stations: A summoning altar, D Milo's desk, W wardrobe
 ##   enemies: i imp, f floater, s succubus, h hellhound, k crawler, n siren
 ## Lower-case enemy letters spawn in the first wave, upper-case in the second.
 
 const TILE: float = 64.0
+const STATION_CODES: Dictionary = {"A": &"altar", "D": &"desk", "W": &"wardrobe"}
 const SPAWN_CODES: Dictionary = {
 	"i": &"imp", "f": &"floater", "s": &"succubus", "h": &"hellhound", "k": &"crawler", "n": &"siren",
 }
@@ -34,6 +36,8 @@ var cages: Array[Vector2] = []
 var temptations: Array[Vector2] = []
 var pizzas: Array[Vector2] = []
 var coffees: Array[Vector2] = []
+## Hellroom stations: id -> feet position.
+var stations: Dictionary = {}
 ## Each spawn: {"kind": StringName, "at": Vector2, "wave": int}
 var spawns: Array[Dictionary] = []
 
@@ -98,6 +102,8 @@ func _scan() -> void:
 					pizzas.append(feet)
 				"o":
 					coffees.append(feet)
+				_ when STATION_CODES.has(c):
+					stations[STATION_CODES[c]] = feet
 				_:
 					var lower: String = c.to_lower()
 					if SPAWN_CODES.has(lower):

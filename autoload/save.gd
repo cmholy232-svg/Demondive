@@ -25,8 +25,10 @@ static func fresh() -> Dictionary:
 		"upgrades": {},
 		"flags": [],
 		"seen_scenes": [],
-		"cosmetics_owned": ["milo_default"],
-		"cosmetic_equipped": "milo_default",
+		"starting_boon": "pyrra",
+		"cosmetics_owned": ["bomber_classic"],
+		"cosmetic_equipped": "bomber_classic",
+		"products": [],
 		"stats": {"runs": 0, "wins": 0, "deaths": 0, "rooms": 0, "kills": 0, "best_level": 0, "fastest_win": 0.0},
 		"settings": {"master": 0.8, "music": 0.7, "sfx": 0.8, "shake": true, "flashes": true, "damage_numbers": true, "reduced_effects": false, "text_scale": 1.0},
 	}
@@ -152,4 +154,51 @@ func setting(key: String) -> Variant:
 
 func set_setting(key: String, value: Variant) -> void:
 	(data["settings"] as Dictionary)[key] = value
+	write()
+
+
+# --- Hellroom choices, cosmetics and store products --------------------------
+func starting_boon() -> StringName:
+	var boon := StringName(str(data.get("starting_boon", "pyrra")))
+	return boon if is_unlocked(boon) else &"pyrra"
+
+
+func set_starting_boon(boon: StringName) -> void:
+	data["starting_boon"] = String(boon)
+	write()
+
+
+func owns_cosmetic(id: StringName) -> bool:
+	return String(id) in (data.get("cosmetics_owned", []) as Array)
+
+
+func grant_cosmetic(id: StringName) -> void:
+	if owns_cosmetic(id):
+		return
+	var owned: Array = data.get("cosmetics_owned", []) as Array
+	owned.append(String(id))
+	data["cosmetics_owned"] = owned
+	write()
+
+
+func equipped_cosmetic() -> StringName:
+	return StringName(str(data.get("cosmetic_equipped", "bomber_classic")))
+
+
+func equip_cosmetic(id: StringName) -> void:
+	data["cosmetic_equipped"] = String(id)
+	write()
+
+
+## Store products the player has bought (restored from the platform store).
+func owns_product(id: StringName) -> bool:
+	return String(id) in (data.get("products", []) as Array)
+
+
+func grant_product(id: StringName) -> void:
+	if owns_product(id):
+		return
+	var owned: Array = data.get("products", []) as Array
+	owned.append(String(id))
+	data["products"] = owned
 	write()

@@ -196,9 +196,9 @@ func _jump(input: MiloInput, delta: float, on_floor: bool) -> void:
 		if input.move.y > 0 and on_floor and standing_on_one_way:
 			_drop_through()
 			return
-		jump_buffer_timer = tuning.jump_buffer_seconds
+		jump_buffer_timer = tuning.jump_buffer_seconds + Upgrades.value(&"training")
 	if on_floor:
-		coyote_timer = tuning.coyote_seconds
+		coyote_timer = tuning.coyote_seconds + Upgrades.value(&"training")
 	else:
 		coyote_timer = maxf(0.0, coyote_timer - delta)
 	if jump_buffer_timer <= 0.0:

@@ -1,0 +1,11 @@
+{
+	"bomber_classic": {"slot": "outfit", "colors": {}, "unlock": {"type": "default"}},
+	"tidecaller": {"slot": "outfit", "colors": {"jacket": "1d4f5e", "jacket_patch": "3fd3c6", "jeans": "10202a", "shoe": "e8f4f2"}, "unlock": {"type": "boon", "boon": "maris"}},
+	"moss_and_stone": {"slot": "outfit", "colors": {"jacket": "4a3a22", "jacket_patch": "7fbf4a", "jeans": "2a2a1c", "shoe": "6b4a2a"}, "unlock": {"type": "boon", "boon": "gaia"}},
+	"skyline": {"slot": "outfit", "colors": {"jacket": "c9dcef", "jacket_patch": "5a8cff", "jeans": "33405a", "shoe": "ffffff"}, "unlock": {"type": "boon", "boon": "zephyra"}},
+	"velvet_rope": {"slot": "outfit", "colors": {"jacket": "5a0f2e", "jacket_patch": "ff4f9a", "tank": "ff4f9a", "jeans": "120810", "shoe": "1a1a1a"}, "unlock": {"type": "stat", "stat": "best_level", "value": 1}},
+	"exterminator": {"slot": "outfit", "colors": {"jacket": "2b2b2b", "jacket_patch": "ff7a3d", "jeans": "4a3b2a", "shoe": "ff7a3d"}, "unlock": {"type": "stat", "stat": "kills", "value": 250}},
+	"shard_baron": {"slot": "outfit", "colors": {"jacket": "1a2f4a", "jacket_patch": "9fe8ff", "tank": "e8f8ff", "jeans": "0e1726", "shoe": "9fe8ff"}, "unlock": {"type": "shards", "cost": 80}},
+	"hellfire_gold": {"slot": "outfit", "colors": {"jacket": "8a5a0c", "jacket_patch": "ffd36a", "tank": "2a0505", "jeans": "1a0a0a", "shoe": "ffc75a"}, "unlock": {"type": "product", "product": "supporter_pack"}},
+	"midnight_velvet": {"slot": "outfit", "colors": {"jacket": "160a2a", "jacket_patch": "c6a8ff", "tank": "c6a8ff", "jeans": "0a0612", "shoe": "c6a8ff"}, "unlock": {"type": "product", "product": "supporter_pack"}}
+}

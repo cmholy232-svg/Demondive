@@ -19,6 +19,8 @@ var _milo_view: MiloView3D
 var _actors: ActorViews3D
 var _fx: FxViews3D
 var _time: float = 0.0
+var _env_root: Node3D
+var _biome: String = ""
 
 
 static func to_3d(point: Vector2, z: float = 0.0) -> Vector3:
@@ -36,7 +38,6 @@ func setup(game_camera: GameCamera, milo: Milo) -> void:
 	camera.far = 120.0
 	add_child(camera)
 	camera.current = true
-	NeonMawKit.environment(self)
 	_milo_view = MiloView3D.new()
 	add_child(_milo_view)
 	_milo_view.bind(milo)
@@ -46,14 +47,31 @@ func setup(game_camera: GameCamera, milo: Milo) -> void:
 	add_child(_fx)
 
 
-func build_room(room: Room, _biome: String) -> void:
+func milo_view() -> MiloView3D:
+	return _milo_view
+
+
+func build_room(room: Room, biome: String) -> void:
+	if biome != _biome:
+		_biome = biome
+		if _env_root != null:
+			_env_root.queue_free()
+		_env_root = Node3D.new()
+		add_child(_env_root)
+		if biome == "hellroom":
+			HellroomKit.environment(_env_root)
+		else:
+			NeonMawKit.environment(_env_root)
 	if _room_root != null:
 		_room_root.queue_free()
 	_movers.clear()
 	_spinners.clear()
 	_room_root = Node3D.new()
 	add_child(_room_root)
-	NeonMawKit.build(_room_root, room)
+	if biome == "hellroom":
+		HellroomKit.build(_room_root, room)
+	else:
+		NeonMawKit.build(_room_root, room)
 	for platform: MovingPlatform in room.builder.movers:
 		_movers[platform] = NeonMawKit.mover(_room_root, platform)
 	for node: Node in _room_root.find_children("*", "MeshInstance3D", true, false):

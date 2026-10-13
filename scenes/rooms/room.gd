@@ -132,7 +132,8 @@ func _set_clear() -> void:
 	is_clear = true
 	for door: ExitDoor in exits:
 		door.open = true
-	Audio.play_sfx(&"room_clear", -2.0)
+	if data.kind != &"hub":
+		Audio.play_sfx(&"room_clear", -2.0)
 	cleared.emit()
 
 

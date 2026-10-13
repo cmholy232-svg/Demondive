@@ -25,6 +25,10 @@ var _trail: CPUParticles3D
 var _burst: CPUParticles3D
 
 
+## [mesh, surface, original colour, material name] for every toon surface.
+var toon_targets: Array = []
+
+
 func bind(target: Milo) -> void:
 	milo = target
 	_model = (load(MODEL_PATH) as PackedScene).instantiate() as Node3D
@@ -73,6 +77,8 @@ func _apply_toon(model: Node3D) -> void:
 		for surface: int in instance.mesh.get_surface_count():
 			var source := instance.mesh.surface_get_material(surface) as BaseMaterial3D
 			var color: Color = source.albedo_color if source != null else Color.WHITE
+			if source != null:
+				toon_targets.append([instance, surface, color, source.resource_name])
 			var toon := ShaderMaterial.new()
 			toon.shader = TOON_SHADER
 			toon.set_shader_parameter("albedo", color)
@@ -81,6 +87,17 @@ func _apply_toon(model: Node3D) -> void:
 			outline.set_shader_parameter("width", 0.012 / maxf(0.01, model.scale.x))
 			toon.next_pass = outline
 			instance.set_surface_override_material(surface, toon)
+	apply_outfit(Cosmetics.equipped())
+
+
+## Recolours Milo's clothes for an outfit; materials it doesn't name keep their colour.
+func apply_outfit(id: StringName) -> void:
+	var colors: Dictionary = Cosmetics.colors(id)
+	for target: Array in toon_targets:
+		var instance := target[0] as MeshInstance3D
+		var toon := instance.get_surface_override_material(int(target[1])) as ShaderMaterial
+		if toon != null:
+			toon.set_shader_parameter("albedo", colors.get(target[3], target[2]))
 
 
 ## A second player that only drives the right arm, so Milo can cast while running.

@@ -69,6 +69,14 @@ func start_run(seed_value: int = 0) -> void:
 	_emit_all()
 
 
+## Back in the Hellroom: no run state, no boons.
+func enter_hub() -> void:
+	in_run = false
+	boons.clear()
+	special = &""
+	_emit_all()
+
+
 func end_run(won: bool) -> void:
 	in_run = false
 	Save.add_shards(run_shards)
