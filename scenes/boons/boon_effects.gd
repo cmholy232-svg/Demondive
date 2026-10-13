@@ -6,6 +6,7 @@ extends RefCounted
 
 const MARIS_HEALTH_PER_STACK: float = 10.0
 const ARMOR_CAP: float = 0.6
+const WEALTH_POWER_CAP: float = 0.3
 
 
 static func s(id: StringName) -> int:
@@ -22,7 +23,9 @@ static func bolt_stats(base: ArcaneTuning) -> BoltStats:
 	_apply_maris(stats)
 	_apply_gaia(stats)
 	_apply_zephyra(stats)
-	stats.damage *= 1.0 + Game.room_damage_bonus
+	BoonEffectsMore.apply(stats)
+	stats.damage *= (1.0 + Game.room_damage_bonus + Game.corruption + wealth_power()) * RoomRules.milo_damage()
+	stats.damage *= low_health_bonus()
 	var dominant: StringName = Game.dominant_boon()
 	if dominant != &"":
 		stats.color = BoonCatalog.color(dominant)
@@ -87,9 +90,47 @@ static func cast_cooldown(base: ArcaneTuning) -> float:
 	return base.cooldown_seconds / rate
 
 
-## Gaia's armor: +8% per stack, capped so Milo can always be hurt.
+## Gaia's armor: +8% per stack; Crya adds 8% per stack while any enemy is
+## slowed, frozen, charmed, rooted or stunned. Capped so Milo can always be hurt.
 static func armor() -> float:
-	return minf(ARMOR_CAP, 0.08 * s(&"gaia"))
+	var total: float = 0.08 * s(&"gaia")
+	if s(&"crya") > 0 and BoonHooks.any_controlled(Game.get_tree()):
+		total += 0.08 * s(&"crya")
+	return minf(ARMOR_CAP, total)
+
+
+## Lilith: up to +18% damage per stack as Health falls to nothing.
+static func low_health_bonus() -> float:
+	if s(&"lilith") <= 0 or Game.max_health <= 0.0:
+		return 1.0
+	return 1.0 + 0.18 * s(&"lilith") * (1.0 - clampf(Game.health / Game.max_health, 0.0, 1.0))
+
+
+## Aurelia: banked wealth turns into damage, 1% per coin (more with stacks), capped.
+static func wealth_power() -> float:
+	var n: int = s(&"aurelia")
+	if n <= 0:
+		return 0.0
+	return minf(WEALTH_POWER_CAP, Game.wealth * 0.01 * (1.0 + 0.25 * (n - 1)))
+
+
+## Somnia: hurt stagger and knockback shrink 10% per stack.
+static func hurt_recovery() -> float:
+	return maxf(0.4, 1.0 - 0.1 * s(&"somnia"))
+
+
+## Vespera: seconds after a dash that a hit still counts as a Perfect Dodge.
+static func dodge_grace() -> float:
+	return 0.05 * s(&"vespera")
+
+
+## Seraphine: shield size and regeneration per second.
+static func shield_max() -> float:
+	return 0.0 if s(&"seraphine") <= 0 else 8.0 + 4.0 * s(&"seraphine")
+
+
+static func shield_regen() -> float:
+	return 0.5 + 0.25 * s(&"seraphine")
 
 
 static func move_speed_multiplier() -> float:

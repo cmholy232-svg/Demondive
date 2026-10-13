@@ -8,14 +8,18 @@ extends RefCounted
 ##   V  moving ledge (up and down, between : markers in its column)
 ##   P  Milo's start   E  exit door         B  boss          G  caged boon-giver
 ##   $  tempting pickup over danger         +  pizza          o  coffee
-##   Hellroom stations: A summoning altar, D Milo's desk, W wardrobe
-##   enemies: i imp, f floater, s succubus, h hellhound, k crawler, n siren
+##   Hellroom stations (hub rooms only): A summoning altar, D Milo's desk, W wardrobe
+##   enemies: i imp, f floater, s succubus, h hellhound, k crawler, n siren,
+##            l lobber, d diver (each level's roster swaps in its own variants)
+##   mechanics: < > current, * bubble vent, % thorn cover, ! timed rail,
+##            - ice (solid), Y icicle, 1 2 / 3 4 linked portals, / mirror, & corruption
 ## Lower-case enemy letters spawn in the first wave, upper-case in the second.
 
 const TILE: float = 64.0
 const STATION_CODES: Dictionary = {"A": &"altar", "D": &"desk", "W": &"wardrobe"}
 const SPAWN_CODES: Dictionary = {
 	"i": &"imp", "f": &"floater", "s": &"succubus", "h": &"hellhound", "k": &"crawler", "n": &"siren",
+	"l": &"lobber", "d": &"diver",
 }
 
 var id: StringName = &""
@@ -102,7 +106,7 @@ func _scan() -> void:
 					pizzas.append(feet)
 				"o":
 					coffees.append(feet)
-				_ when STATION_CODES.has(c):
+				_ when kind == &"hub" and STATION_CODES.has(c):
 					stations[STATION_CODES[c]] = feet
 				_:
 					var lower: String = c.to_lower()
@@ -117,7 +121,8 @@ func tile(x: int, y: int) -> String:
 
 
 func is_solid(x: int, y: int) -> bool:
-	return tile(x, y) == "#"
+	var c: String = tile(x, y)
+	return c == "#" or c == "-"
 
 
 func size_px() -> Vector2:

@@ -15,9 +15,11 @@ var _milo: Milo
 var _room_root: Node3D
 var _movers: Dictionary = {}
 var _spinners: Array[MeshInstance3D] = []
+var _mechanics: MechanicViews3D
 var _milo_view: MiloView3D
 var _actors: ActorViews3D
 var _fx: FxViews3D
+var _specials: SpecialViews3D
 var _time: float = 0.0
 var _env_root: Node3D
 var _biome: String = ""
@@ -45,6 +47,11 @@ func setup(game_camera: GameCamera, milo: Milo) -> void:
 	add_child(_actors)
 	_fx = FxViews3D.new()
 	add_child(_fx)
+	_mechanics = MechanicViews3D.new()
+	add_child(_mechanics)
+	_specials = SpecialViews3D.new()
+	add_child(_specials)
+	_specials.bind(milo)
 
 
 func milo_view() -> MiloView3D:
@@ -60,6 +67,8 @@ func build_room(room: Room, biome: String) -> void:
 		add_child(_env_root)
 		if biome == "hellroom":
 			HellroomKit.environment(_env_root)
+		elif BiomeKit.has(biome):
+			BiomeKit.environment(_env_root, biome)
 		else:
 			NeonMawKit.environment(_env_root)
 	if _room_root != null:
@@ -68,15 +77,19 @@ func build_room(room: Room, biome: String) -> void:
 	_spinners.clear()
 	_room_root = Node3D.new()
 	add_child(_room_root)
+	var themed: bool = BiomeKit.has(biome)
 	if biome == "hellroom":
 		HellroomKit.build(_room_root, room)
+	elif themed:
+		BiomeKit.build(_room_root, room, biome)
 	else:
 		NeonMawKit.build(_room_root, room)
 	for platform: MovingPlatform in room.builder.movers:
-		_movers[platform] = NeonMawKit.mover(_room_root, platform)
+		_movers[platform] = BiomeKit.mover(_room_root, platform, biome) if themed else NeonMawKit.mover(_room_root, platform)
+	_mechanics.bind(room, BiomeKit.theme(biome) if themed else {})
 	for node: Node in _room_root.find_children("*", "MeshInstance3D", true, false):
 		var mesh := node as MeshInstance3D
-		if mesh.has_meta("spin") or mesh.has_meta("sweep"):
+		if mesh.has_meta("spin") or mesh.has_meta("sweep") or mesh.has_meta("rise") or mesh.has_meta("drift") or mesh.has_meta("spin_z"):
 			_spinners.append(mesh)
 	_actors.bind_room(room)
 	_fx.bind_room(room)
@@ -93,6 +106,15 @@ func _process(delta: float) -> void:
 	for mesh: MeshInstance3D in _spinners:
 		if mesh.has_meta("spin"):
 			mesh.rotation.y += float(mesh.get_meta("spin")) * delta
+		elif mesh.has_meta("spin_z"):
+			mesh.rotation.z += float(mesh.get_meta("spin_z")) * delta
+		elif mesh.has_meta("rise"):
+			mesh.position.y += float(mesh.get_meta("rise")) * delta
+			if mesh.position.y > float(mesh.get_meta("rise_floor")) + 9.0:
+				mesh.position.y = float(mesh.get_meta("rise_floor")) + 0.3
+		elif mesh.has_meta("drift"):
+			mesh.position.y += sin(_time * float(mesh.get_meta("drift")) + mesh.position.x) * 0.15 * delta
+			mesh.rotation.y += float(mesh.get_meta("drift")) * 0.2 * delta
 		else:
 			mesh.rotation.z = float(mesh.get_meta("sweep")) + sin(_time * 0.5 + mesh.position.x) * 0.35
 

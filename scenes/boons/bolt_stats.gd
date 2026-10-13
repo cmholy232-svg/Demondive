@@ -19,8 +19,27 @@ var blast_radius: float = 0.0
 var stun_seconds: float = 0.0
 var crit_chance: float = 0.05
 var crit_multiplier: float = 1.75
+## Radians per second the bolt turns toward the nearest enemy (Nerissa).
+var homing: float = 0.0
+## Wall and enemy ricochets left (Isolde).
+var bounces: int = 0
+## Chance a hit charms its target (Nerissa).
+var charm_chance: float = 0.0
+## Calyptra's power band for this cast: 0 low, 1 even, 2 high, 3 Jackpot.
+var band: int = 1
+## A harmless decoy (Somnia's Velvet Feint).
+var decoy: bool = false
 var color: Color = Color(0.8, 0.6, 1.0)
 var trail_colors: Array[Color] = []
+
+
+func duplicate_stats() -> BoltStats:
+	var copy := BoltStats.new()
+	for prop: Dictionary in get_property_list():
+		if prop["usage"] & PROPERTY_USAGE_SCRIPT_VARIABLE:
+			copy.set(prop["name"], get(prop["name"]))
+	copy.trail_colors = trail_colors.duplicate()
+	return copy
 
 
 func make_hit(direction: Vector2, rng: RandomNumberGenerator) -> Hit:

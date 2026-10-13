@@ -8,6 +8,7 @@ extends CanvasLayer
 const MARGIN: float = 22.0
 
 var _health_bar: ProgressBar
+var _shield_bar: ProgressBar
 var _health_text: Label
 var _energy_bar: ProgressBar
 var _shards: Label
@@ -72,6 +73,12 @@ func _build_vitals() -> void:
 	_energy_bar = UiStyle.bar(UiStyle.ENERGY)
 	_energy_bar.custom_minimum_size = Vector2(220.0, 12.0)
 	box.add_child(_energy_bar)
+	_shield_bar = UiStyle.bar(UiStyle.GOLD.lerp(Color.WHITE, 0.4))
+	_shield_bar.custom_minimum_size = Vector2(300.0, 6.0)
+	_shield_bar.max_value = Game.BLOOD_SHIELD_CAP
+	_shield_bar.visible = false
+	box.add_child(_shield_bar)
+	Game.shield_changed.connect(_on_shield)
 
 
 func _build_boss_bar() -> void:
@@ -140,6 +147,11 @@ func _build_prompts() -> void:
 	_callout.visible = false
 	_anchor(_callout, Control.PRESET_CENTER_TOP)
 	_callout.offset_top = 92.0
+
+
+func _on_shield(shield: float) -> void:
+	_shield_bar.visible = shield > 0.5
+	_shield_bar.value = shield
 
 
 func _on_health(health: float, max_health: float) -> void:

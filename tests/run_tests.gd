@@ -16,6 +16,10 @@ func _run() -> void:
 	var failed: int = 0
 	for file_name: String in _test_files():
 		var script: GDScript = load(TEST_DIR.path_join(file_name)) as GDScript
+		if script == null or not script.can_instantiate():
+			failed += 1
+			print("FAIL  ", file_name, " does not load")
+			continue
 		for method: Dictionary in script.get_script_method_list():
 			var method_name: String = method["name"]
 			if not method_name.begins_with("test_"):

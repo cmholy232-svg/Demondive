@@ -1,0 +1,625 @@
+{
+ "drowned_fan": {
+  "base": "imp",
+  "palette": {
+   "main": "#2f8f9a",
+   "dark": "#103a44",
+   "eye": "#b8fff4",
+   "accent": "#e8d9b0"
+  }
+ },
+ "chorus_wisp": {
+  "base": "floater",
+  "palette": {
+   "main": "#3fb6d6",
+   "dark": "#0f4d66",
+   "eye": "#ff9be6",
+   "accent": "#dff8ff"
+  },
+  "shot": "#7fe8ff"
+ },
+ "court_cantor": {
+  "base": "succubus",
+  "palette": {
+   "main": "#3a9fb0",
+   "dark": "#0c3440",
+   "eye": "#ffe08a",
+   "accent": "#ffe08a"
+  },
+  "shot": "#5fe0ff"
+ },
+ "reef_hound": {
+  "base": "hellhound",
+  "palette": {
+   "main": "#1e5c6e",
+   "dark": "#f0e0c0",
+   "eye": "#ff8a5a",
+   "accent": "#3ff0ff"
+  },
+  "speed": 1.05
+ },
+ "bubble_crab": {
+  "base": "crawler",
+  "palette": {
+   "main": "#d0603a",
+   "dark": "#f2b48a",
+   "eye": "#ffffff",
+   "accent": "#ffd0a0"
+  },
+  "health": 1.15
+ },
+ "spotlight_dancer": {
+  "base": "siren",
+  "palette": {
+   "main": "#4ac0d8",
+   "dark": "#0a2a3a",
+   "eye": "#ff9be6",
+   "accent": "#ff9be6"
+  }
+ },
+ "chant_pillar": {
+  "base": "lobber",
+  "palette": {
+   "main": "#c8b080",
+   "dark": "#3a6a7a",
+   "eye": "#7ffcff",
+   "accent": "#36c9ff"
+  },
+  "shot": "#7ffcff"
+ },
+ "reef_eel": {
+  "base": "diver",
+  "palette": {
+   "main": "#1a7a8a",
+   "dark": "#0a2a3a",
+   "eye": "#fff27a",
+   "accent": "#5ff0ff"
+  }
+ },
+ "thorn_stalker": {
+  "base": "imp",
+  "palette": {
+   "main": "#4a7a2a",
+   "dark": "#1e3012",
+   "eye": "#ffd23a",
+   "accent": "#c9a14a"
+  },
+  "speed": 1.1
+ },
+ "spore_maw": {
+  "base": "lobber",
+  "palette": {
+   "main": "#6a8a3a",
+   "dark": "#7a1a3a",
+   "eye": "#ff7ab0",
+   "accent": "#ff8fbd"
+  },
+  "shot": "#c8ff5a"
+ },
+ "vine_lurker": {
+  "base": "siren",
+  "palette": {
+   "main": "#3a6a2a",
+   "dark": "#14260c",
+   "eye": "#ffe05a",
+   "accent": "#64d879"
+  }
+ },
+ "razor_boar": {
+  "base": "hellhound",
+  "palette": {
+   "main": "#5a3a24",
+   "dark": "#e8d8b0",
+   "eye": "#ff5a3a",
+   "accent": "#ff8a3a"
+  },
+  "speed": 1.1,
+  "health": 1.1
+ },
+ "root_maw": {
+  "base": "crawler",
+  "palette": {
+   "main": "#4a3420",
+   "dark": "#7a1a2a",
+   "eye": "#c8ff5a",
+   "accent": "#64d879"
+  },
+  "health": 1.2
+ },
+ "thorn_archer": {
+  "base": "succubus",
+  "palette": {
+   "main": "#5a8a3a",
+   "dark": "#1e2a14",
+   "eye": "#ff5a5a",
+   "accent": "#e35b58"
+  },
+  "shot": "#c8ff5a"
+ },
+ "thorn_moth": {
+  "base": "diver",
+  "palette": {
+   "main": "#6a5a3a",
+   "dark": "#2a3a14",
+   "eye": "#ffef8a",
+   "accent": "#c8ff5a"
+  }
+ },
+ "jackpot_gremlin": {
+  "base": "imp",
+  "palette": {
+   "main": "#d4a020",
+   "dark": "#3a2a10",
+   "eye": "#ffffff",
+   "accent": "#ff4ab0"
+  },
+  "speed": 1.15
+ },
+ "card_dealer": {
+  "base": "succubus",
+  "palette": {
+   "main": "#c02a5a",
+   "dark": "#140a14",
+   "eye": "#ffe36e",
+   "accent": "#ffe36e"
+  },
+  "shot": "#e97cff"
+ },
+ "dice_hound": {
+  "base": "hellhound",
+  "palette": {
+   "main": "#f2f0e8",
+   "dark": "#141414",
+   "eye": "#e97cff",
+   "accent": "#ffe36e"
+  }
+ },
+ "rail_wisp": {
+  "base": "floater",
+  "palette": {
+   "main": "#e8d040",
+   "dark": "#3a2a5a",
+   "eye": "#fff9bd",
+   "accent": "#ffffff"
+  },
+  "shot": "#f6df45"
+ },
+ "slot_mimic": {
+  "base": "crawler",
+  "palette": {
+   "main": "#a01a3a",
+   "dark": "#f2c040",
+   "eye": "#ffe36e",
+   "accent": "#ffe36e"
+  },
+  "health": 1.15
+ },
+ "jinx_croupier": {
+  "base": "siren",
+  "palette": {
+   "main": "#7a2aa0",
+   "dark": "#14081a",
+   "eye": "#ffe36e",
+   "accent": "#e97cff"
+  }
+ },
+ "chip_tosser": {
+  "base": "lobber",
+  "palette": {
+   "main": "#3a2a5a",
+   "dark": "#e97cff",
+   "eye": "#ffe36e",
+   "accent": "#f6df45"
+  },
+  "shot": "#ffe36e"
+ },
+ "volt_bat": {
+  "base": "diver",
+  "palette": {
+   "main": "#2a2a3a",
+   "dark": "#f6df45",
+   "eye": "#fff9bd",
+   "accent": "#f6df45"
+  },
+  "speed": 1.1
+ },
+ "ice_penitent": {
+  "base": "imp",
+  "palette": {
+   "main": "#a8c8e0",
+   "dark": "#3a5a7a",
+   "eye": "#e8f5ff",
+   "accent": "#ffffff"
+  }
+ },
+ "choir_shard": {
+  "base": "floater",
+  "palette": {
+   "main": "#c8e8ff",
+   "dark": "#5a7aa0",
+   "eye": "#8ee7ff",
+   "accent": "#ffffff"
+  },
+  "shot": "#aef0ff"
+ },
+ "reliquary_knight": {
+  "base": "siren",
+  "palette": {
+   "main": "#8aa8c8",
+   "dark": "#2a3a5a",
+   "eye": "#8ee7ff",
+   "accent": "#c8e0ff"
+  },
+  "health": 1.25,
+  "speed": 0.9
+ },
+ "frost_hound": {
+  "base": "hellhound",
+  "palette": {
+   "main": "#d8e8f8",
+   "dark": "#5a7a9a",
+   "eye": "#5ab8ff",
+   "accent": "#aef0ff"
+  }
+ },
+ "glass_deacon": {
+  "base": "succubus",
+  "palette": {
+   "main": "#b8d8f0",
+   "dark": "#1c2a44",
+   "eye": "#82baff",
+   "accent": "#82baff"
+  },
+  "shot": "#aef0ff"
+ },
+ "preservation_wisp": {
+  "base": "diver",
+  "palette": {
+   "main": "#a0d0f0",
+   "dark": "#3a5a7a",
+   "eye": "#ffffff",
+   "accent": "#aef0ff"
+  }
+ },
+ "relic_crawler": {
+  "base": "crawler",
+  "palette": {
+   "main": "#6a8aa8",
+   "dark": "#c8e0ff",
+   "eye": "#aef0ff",
+   "accent": "#ffffff"
+  },
+  "health": 1.2
+ },
+ "frost_lobber": {
+  "base": "lobber",
+  "palette": {
+   "main": "#8ab8d8",
+   "dark": "#2a4a6a",
+   "eye": "#e8f5ff",
+   "accent": "#ffffff"
+  },
+  "shot": "#aef0ff"
+ },
+ "luggage_imp": {
+  "base": "imp",
+  "palette": {
+   "main": "#8a4a2a",
+   "dark": "#3a1a10",
+   "eye": "#ffd8f5",
+   "accent": "#d4a83a"
+  }
+ },
+ "sleepwalker": {
+  "base": "siren",
+  "palette": {
+   "main": "#c8a0d8",
+   "dark": "#3a2a5a",
+   "eye": "#ffffff",
+   "accent": "#bc7cff"
+  },
+  "speed": 0.9
+ },
+ "keyhole_wisp": {
+  "base": "floater",
+  "palette": {
+   "main": "#d4a83a",
+   "dark": "#3a2a14",
+   "eye": "#bc7cff",
+   "accent": "#2a1a10"
+  },
+  "shot": "#ffd8f5"
+ },
+ "bellhop_mimic": {
+  "base": "crawler",
+  "palette": {
+   "main": "#8a1a2a",
+   "dark": "#d4a83a",
+   "eye": "#ffd8f5",
+   "accent": "#d4a83a"
+  },
+  "health": 1.15
+ },
+ "hallway_hound": {
+  "base": "hellhound",
+  "palette": {
+   "main": "#3a2a4a",
+   "dark": "#e8d0f0",
+   "eye": "#bc7cff",
+   "accent": "#ff8ad8"
+  }
+ },
+ "wake_up_caller": {
+  "base": "succubus",
+  "palette": {
+   "main": "#e8c0d8",
+   "dark": "#2a1a3a",
+   "eye": "#ff5a5a",
+   "accent": "#ffd8f5"
+  },
+  "shot": "#ff8ad8"
+ },
+ "fantasy_anchor": {
+  "base": "lobber",
+  "palette": {
+   "main": "#5a3a7a",
+   "dark": "#ffd8f5",
+   "eye": "#ffffff",
+   "accent": "#bc7cff"
+  },
+  "shot": "#ffd8f5"
+ },
+ "night_moth": {
+  "base": "diver",
+  "palette": {
+   "main": "#6a5a8a",
+   "dark": "#2a1a3a",
+   "eye": "#ffd8f5",
+   "accent": "#bc7cff"
+  }
+ },
+ "mirror_punk": {
+  "base": "imp",
+  "palette": {
+   "main": "#c8c8d8",
+   "dark": "#2a2a3a",
+   "eye": "#d7b7ff",
+   "accent": "#ffffff"
+  },
+  "speed": 1.15
+ },
+ "prism_wisp": {
+  "base": "floater",
+  "palette": {
+   "main": "#e8e8ff",
+   "dark": "#7a6aa0",
+   "eye": "#ffffff",
+   "accent": "#d7b7ff"
+  },
+  "shot": "#e0f0ff"
+ },
+ "faceless_striker": {
+  "base": "siren",
+  "palette": {
+   "main": "#e0d8e8",
+   "dark": "#141420",
+   "eye": "#d7b7ff",
+   "accent": "#ffffff"
+  }
+ },
+ "glass_hound": {
+  "base": "hellhound",
+  "palette": {
+   "main": "#b8c8e0",
+   "dark": "#3a3a5a",
+   "eye": "#ffffff",
+   "accent": "#d7b7ff"
+  }
+ },
+ "echo_sniper": {
+  "base": "succubus",
+  "palette": {
+   "main": "#2a2a3a",
+   "dark": "#0a0a14",
+   "eye": "#e0f0ff",
+   "accent": "#d7b7ff"
+  },
+  "shot": "#e0f0ff",
+  "speed": 1.1
+ },
+ "reflection_knight": {
+  "base": "crawler",
+  "palette": {
+   "main": "#9aa0b8",
+   "dark": "#2a2a3a",
+   "eye": "#d7b7ff",
+   "accent": "#ffffff"
+  },
+  "health": 1.2
+ },
+ "shard_diver": {
+  "base": "diver",
+  "palette": {
+   "main": "#d0d8f0",
+   "dark": "#5a5a7a",
+   "eye": "#ffffff",
+   "accent": "#d7b7ff"
+  }
+ },
+ "mask_lobber": {
+  "base": "lobber",
+  "palette": {
+   "main": "#e8e0d0",
+   "dark": "#1a1a24",
+   "eye": "#d7b7ff",
+   "accent": "#ffffff"
+  },
+  "shot": "#d7b7ff"
+ },
+ "throne_legionary": {
+  "base": "crawler",
+  "palette": {
+   "main": "#5a0a14",
+   "dark": "#c81a2a",
+   "eye": "#ff2a3a",
+   "accent": "#d4a83a"
+  },
+  "health": 1.25
+ },
+ "charm_acolyte": {
+  "base": "succubus",
+  "palette": {
+   "main": "#c84a6a",
+   "dark": "#1a0408",
+   "eye": "#ff9aa9",
+   "accent": "#ff9aa9"
+  },
+  "shot": "#ff2a5a"
+ },
+ "portal_hound": {
+  "base": "hellhound",
+  "palette": {
+   "main": "#2a0a14",
+   "dark": "#c81a2a",
+   "eye": "#ff2a3a",
+   "accent": "#ff5a8a"
+  },
+  "speed": 1.1
+ },
+ "blood_cantor": {
+  "base": "lobber",
+  "palette": {
+   "main": "#7a0a1a",
+   "dark": "#1a0408",
+   "eye": "#ff9aa9",
+   "accent": "#b90f4a"
+  },
+  "shot": "#ff2a3a"
+ },
+ "decree_wisp": {
+  "base": "floater",
+  "palette": {
+   "main": "#b90f4a",
+   "dark": "#2a0408",
+   "eye": "#ffd04a",
+   "accent": "#ff9aa9"
+  },
+  "shot": "#ff2a5a"
+ },
+ "hollow_succubus": {
+  "base": "siren",
+  "palette": {
+   "main": "#3a2a3a",
+   "dark": "#0a0408",
+   "eye": "#ff2a3a",
+   "accent": "#b90f4a"
+  }
+ },
+ "blood_bat": {
+  "base": "diver",
+  "palette": {
+   "main": "#4a0a14",
+   "dark": "#1a0408",
+   "eye": "#ff2a3a",
+   "accent": "#ff2a3a"
+  },
+  "speed": 1.15
+ },
+ "throne_imp": {
+  "base": "imp",
+  "palette": {
+   "main": "#9a0a1a",
+   "dark": "#2a0408",
+   "eye": "#ffd04a",
+   "accent": "#d4a83a"
+  }
+ },
+ "hollow_imp": {
+  "base": "imp",
+  "palette": {
+   "main": "#1a1824",
+   "dark": "#0a0a10",
+   "eye": "#9a8aff",
+   "accent": "#5a5a7a"
+  },
+  "speed": 1.15
+ },
+ "hollow_wisp": {
+  "base": "floater",
+  "palette": {
+   "main": "#1a1830",
+   "dark": "#0a0a14",
+   "eye": "#9a8aff",
+   "accent": "#3a3a5a"
+  },
+  "shot": "#9a8aff"
+ },
+ "hollow_hound": {
+  "base": "hellhound",
+  "palette": {
+   "main": "#141220",
+   "dark": "#3a3a5a",
+   "eye": "#9a8aff",
+   "accent": "#5a4aff"
+  },
+  "speed": 1.15
+ },
+ "hollow_siren": {
+  "base": "siren",
+  "palette": {
+   "main": "#24202e",
+   "dark": "#0a0a10",
+   "eye": "#9a8aff",
+   "accent": "#9a8aff"
+  }
+ },
+ "hollow_caster": {
+  "base": "succubus",
+  "palette": {
+   "main": "#24202e",
+   "dark": "#0a0a10",
+   "eye": "#9a8aff",
+   "accent": "#9a8aff"
+  },
+  "shot": "#9a8aff"
+ },
+ "hollow_crawler": {
+  "base": "crawler",
+  "palette": {
+   "main": "#1a1824",
+   "dark": "#3a3a5a",
+   "eye": "#9a8aff",
+   "accent": "#5a4aff"
+  },
+  "health": 1.2
+ },
+ "hollow_lobber": {
+  "base": "lobber",
+  "palette": {
+   "main": "#1a1824",
+   "dark": "#3a3a5a",
+   "eye": "#9a8aff",
+   "accent": "#5a4aff"
+  },
+  "shot": "#9a8aff"
+ },
+ "hollow_diver": {
+  "base": "diver",
+  "palette": {
+   "main": "#1a1824",
+   "dark": "#0a0a14",
+   "eye": "#9a8aff",
+   "accent": "#5a4aff"
+  }
+ },
+ "spore_wisp": {
+  "base": "floater",
+  "palette": {
+   "main": "#6a8a3a",
+   "dark": "#2a3a14",
+   "eye": "#ff7ab0",
+   "accent": "#e0ff6a"
+  },
+  "shot": "#c8ff5a"
+ }
+}

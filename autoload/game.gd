@@ -8,12 +8,15 @@ signal boons_changed
 signal run_shards_changed(amount: int)
 signal milo_hurt(amount: float)
 signal milo_died
+signal shield_changed(shield: float)
 ## Asks the 3D view for a one-shot effect (burst, ring, blast, shards...).
 signal fx_requested(kind: StringName, at: Vector2, color: Color, size: float)
 
 const BASE_HEALTH: float = 100.0
 const BASE_ENERGY: float = 60.0
 const HURT_INVULNERABLE_SECONDS: float = 0.9
+## Lilith's blood shield can't grow past this.
+const BLOOD_SHIELD_CAP: float = 25.0
 
 var health: float = BASE_HEALTH
 var max_health: float = BASE_HEALTH
@@ -35,6 +38,15 @@ var rng := RandomNumberGenerator.new()
 var room_damage_bonus: float = 0.0
 ## Short speed buffs from Belladonna, as remaining seconds per stack.
 var appetite_buffs: Array[float] = []
+## Lilith's corruption pools: a damage bonus soaked up by standing in them.
+var corruption: float = 0.0
+var corruption_timer: float = 0.0
+## True in The Hollow's second phase: Milo fights with his base kit only.
+var boons_suppressed: bool = false
+## Aurelia's temporary wealth: coins from kills that feed capped damage.
+var wealth: int = 0
+## Hits soak into this before Health (Seraphine's halo shield, Lilith's blood shield).
+var shield: float = 0.0
 
 
 func _process(delta: float) -> void:
@@ -45,6 +57,14 @@ func _process(delta: float) -> void:
 		appetite_buffs[i] -= delta
 		if appetite_buffs[i] <= 0.0:
 			appetite_buffs.remove_at(i)
+	if corruption_timer > 0.0:
+		corruption_timer -= delta
+		if corruption_timer <= 0.0:
+			corruption = 0.0
+	var halo: float = BoonEffects.shield_max()
+	if shield < halo:
+		shield = minf(halo, shield + BoonEffects.shield_regen() * delta)
+		shield_changed.emit(shield)
 
 
 func start_run(seed_value: int = 0) -> void:
@@ -58,6 +78,11 @@ func start_run(seed_value: int = 0) -> void:
 	kills = 0
 	room_damage_bonus = 0.0
 	appetite_buffs.clear()
+	corruption = 0.0
+	corruption_timer = 0.0
+	boons_suppressed = false
+	wealth = 0
+	shield = 0.0
 	max_health = BASE_HEALTH + Upgrades.value(&"vitality")
 	max_energy = BASE_ENERGY + Upgrades.value(&"reservoir")
 	health = max_health
@@ -99,12 +124,25 @@ func hurt(amount: float) -> float:
 	if health <= 0.0:
 		return 0.0
 	var taken: float = maxf(1.0, amount * (1.0 - BoonEffects.armor()))
+	if shield > 0.0:
+		var soaked: float = minf(shield, taken)
+		shield -= soaked
+		taken -= soaked
+		shield_changed.emit(shield)
+		if taken <= 0.0:
+			return 0.0
 	health = maxf(0.0, health - taken)
 	health_changed.emit(health, max_health)
 	milo_hurt.emit(taken)
 	if health <= 0.0:
 		milo_died.emit()
 	return taken
+
+
+func add_shield(amount: float) -> void:
+	if shield < BLOOD_SHIELD_CAP:
+		shield = minf(BLOOD_SHIELD_CAP, shield + amount)
+		shield_changed.emit(shield)
 
 
 func heal(amount: float) -> void:
@@ -138,8 +176,14 @@ func add_run_shards(amount: int) -> void:
 
 # --- Boons -----------------------------------------------------------------
 
+## Health drained by a level hazard: never kills, never triggers hurt feedback.
+func drain(amount: float) -> void:
+	health = maxf(1.0, health - amount)
+	health_changed.emit(health, max_health)
+
+
 func stacks(id: StringName) -> int:
-	return int(boons.get(id, 0))
+	return 0 if boons_suppressed else int(boons.get(id, 0))
 
 
 func add_boon(id: StringName) -> void:

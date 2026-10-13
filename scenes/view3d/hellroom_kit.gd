@@ -297,13 +297,9 @@ static func _goddesses(root: Node3D, data: RoomData, floor_y: float) -> void:
 	for boon: StringName in Save.unlocked_boons():
 		if i >= spots.size():
 			break
-		var figure: Node3D = CreatureModels.make(&"siren")
-		figure.position = Vector3(spots[i], floor_y, -2.2 + float(i % 2) * 0.4)
-		figure.rotation.y = PI * 0.5 + (0.4 if i % 2 == 0 else -0.4)
-		figure.scale = Vector3.ONE * 1.25
 		var color: Color = BoonCatalog.color(boon)
-		for node: Node in figure.find_children("*", "MeshInstance3D", true, false):
-			(node as MeshInstance3D).material_override = Kit3D.toon(color.lerp(Color.WHITE, 0.15), 0.015, 1.2)
+		var figure: Node3D = CharacterModels.figure(boon, 1.75, color, 0.45 if i % 2 == 0 else -0.45)
+		figure.position = Vector3(spots[i], floor_y, -2.2 + float(i % 2) * 0.4)
 		root.add_child(figure)
 		Kit3D.sign_text(root, BoonCatalog.text(boon, "name"), Vector3(spots[i], floor_y + 2.15, -2.0), color, 0.004, 64)
 		i += 1

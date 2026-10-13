@@ -26,5 +26,310 @@
 			"miniboss": "neon_miniboss",
 			"boss": "neon_boss"
 		}
+	},
+	"2": {
+		"dir": "drowned_court",
+		"slots": [
+			"entry",
+			"combat",
+			"recovery",
+			"miniboss",
+			"combat",
+			"combat",
+			"recovery",
+			"boss"
+		],
+		"cages": [
+			"flora",
+			"voltara"
+		],
+		"boss_boon": "nerissa",
+		"entrance_beat": "level_two_entrance",
+		"miniboss_beat": "fan_club_intro",
+		"boss_beat": "nerissa_intro",
+		"aftermath_beat": "level_two_revelation",
+		"music": {
+			"explore": "drowned_court_explore",
+			"miniboss": "drowned_court_miniboss",
+			"boss": "drowned_court_boss"
+		},
+		"roster": {
+			"imp": "drowned_fan",
+			"floater": "chorus_wisp",
+			"succubus": "court_cantor",
+			"hellhound": "reef_hound",
+			"crawler": "bubble_crab",
+			"siren": "spotlight_dancer",
+			"lobber": "chant_pillar",
+			"diver": "reef_eel"
+		},
+		"miniboss": "fan_club",
+		"boss": "nerissa"
+	},
+	"3": {
+		"dir": "thornwild",
+		"slots": [
+			"entry",
+			"combat",
+			"recovery",
+			"miniboss",
+			"combat",
+			"combat",
+			"recovery",
+			"boss"
+		],
+		"cages": [
+			"crya"
+		],
+		"boss_boon": "roxyne",
+		"entrance_beat": "level_three_entrance",
+		"miniboss_beat": "perfect_prey_intro",
+		"boss_beat": "roxyne_intro",
+		"aftermath_beat": "level_three_revelation",
+		"music": {
+			"explore": "thornwild_explore",
+			"miniboss": "thornwild_miniboss",
+			"boss": "thornwild_boss"
+		},
+		"roster": {
+			"imp": "thorn_stalker",
+			"floater": "spore_wisp",
+			"succubus": "thorn_archer",
+			"hellhound": "razor_boar",
+			"crawler": "root_maw",
+			"siren": "vine_lurker",
+			"lobber": "spore_maw",
+			"diver": "thorn_moth"
+		},
+		"miniboss": "perfect_prey",
+		"boss": "roxyne"
+	},
+	"4": {
+		"dir": "thunder_jackpot",
+		"slots": [
+			"entry",
+			"combat",
+			"recovery",
+			"miniboss",
+			"combat",
+			"combat",
+			"recovery",
+			"boss"
+		],
+		"cages": [
+			"luna"
+		],
+		"boss_boon": "calyptra",
+		"entrance_beat": "level_four_entrance",
+		"miniboss_beat": "lady_luckless_intro",
+		"boss_beat": "calyptra_intro",
+		"aftermath_beat": "level_four_aftermath",
+		"music": {
+			"explore": "thunder_jackpot_explore",
+			"miniboss": "thunder_jackpot_miniboss",
+			"boss": "thunder_jackpot_boss"
+		},
+		"roster": {
+			"imp": "jackpot_gremlin",
+			"floater": "rail_wisp",
+			"succubus": "card_dealer",
+			"hellhound": "dice_hound",
+			"crawler": "slot_mimic",
+			"siren": "jinx_croupier",
+			"lobber": "chip_tosser",
+			"diver": "volt_bat"
+		},
+		"miniboss": "lady_luckless",
+		"boss": "calyptra",
+		"house_rules": true
+	},
+	"5": {
+		"dir": "frozen_basilica",
+		"slots": [
+			"entry",
+			"combat",
+			"recovery",
+			"miniboss",
+			"combat",
+			"combat",
+			"recovery",
+			"boss"
+		],
+		"cages": [
+			"solara"
+		],
+		"boss_boon": "isolde",
+		"entrance_beat": "level_five_entrance",
+		"miniboss_beat": "memory_golem_intro",
+		"boss_beat": "isolde_intro",
+		"aftermath_beat": "level_five_aftermath",
+		"music": {
+			"explore": "frozen_basilica_explore",
+			"miniboss": "frozen_basilica_miniboss",
+			"boss": "frozen_basilica_boss"
+		},
+		"roster": {
+			"imp": "ice_penitent",
+			"floater": "choir_shard",
+			"succubus": "glass_deacon",
+			"hellhound": "frost_hound",
+			"crawler": "relic_crawler",
+			"siren": "reliquary_knight",
+			"lobber": "frost_lobber",
+			"diver": "preservation_wisp"
+		},
+		"miniboss": "memory_golem",
+		"boss": "isolde"
+	},
+	"6": {
+		"dir": "forever_motel",
+		"slots": [
+			"entry",
+			"combat",
+			"recovery",
+			"miniboss",
+			"combat",
+			"combat",
+			"recovery",
+			"boss"
+		],
+		"cages": [
+			"aurelia"
+		],
+		"boss_boon": "somnia",
+		"entrance_beat": "level_six_entrance",
+		"miniboss_beat": "dream_girl_intro",
+		"boss_beat": "somnia_intro",
+		"aftermath_beat": "level_six_aftermath",
+		"music": {
+			"explore": "forever_motel_explore",
+			"miniboss": "forever_motel_miniboss",
+			"boss": "forever_motel_boss"
+		},
+		"roster": {
+			"imp": "luggage_imp",
+			"floater": "keyhole_wisp",
+			"succubus": "wake_up_caller",
+			"hellhound": "hallway_hound",
+			"crawler": "bellhop_mimic",
+			"siren": "sleepwalker",
+			"lobber": "fantasy_anchor",
+			"diver": "night_moth"
+		},
+		"miniboss": "dream_girl",
+		"boss": "somnia",
+		"false_awakening": 0.35
+	},
+	"7": {
+		"dir": "thousand_faces",
+		"slots": [
+			"entry",
+			"combat",
+			"recovery",
+			"miniboss",
+			"combat",
+			"combat",
+			"recovery",
+			"boss"
+		],
+		"cages": [
+			"noctissa"
+		],
+		"boss_boon": "vespera",
+		"entrance_beat": "level_seven_entrance",
+		"miniboss_beat": "better_milo_intro",
+		"boss_beat": "vespera_intro",
+		"aftermath_beat": "level_seven_aftermath",
+		"music": {
+			"explore": "thousand_faces_explore",
+			"miniboss": "thousand_faces_miniboss",
+			"boss": "thousand_faces_boss"
+		},
+		"roster": {
+			"imp": "mirror_punk",
+			"floater": "prism_wisp",
+			"succubus": "echo_sniper",
+			"hellhound": "glass_hound",
+			"crawler": "reflection_knight",
+			"siren": "faceless_striker",
+			"lobber": "mask_lobber",
+			"diver": "shard_diver"
+		},
+		"miniboss": "better_milo",
+		"boss": "vespera"
+	},
+	"8": {
+		"dir": "lilith_throne",
+		"slots": [
+			"entry",
+			"combat",
+			"recovery",
+			"miniboss",
+			"combat",
+			"combat",
+			"recovery",
+			"boss"
+		],
+		"cages": [],
+		"boss_boon": "lilith",
+		"entrance_beat": "level_eight_entrance",
+		"miniboss_beat": "daughters_intro",
+		"boss_beat": "lilith_intro",
+		"aftermath_beat": "level_eight_aftermath",
+		"music": {
+			"explore": "lilith_throne_explore",
+			"miniboss": "lilith_throne_miniboss",
+			"boss": "lilith_throne_boss"
+		},
+		"roster": {
+			"imp": "throne_imp",
+			"floater": "decree_wisp",
+			"succubus": "charm_acolyte",
+			"hellhound": "portal_hound",
+			"crawler": "throne_legionary",
+			"siren": "hollow_succubus",
+			"lobber": "blood_cantor",
+			"diver": "blood_bat"
+		},
+		"miniboss": "lilith_daughters",
+		"boss": "lilith"
+	},
+	"9": {
+		"dir": "self_below",
+		"slots": [
+			"entry",
+			"combat",
+			"recovery",
+			"miniboss",
+			"combat",
+			"combat",
+			"recovery",
+			"boss"
+		],
+		"cages": [
+			"seraphine"
+		],
+		"boss_boon": "",
+		"entrance_beat": "level_nine_entrance",
+		"miniboss_beat": "boss_rush_intro",
+		"boss_beat": "hollow_intro",
+		"aftermath_beat": "level_nine_aftermath",
+		"music": {
+			"explore": "self_below_explore",
+			"miniboss": "self_below_rush",
+			"boss": "self_below_boss"
+		},
+		"roster": {
+			"imp": "hollow_imp",
+			"floater": "hollow_wisp",
+			"succubus": "hollow_caster",
+			"hellhound": "hollow_hound",
+			"crawler": "hollow_crawler",
+			"siren": "hollow_siren",
+			"lobber": "hollow_lobber",
+			"diver": "hollow_diver"
+		},
+		"miniboss": "rush",
+		"boss": "hollow"
 	}
 }

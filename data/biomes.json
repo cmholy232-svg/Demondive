@@ -1,0 +1,444 @@
+{
+ "drowned_court": {
+  "bg": "#020b12",
+  "ambient": "#3f7a9a",
+  "ambient_energy": 0.34,
+  "fog": "#05222e",
+  "fog_density": 0.013,
+  "key": "#c8ecff",
+  "key_energy": 0.95,
+  "fill": "#ff9be6",
+  "fill_energy": 0.32,
+  "saturation": 1.12,
+  "stone": "#0d2630",
+  "stone_top": "#1f4e5a",
+  "lip": "#36c9ff",
+  "strip": "#ff9be6",
+  "ledge": "#c8b48a",
+  "ledge_glow": "#5ff0ff",
+  "liquid_a": "#14a8c8",
+  "liquid_b": "#b8fff4",
+  "spike": "#e8d9b0",
+  "mover_a": "#36c9ff",
+  "mover_b": "#ff9be6",
+  "wall": {
+   "base_color": "#03121a",
+   "seam_color": "#2ab0d8",
+   "wash_color": "#1a7a98",
+   "panel": [
+    3.4,
+    2.6
+   ]
+  },
+  "crowd": [
+   "#36c9ff",
+   "#ff9be6"
+  ],
+  "crowd_density": 0.5,
+  "shafts": [
+   "#9ff0ff",
+   "#ff9be6"
+  ],
+  "haze": [
+   "#1a6a8a",
+   "#3a2a7a"
+  ],
+  "props": [
+   "columns",
+   "coral",
+   "bubbles"
+  ],
+  "signs": [
+   "sign.court_adore",
+   "sign.court_encore",
+   "sign.court_stage"
+  ],
+  "sign_colors": [
+   "#36c9ff",
+   "#ff9be6"
+  ]
+ },
+ "thornwild": {
+  "bg": "#030a04",
+  "ambient": "#5a8a4a",
+  "ambient_energy": 0.34,
+  "fog": "#0a1a08",
+  "fog_density": 0.016,
+  "key": "#f0ffd0",
+  "key_energy": 1.0,
+  "fill": "#ff8fbd",
+  "fill_energy": 0.25,
+  "saturation": 1.1,
+  "stone": "#1a1a0e",
+  "stone_top": "#3a4a1c",
+  "lip": "#9be05a",
+  "strip": "#ff8fbd",
+  "ledge": "#5a3a1e",
+  "ledge_glow": "#c8ff5a",
+  "liquid_a": "#3a8a1a",
+  "liquid_b": "#e0ff6a",
+  "spike": "#c8b080",
+  "mover_a": "#9be05a",
+  "mover_b": "#ff8fbd",
+  "wall": {
+   "base_color": "#061006",
+   "seam_color": "#3a7a2a",
+   "wash_color": "#2a5a1a",
+   "panel": [
+    1.6,
+    3.8
+   ]
+  },
+  "crowd": [],
+  "shafts": [
+   "#e0ffb0",
+   "#fff0a0"
+  ],
+  "haze": [
+   "#2a5a1a",
+   "#5a2a4a"
+  ],
+  "props": [
+   "trees",
+   "vines",
+   "flowers"
+  ],
+  "signs": [],
+  "sign_colors": [
+   "#c8ff5a"
+  ]
+ },
+ "thunder_jackpot": {
+  "bg": "#08040e",
+  "ambient": "#7a5aa0",
+  "ambient_energy": 0.34,
+  "fog": "#14081e",
+  "fog_density": 0.011,
+  "key": "#fff4d8",
+  "key_energy": 1.0,
+  "fill": "#e97cff",
+  "fill_energy": 0.35,
+  "saturation": 1.2,
+  "stone": "#140a1c",
+  "stone_top": "#3a1a4a",
+  "lip": "#ffe36e",
+  "strip": "#e97cff",
+  "ledge": "#c8a040",
+  "ledge_glow": "#ffe36e",
+  "liquid_a": "#c040ff",
+  "liquid_b": "#ffe36e",
+  "spike": "#ffe36e",
+  "mover_a": "#ffe36e",
+  "mover_b": "#e97cff",
+  "wall": {
+   "base_color": "#0a0410",
+   "seam_color": "#ffd040",
+   "wash_color": "#a040d0",
+   "panel": [
+    1.8,
+    1.8
+   ]
+  },
+  "crowd": [
+   "#ffe36e",
+   "#e97cff"
+  ],
+  "crowd_density": 0.4,
+  "shafts": [
+   "#ffe36e",
+   "#e97cff",
+   "#5ff0ff"
+  ],
+  "haze": [
+   "#6a2a8a",
+   "#8a6a1a"
+  ],
+  "props": [
+   "slots",
+   "chips",
+   "marquee"
+  ],
+  "signs": [
+   "sign.jackpot",
+   "sign.house_wins",
+   "sign.double",
+   "sign.lucky"
+  ],
+  "sign_colors": [
+   "#ffe36e",
+   "#e97cff",
+   "#5ff0ff"
+  ]
+ },
+ "frozen_basilica": {
+  "bg": "#060a12",
+  "ambient": "#8aa8d0",
+  "ambient_energy": 0.4,
+  "fog": "#1a2a3a",
+  "fog_density": 0.015,
+  "key": "#e8f4ff",
+  "key_energy": 1.05,
+  "fill": "#82baff",
+  "fill_energy": 0.35,
+  "saturation": 1.0,
+  "stone": "#24344a",
+  "stone_top": "#c8e0f4",
+  "lip": "#8ee7ff",
+  "strip": "#ffffff",
+  "ledge": "#9ab8d0",
+  "ledge_glow": "#aef0ff",
+  "liquid_a": "#5ab8ff",
+  "liquid_b": "#ffffff",
+  "spike": "#cfefff",
+  "mover_a": "#aef0ff",
+  "mover_b": "#ffffff",
+  "wall": {
+   "base_color": "#0c1624",
+   "seam_color": "#6aa8e0",
+   "wash_color": "#4a7ab0",
+   "panel": [
+    2.2,
+    4.4
+   ]
+  },
+  "crowd": [],
+  "shafts": [
+   "#cfeeff",
+   "#ffffff"
+  ],
+  "haze": [
+   "#4a7ab0",
+   "#8aa8d0"
+  ],
+  "props": [
+   "columns",
+   "windows",
+   "snow"
+  ],
+  "signs": [],
+  "sign_colors": [
+   "#aef0ff"
+  ]
+ },
+ "forever_motel": {
+  "bg": "#08040a",
+  "ambient": "#8a6a9a",
+  "ambient_energy": 0.32,
+  "fog": "#1a0e1e",
+  "fog_density": 0.014,
+  "key": "#ffe8c8",
+  "key_energy": 0.9,
+  "fill": "#bc7cff",
+  "fill_energy": 0.35,
+  "saturation": 1.08,
+  "stone": "#2a1a22",
+  "stone_top": "#5a3a3a",
+  "lip": "#ff8ad8",
+  "strip": "#bc7cff",
+  "ledge": "#8a5a3a",
+  "ledge_glow": "#ffd8a0",
+  "liquid_a": "#8a4ad8",
+  "liquid_b": "#ffd8f5",
+  "spike": "#d4a83a",
+  "mover_a": "#ffd8f5",
+  "mover_b": "#bc7cff",
+  "wall": {
+   "base_color": "#1a0e14",
+   "seam_color": "#5a3a4a",
+   "wash_color": "#8a4a7a",
+   "panel": [
+    2.6,
+    3.0
+   ]
+  },
+  "crowd": [],
+  "shafts": [
+   "#ffd8a0",
+   "#bc7cff"
+  ],
+  "haze": [
+   "#5a2a6a",
+   "#8a5a3a"
+  ],
+  "props": [
+   "motel_doors",
+   "lamps",
+   "clocks"
+  ],
+  "signs": [
+   "sign.vacancy",
+   "sign.no_checkout",
+   "sign.wake_up"
+  ],
+  "sign_colors": [
+   "#ff5a8a",
+   "#bc7cff",
+   "#ffd8a0"
+  ]
+ },
+ "thousand_faces": {
+  "bg": "#06060c",
+  "ambient": "#9a9ab8",
+  "ambient_energy": 0.36,
+  "fog": "#14141e",
+  "fog_density": 0.012,
+  "key": "#f4f4ff",
+  "key_energy": 1.0,
+  "fill": "#d7b7ff",
+  "fill_energy": 0.35,
+  "saturation": 0.95,
+  "stone": "#1a1a24",
+  "stone_top": "#4a4a5e",
+  "lip": "#d7b7ff",
+  "strip": "#e0f0ff",
+  "ledge": "#9aa0b8",
+  "ledge_glow": "#e0f0ff",
+  "liquid_a": "#8a7ad8",
+  "liquid_b": "#ffffff",
+  "spike": "#e0e0f0",
+  "mover_a": "#d7b7ff",
+  "mover_b": "#e0f0ff",
+  "wall": {
+   "base_color": "#0c0c14",
+   "seam_color": "#8a7ab8",
+   "wash_color": "#5a5a8a",
+   "panel": [
+    1.4,
+    2.8
+   ]
+  },
+  "crowd": [
+   "#d7b7ff",
+   "#e0f0ff"
+  ],
+  "crowd_density": 0.35,
+  "shafts": [
+   "#ffffff",
+   "#d7b7ff"
+  ],
+  "haze": [
+   "#5a4a8a",
+   "#3a3a5a"
+  ],
+  "props": [
+   "mirror_panes",
+   "masks",
+   "towers"
+  ],
+  "signs": [
+   "sign.be_better",
+   "sign.smile",
+   "sign.perfect"
+  ],
+  "sign_colors": [
+   "#d7b7ff",
+   "#e0f0ff"
+  ]
+ },
+ "lilith_throne": {
+  "bg": "#0a0204",
+  "ambient": "#8a3a4a",
+  "ambient_energy": 0.34,
+  "fog": "#1e0408",
+  "fog_density": 0.014,
+  "key": "#ffd8c8",
+  "key_energy": 1.0,
+  "fill": "#ff2a5a",
+  "fill_energy": 0.38,
+  "saturation": 1.15,
+  "stone": "#1e0a0e",
+  "stone_top": "#4a1a1e",
+  "lip": "#ff2a3a",
+  "strip": "#d4a83a",
+  "ledge": "#d4a83a",
+  "ledge_glow": "#ff5a3a",
+  "liquid_a": "#b90f2a",
+  "liquid_b": "#ff9a6a",
+  "spike": "#d4a83a",
+  "mover_a": "#ff2a3a",
+  "mover_b": "#d4a83a",
+  "wall": {
+   "base_color": "#12040a",
+   "seam_color": "#8a1a2a",
+   "wash_color": "#b90f4a",
+   "panel": [
+    3.0,
+    4.0
+   ]
+  },
+  "crowd": [
+   "#ff2a3a",
+   "#d4a83a"
+  ],
+  "crowd_density": 0.45,
+  "shafts": [
+   "#ff5a3a",
+   "#ffd04a"
+  ],
+  "haze": [
+   "#8a0a2a",
+   "#5a1a1a"
+  ],
+  "props": [
+   "columns",
+   "banners",
+   "candles"
+  ],
+  "signs": [],
+  "sign_colors": [
+   "#ff2a3a"
+  ]
+ },
+ "self_below": {
+  "bg": "#030208",
+  "ambient": "#5a4a9a",
+  "ambient_energy": 0.3,
+  "fog": "#0a0818",
+  "fog_density": 0.018,
+  "key": "#d8d0ff",
+  "key_energy": 0.85,
+  "fill": "#5a4aff",
+  "fill_energy": 0.4,
+  "saturation": 0.9,
+  "stone": "#0c0a14",
+  "stone_top": "#24203a",
+  "lip": "#9a8aff",
+  "strip": "#5a4aff",
+  "ledge": "#3a3458",
+  "ledge_glow": "#9a8aff",
+  "liquid_a": "#3a2aaa",
+  "liquid_b": "#d8d0ff",
+  "spike": "#9a8aff",
+  "mover_a": "#9a8aff",
+  "mover_b": "#5a4aff",
+  "wall": {
+   "base_color": "#05040c",
+   "seam_color": "#3a3070",
+   "wash_color": "#2a2060",
+   "panel": [
+    4.0,
+    4.0
+   ]
+  },
+  "crowd": [
+   "#9a8aff"
+  ],
+  "crowd_density": 0.25,
+  "shafts": [
+   "#9a8aff",
+   "#ffffff"
+  ],
+  "haze": [
+   "#2a2060",
+   "#4a3a8a"
+  ],
+  "props": [
+   "memories",
+   "shards"
+  ],
+  "signs": [],
+  "sign_colors": [
+   "#9a8aff"
+  ]
+ }
+}

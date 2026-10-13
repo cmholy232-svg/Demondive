@@ -11,6 +11,11 @@ const BURSTS: Dictionary = {
 	&"fizzle": [8, 1.6, 0.04, 0.2, false], &"wave": [40, 7.0, 0.08, 0.5, true],
 	&"barrier": [30, 2.5, 0.08, 0.6, true], &"gust": [40, 8.0, 0.06, 0.4, true],
 	&"devour": [40, 3.0, 0.1, 0.6, true], &"announce": [20, 2.0, 0.06, 0.5, true],
+	&"spark": [16, 6.0, 0.035, 0.18, false], &"frost": [26, 2.2, 0.06, 0.55, true],
+	&"mirror": [18, 4.0, 0.05, 0.3, false], &"beam": [50, 1.5, 0.09, 0.5, true],
+	&"vine": [24, 1.8, 0.07, 0.6, true], &"charm": [18, 1.6, 0.06, 0.7, true],
+	&"dice": [30, 4.0, 0.07, 0.5, true], &"blink": [34, 3.5, 0.06, 0.35, true],
+	&"halo": [28, 2.0, 0.05, 0.6, true],
 }
 
 var _room: Room

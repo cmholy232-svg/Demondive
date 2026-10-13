@@ -34,12 +34,18 @@ static func _floor_top(data: RoomData, x: int) -> float:
 	return -float(y) * RoomData.TILE / Kit3D.PX_PER_M
 
 
-static func _wall(root: Node3D, size: Vector2, wall_z: float, floor_y: float) -> void:
+static func _wall(root: Node3D, size: Vector2, wall_z: float, floor_y: float, look: Dictionary = {}) -> void:
 	var w: float = size.x / Kit3D.PX_PER_M + 30.0
 	var h: float = size.y / Kit3D.PX_PER_M + 16.0
 	var mat := ShaderMaterial.new()
 	mat.shader = _wall_shader
 	mat.set_shader_parameter("floor_y", floor_y)
+	for key: String in ["base_color", "seam_color", "wash_color"]:
+		if look.has(key):
+			mat.set_shader_parameter(key, Color.html(str(look[key])))
+	if look.has("panel"):
+		var panel: Array = look["panel"] as Array
+		mat.set_shader_parameter("panel", Vector2(float(panel[0]), float(panel[1])))
 	Kit3D.box(root, Kit3D.to_3d(size * 0.5, wall_z), Vector3(w, h, 0.4), mat)
 
 
@@ -80,7 +86,7 @@ static func _dancer() -> ArrayMesh:
 	return _dancer_mesh
 
 
-static func _crowd(root: Node3D, data: RoomData, rng: RandomNumberGenerator) -> void:
+static func _crowd(root: Node3D, data: RoomData, rng: RandomNumberGenerator, rims: Array[Color] = [NeonMawKit.MAGENTA, NeonMawKit.CYAN], density: float = 0.55) -> void:
 	var spots: Array[Vector3] = []
 	var floor_row: float = _floor_top(data, 1)
 	for x: int in range(2, data.width - 2):
@@ -88,7 +94,7 @@ static func _crowd(root: Node3D, data: RoomData, rng: RandomNumberGenerator) -> 
 		# Only on the main floor, and only where no wall rises behind the dancer.
 		if absf(top - floor_row) > 1.0 or data.is_solid(x, int(-top * Kit3D.PX_PER_M / RoomData.TILE) - 2):
 			continue
-		var count: int = 1 if rng.randf() < 0.55 else 0
+		var count: int = 1 if rng.randf() < density else 0
 		for i: int in count:
 			var px: float = (x + rng.randf()) * RoomData.TILE / Kit3D.PX_PER_M
 			spots.append(Vector3(px, top, rng.randf_range(CROWD_Z_MIN, CROWD_Z_MAX)))
@@ -107,7 +113,7 @@ static func _crowd(root: Node3D, data: RoomData, rng: RandomNumberGenerator) -> 
 		multimesh.set_instance_custom_data(i, Color(rng.randf(), rng.randf_range(0.5, 1.0), arms_up, 0.0))
 	var mat := ShaderMaterial.new()
 	mat.shader = _crowd_shader
-	mat.set_shader_parameter("rim_color", [NeonMawKit.MAGENTA, NeonMawKit.CYAN][rng.randi_range(0, 1)])
+	mat.set_shader_parameter("rim_color", rims[rng.randi_range(0, rims.size() - 1)])
 	var instance := MultiMeshInstance3D.new()
 	instance.multimesh = multimesh
 	instance.material_override = mat
@@ -115,12 +121,12 @@ static func _crowd(root: Node3D, data: RoomData, rng: RandomNumberGenerator) -> 
 	root.add_child(instance)
 
 
-static func _shafts(root: Node3D, size: Vector2, rng: RandomNumberGenerator) -> void:
+static func _shafts(root: Node3D, size: Vector2, rng: RandomNumberGenerator, colors: Array[Color] = [NeonMawKit.MAGENTA, NeonMawKit.CYAN, NeonMawKit.AMBER]) -> void:
 	var w: float = size.x / Kit3D.PX_PER_M
 	var h: float = size.y / Kit3D.PX_PER_M
 	var count: int = int(w / 16.0) + 1
 	for i: int in count:
-		var color: Color = [NeonMawKit.MAGENTA, NeonMawKit.CYAN, NeonMawKit.AMBER][rng.randi_range(0, 2)]
+		var color: Color = colors[rng.randi_range(0, colors.size() - 1)]
 		var top := Vector3((i + rng.randf_range(0.2, 0.8)) * w / count, -0.4, rng.randf_range(-2.0, -1.0))
 		var length: float = h * rng.randf_range(0.7, 1.0)
 		var mat := ShaderMaterial.new()
@@ -147,10 +153,10 @@ static func _shafts(root: Node3D, size: Vector2, rng: RandomNumberGenerator) -> 
 		Kit3D.sphere(root, top, 0.14, Kit3D.neon(color, 6.0))
 
 
-static func _haze(root: Node3D, size: Vector2) -> void:
+static func _haze(root: Node3D, size: Vector2, back: Color = Color(0.7, 0.15, 0.55), front: Color = Color(0.3, 0.2, 0.7)) -> void:
 	var w: float = size.x / Kit3D.PX_PER_M + 20.0
 	var h: float = size.y / Kit3D.PX_PER_M + 6.0
-	for layer: Array in [[-1.6, Color(0.7, 0.15, 0.55), 0.05], [1.4, Color(0.3, 0.2, 0.7), 0.025]]:
+	for layer: Array in [[-1.6, back, 0.05], [1.4, front, 0.025]]:
 		var mat := ShaderMaterial.new()
 		mat.shader = _haze_shader
 		mat.set_shader_parameter("color", layer[1] as Color)

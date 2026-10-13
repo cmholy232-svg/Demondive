@@ -1,84 +1,1610 @@
 {
-	"belladonna": {
-		"build": {
-			"cup": 0.85,
-			"waist": 0.75,
-			"hips": 0.45,
-			"seat": 0.45,
-			"slim": 0.5,
-			"legs": 0.45,
-			"tall": 0.5
-		},
-		"neckline": 0.045,
-		"iris_size": 1.15,
-		"colors": {
-			"skin": "e88da6",
-			"lips": "c4124f",
-			"hair": "ff3d8b",
-			"eye_white": "f4eaee",
-			"iris": "ffd23a",
-			"lash": "1a0710",
-			"outfit_main": "1a0612",
-			"trim": "ffc75a",
-			"skirt": "d0145a",
-			"gloves": "14060c",
-			"boots": "ffc75a",
-			"horn": "2a0d1a",
-			"wing": "3a0c22"
-		},
-		"hair": {
-			"style": "wavy",
-			"bangs": 0.06,
-			"part": 0.45
-		},
-		"outfit": [
-			{
-				"part": "top",
-				"kind": "corset",
-				"mat": "outfit_main",
-				"trim": true
-			},
-			{
-				"part": "skirt",
-				"length": "ankle",
-				"flare": 0.16,
-				"slit": true,
-				"mat": "skirt"
-			},
-			{
-				"part": "gloves",
-				"kind": "opera",
-				"mat": "gloves"
-			},
-			{
-				"part": "legwear",
-				"kind": "stockings",
-				"mat": "outfit_main"
-			},
-			{
-				"part": "shoes",
-				"mat": "boots"
-			},
-			{
-				"part": "choker",
-				"mat": "trim"
-			}
-		],
-		"extras": [
-			{
-				"kind": "horns",
-				"length": 0.17,
-				"curl": 1.2,
-				"mat": "horn"
-			},
-			{
-				"kind": "tail",
-				"mat": "horn"
-			},
-			{
-				"kind": "earrings",
-				"mat": "trim"
-			}
-		]
-	}
+ "pyrra": {
+  "build": {
+   "cup": 0.75,
+   "waist": 0.7,
+   "hips": 0.4,
+   "seat": 0.4,
+   "legs": 0.5,
+   "tall": 0.55,
+   "ethnicity": "african",
+   "slim": 0.5
+  },
+  "colors": {
+   "eye_white": "f4eaee",
+   "lash": "1a0710",
+   "skin": "a8673f",
+   "lips": "8e1a14",
+   "hair": "3a0d08",
+   "iris": "ff8a1e",
+   "outfit_main": "1c0806",
+   "trim": "e0a234",
+   "skirt": "c2321a",
+   "boots": "e0a234",
+   "glow": "ff6a1a",
+   "horn": "e0a234"
+  },
+  "hair": {
+   "style": "wavy",
+   "bangs": 0.06,
+   "part": 0.3,
+   "locks": 18
+  },
+  "outfit": [
+   {
+    "part": "top",
+    "kind": "corset",
+    "mat": "outfit_main",
+    "trim": true
+   },
+   {
+    "part": "skirt",
+    "length": "ankle",
+    "mat": "skirt",
+    "flare": 0.2,
+    "slit": "both"
+   },
+   {
+    "part": "legwear",
+    "kind": "stockings",
+    "mat": "outfit_main"
+   },
+   {
+    "part": "shoes",
+    "mat": "boots"
+   },
+   {
+    "part": "belt"
+   },
+   {
+    "part": "crown",
+    "spikes": 11,
+    "height": 0.09,
+    "mat": "glow"
+   },
+   {
+    "part": "prop",
+    "kind": "spear",
+    "mat": "trim",
+    "glow": "glow"
+   }
+  ],
+  "extras": [
+   {
+    "kind": "earrings",
+    "mat": "trim"
+   }
+  ]
+ },
+ "maris": {
+  "build": {
+   "cup": 0.8,
+   "waist": 0.65,
+   "hips": 0.5,
+   "seat": 0.45,
+   "legs": 0.45,
+   "tall": 0.5,
+   "ethnicity": "african",
+   "slim": 0.45
+  },
+  "colors": {
+   "eye_white": "f4eaee",
+   "lash": "1a0710",
+   "skin": "8a5634",
+   "lips": "6e2a26",
+   "hair": "0c2a33",
+   "iris": "3fe0d0",
+   "outfit_main": "0f5e66",
+   "trim": "e0b44a",
+   "skirt": "1aa0a8",
+   "boots": "e0b44a",
+   "glow": "5ff0ff"
+  },
+  "hair": {
+   "style": "wavy",
+   "bangs": 0.05,
+   "part": 0.4,
+   "locks": 20
+  },
+  "outfit": [
+   {
+    "part": "top",
+    "kind": "dress",
+    "mat": "outfit_main",
+    "trim": true
+   },
+   {
+    "part": "skirt",
+    "length": "ankle",
+    "mat": "skirt",
+    "flare": 0.26,
+    "slit": "both"
+   },
+   {
+    "part": "sleeves",
+    "kind": "puff",
+    "mat": "skirt"
+   },
+   {
+    "part": "shoes",
+    "mat": "boots"
+   },
+   {
+    "part": "belt"
+   },
+   {
+    "part": "prop",
+    "kind": "trident",
+    "mat": "trim"
+   }
+  ],
+  "extras": [
+   {
+    "kind": "tiara",
+    "mat": "trim"
+   },
+   {
+    "kind": "earrings",
+    "mat": "trim"
+   }
+  ]
+ },
+ "gaia": {
+  "build": {
+   "cup": 0.7,
+   "waist": 0.45,
+   "hips": 0.55,
+   "seat": 0.5,
+   "legs": 0.4,
+   "tall": 0.85,
+   "ethnicity": "african",
+   "slim": 0.35,
+   "muscle": 0.7
+  },
+  "colors": {
+   "eye_white": "f4eaee",
+   "lash": "1a0710",
+   "skin": "5c3a24",
+   "lips": "4a1e16",
+   "hair": "1d2414",
+   "iris": "9be05a",
+   "outfit_main": "2b2a20",
+   "trim": "c69a3a",
+   "skirt": "3d5a2a",
+   "boots": "6b5a44",
+   "armour": "7a6c58"
+  },
+  "hair": {
+   "style": "long",
+   "bangs": 0.05,
+   "part": 0.35,
+   "locks": 20
+  },
+  "outfit": [
+   {
+    "part": "top",
+    "kind": "crop",
+    "mat": "outfit_main",
+    "trim": true
+   },
+   {
+    "part": "skirt",
+    "length": "midi",
+    "mat": "skirt",
+    "flare": 0.12,
+    "slit": "both"
+   },
+   {
+    "part": "armour"
+   },
+   {
+    "part": "legwear",
+    "kind": "knee_boots",
+    "mat": "boots"
+   },
+   {
+    "part": "shoes",
+    "mat": "boots",
+    "heel": false
+   },
+   {
+    "part": "belt"
+   },
+   {
+    "part": "crown",
+    "spikes": 7,
+    "height": 0.07
+   }
+  ],
+  "extras": []
+ },
+ "zephyra": {
+  "build": {
+   "cup": 0.65,
+   "waist": 0.75,
+   "hips": 0.4,
+   "seat": 0.4,
+   "legs": 0.6,
+   "tall": 0.5,
+   "ethnicity": "caucasian",
+   "slim": 0.6
+  },
+  "colors": {
+   "eye_white": "f4eaee",
+   "lash": "1a0710",
+   "skin": "c99a76",
+   "lips": "a8455a",
+   "hair": "bff5e4",
+   "iris": "6effd0",
+   "outfit_main": "7fd6b4",
+   "trim": "f0e2b0",
+   "skirt": "bdf2e0",
+   "boots": "f0e2b0"
+  },
+  "hair": {
+   "style": "ponytail",
+   "length": 0.55,
+   "bangs": 0.07,
+   "part": 0.5
+  },
+  "outfit": [
+   {
+    "part": "top",
+    "kind": "bodysuit",
+    "mat": "outfit_main",
+    "trim": true
+   },
+   {
+    "part": "skirt",
+    "length": "ankle",
+    "mat": "skirt",
+    "flare": 0.3,
+    "slit": true
+   },
+   {
+    "part": "sleeves",
+    "kind": "long",
+    "mat": "skirt"
+   },
+   {
+    "part": "shoes",
+    "mat": "boots"
+   }
+  ],
+  "extras": [
+   {
+    "kind": "earrings",
+    "mat": "trim"
+   }
+  ]
+ },
+ "belladonna": {
+  "build": {
+   "cup": 0.9,
+   "waist": 0.75,
+   "hips": 0.5,
+   "seat": 0.5,
+   "legs": 0.5,
+   "tall": 0.6,
+   "slim": 0.5
+  },
+  "colors": {
+   "eye_white": "f4eaee",
+   "lash": "1a0710",
+   "skin": "efcfc6",
+   "lips": "8a0a3a",
+   "hair": "1e0a26",
+   "iris": "d23cff",
+   "outfit_main": "140612",
+   "trim": "d4a83a",
+   "skirt": "3a0a3c",
+   "gloves": "140612",
+   "boots": "140612",
+   "horn": "2a0d1a",
+   "fur": "efe3d4",
+   "glow": "c040ff"
+  },
+  "hair": {
+   "style": "wavy",
+   "bangs": 0.06,
+   "part": 0.45,
+   "locks": 20
+  },
+  "outfit": [
+   {
+    "part": "top",
+    "kind": "corset",
+    "mat": "outfit_main",
+    "trim": true
+   },
+   {
+    "part": "skirt",
+    "length": "ankle",
+    "mat": "skirt",
+    "flare": 0.22,
+    "slit": true
+   },
+   {
+    "part": "gloves",
+    "kind": "opera"
+   },
+   {
+    "part": "legwear",
+    "kind": "stockings",
+    "mat": "outfit_main"
+   },
+   {
+    "part": "shoes",
+    "mat": "boots"
+   },
+   {
+    "part": "choker",
+    "mat": "trim"
+   },
+   {
+    "part": "stole"
+   },
+   {
+    "part": "prop",
+    "kind": "goblet",
+    "mat": "trim"
+   }
+  ],
+  "extras": [
+   {
+    "kind": "earrings",
+    "mat": "trim"
+   }
+  ],
+  "neckline": 0.045,
+  "iris_size": 1.15
+ },
+ "flora": {
+  "build": {
+   "cup": 0.7,
+   "waist": 0.7,
+   "hips": 0.45,
+   "seat": 0.45,
+   "legs": 0.5,
+   "tall": 0.5,
+   "ethnicity": "african",
+   "slim": 0.5
+  },
+  "colors": {
+   "eye_white": "f4eaee",
+   "lash": "1a0710",
+   "skin": "9c6a44",
+   "lips": "8e2a3a",
+   "hair": "1f3a1c",
+   "iris": "e0ff6a",
+   "outfit_main": "3f6b2c",
+   "trim": "c9a14a",
+   "skirt": "58823a",
+   "boots": "c9a14a",
+   "glow": "ff3a5a"
+  },
+  "hair": {
+   "style": "wavy",
+   "bangs": 0.06,
+   "part": 0.35,
+   "locks": 18
+  },
+  "outfit": [
+   {
+    "part": "top",
+    "kind": "corset",
+    "mat": "outfit_main",
+    "trim": true
+   },
+   {
+    "part": "skirt",
+    "length": "ankle",
+    "mat": "skirt",
+    "flare": 0.24,
+    "slit": "both"
+   },
+   {
+    "part": "sleeves",
+    "kind": "long",
+    "mat": "skirt",
+    "offset": 0.006
+   },
+   {
+    "part": "shoes",
+    "mat": "boots"
+   },
+   {
+    "part": "crown",
+    "spikes": 9,
+    "height": 0.05,
+    "mat": "glow",
+    "gem": false
+   }
+  ],
+  "extras": [
+   {
+    "kind": "earrings",
+    "mat": "trim"
+   }
+  ]
+ },
+ "voltara": {
+  "build": {
+   "cup": 0.55,
+   "waist": 0.6,
+   "hips": 0.4,
+   "seat": 0.45,
+   "legs": 0.5,
+   "tall": 0.6,
+   "ethnicity": "african",
+   "slim": 0.45,
+   "muscle": 0.4
+  },
+  "colors": {
+   "eye_white": "f4eaee",
+   "lash": "1a0710",
+   "skin": "6b4128",
+   "lips": "4a2018",
+   "hair": "ffd21a",
+   "iris": "ffe23a",
+   "outfit_main": "141414",
+   "trim": "ffc21a",
+   "jacket": "1a1a1a",
+   "boots": "ffc21a",
+   "glow": "ffe84a"
+  },
+  "hair": {
+   "style": "bob",
+   "bangs": 0.12,
+   "part": 0.5,
+   "locks": 14
+  },
+  "outfit": [
+   {
+    "part": "top",
+    "kind": "crop",
+    "mat": "outfit_main"
+   },
+   {
+    "part": "jacket"
+   },
+   {
+    "part": "legwear",
+    "kind": "pants",
+    "mat": "outfit_main"
+   },
+   {
+    "part": "shoes",
+    "mat": "boots",
+    "heel": false
+   },
+   {
+    "part": "belt",
+    "mat": "trim"
+   }
+  ],
+  "extras": [
+   {
+    "kind": "earrings",
+    "mat": "trim"
+   }
+  ]
+ },
+ "nerissa": {
+  "build": {
+   "cup": 0.85,
+   "waist": 0.75,
+   "hips": 0.55,
+   "seat": 0.5,
+   "legs": 0.55,
+   "tall": 0.6,
+   "ethnicity": "african",
+   "slim": 0.5
+  },
+  "colors": {
+   "eye_white": "f4eaee",
+   "lash": "1a0710",
+   "skin": "7a4a2c",
+   "lips": "6a1e2a",
+   "hair": "0a1418",
+   "iris": "4ff0e8",
+   "outfit_main": "0e6a72",
+   "trim": "e8c25a",
+   "skirt": "22b8c0",
+   "boots": "e8c25a",
+   "glow": "7ffcff"
+  },
+  "hair": {
+   "style": "wavy",
+   "bangs": 0.05,
+   "part": 0.4,
+   "locks": 22
+  },
+  "outfit": [
+   {
+    "part": "top",
+    "kind": "crop",
+    "mat": "trim",
+    "trim": true
+   },
+   {
+    "part": "skirt",
+    "length": "ankle",
+    "mat": "skirt",
+    "flare": 0.3,
+    "slit": "both"
+   },
+   {
+    "part": "sleeves",
+    "kind": "long",
+    "mat": "skirt",
+    "offset": 0.012
+   },
+   {
+    "part": "shoes",
+    "mat": "boots"
+   },
+   {
+    "part": "belt"
+   },
+   {
+    "part": "crown",
+    "spikes": 5,
+    "height": 0.08,
+    "mat": "glow"
+   }
+  ],
+  "extras": [
+   {
+    "kind": "earrings",
+    "mat": "trim"
+   }
+  ],
+  "neckline": 0.04
+ },
+ "crya": {
+  "build": {
+   "cup": 0.75,
+   "waist": 0.75,
+   "hips": 0.4,
+   "seat": 0.4,
+   "legs": 0.6,
+   "tall": 0.65,
+   "slim": 0.6
+  },
+  "colors": {
+   "eye_white": "f4eaee",
+   "lash": "1a0710",
+   "skin": "e6ecf2",
+   "lips": "6a8cc0",
+   "hair": "dfeeff",
+   "iris": "7fd8ff",
+   "outfit_main": "1c2a44",
+   "trim": "bfe6ff",
+   "skirt": "2a3e66",
+   "cape": "9fc8ee",
+   "boots": "bfe6ff",
+   "glow": "aef0ff"
+  },
+  "hair": {
+   "style": "long",
+   "bangs": 0.06,
+   "part": 0.4,
+   "locks": 20
+  },
+  "outfit": [
+   {
+    "part": "top",
+    "kind": "corset",
+    "mat": "outfit_main",
+    "trim": true
+   },
+   {
+    "part": "skirt",
+    "length": "ankle",
+    "mat": "skirt",
+    "flare": 0.18,
+    "slit": true
+   },
+   {
+    "part": "cape",
+    "open": 0.3
+   },
+   {
+    "part": "legwear",
+    "kind": "thigh_boots",
+    "mat": "boots"
+   },
+   {
+    "part": "shoes",
+    "mat": "boots"
+   },
+   {
+    "part": "crown",
+    "spikes": 9,
+    "height": 0.12,
+    "mat": "glow",
+    "gem": false
+   }
+  ],
+  "extras": []
+ },
+ "roxyne": {
+  "build": {
+   "cup": 0.75,
+   "waist": 0.7,
+   "hips": 0.55,
+   "seat": 0.6,
+   "legs": 0.6,
+   "tall": 0.6,
+   "ethnicity": "african",
+   "slim": 0.45,
+   "muscle": 0.35
+  },
+  "colors": {
+   "eye_white": "f4eaee",
+   "lash": "1a0710",
+   "skin": "7d4c2e",
+   "lips": "5a1a16",
+   "hair": "3a2414",
+   "iris": "ffb02a",
+   "outfit_main": "2a1612",
+   "trim": "a07a4a",
+   "skirt": "8a1a1a",
+   "cape": "8a1a1a",
+   "boots": "2a1612",
+   "horn": "3a2414"
+  },
+  "hair": {
+   "style": "wavy",
+   "bangs": 0.09,
+   "part": 0.6,
+   "locks": 22
+  },
+  "outfit": [
+   {
+    "part": "top",
+    "kind": "bodysuit",
+    "mat": "outfit_main",
+    "trim": true
+   },
+   {
+    "part": "cape",
+    "length": "knee",
+    "open": 0.0
+   },
+   {
+    "part": "legwear",
+    "kind": "thigh_boots",
+    "mat": "boots"
+   },
+   {
+    "part": "shoes",
+    "mat": "boots",
+    "heel": false
+   },
+   {
+    "part": "belt"
+   },
+   {
+    "part": "prop",
+    "kind": "spear",
+    "mat": "trim"
+   }
+  ],
+  "extras": [
+   {
+    "kind": "ears",
+    "mat": "horn"
+   },
+   {
+    "kind": "tail",
+    "mat": "horn"
+   }
+  ]
+ },
+ "luna": {
+  "build": {
+   "cup": 0.75,
+   "waist": 0.7,
+   "hips": 0.5,
+   "seat": 0.45,
+   "legs": 0.5,
+   "tall": 0.55,
+   "slim": 0.5
+  },
+  "colors": {
+   "eye_white": "f4eaee",
+   "lash": "1a0710",
+   "skin": "f0dfe4",
+   "lips": "9a4a7a",
+   "hair": "c6b0ff",
+   "iris": "b88cff",
+   "outfit_main": "3a2a6e",
+   "trim": "f2f0ff",
+   "skirt": "7a5ac8",
+   "cape": "5a44a8",
+   "boots": "f2f0ff",
+   "glow": "e8e0ff"
+  },
+  "hair": {
+   "style": "long",
+   "bangs": 0.07,
+   "part": 0.4,
+   "locks": 20
+  },
+  "outfit": [
+   {
+    "part": "top",
+    "kind": "dress",
+    "mat": "outfit_main",
+    "trim": true
+   },
+   {
+    "part": "skirt",
+    "length": "ankle",
+    "mat": "skirt",
+    "flare": 0.22,
+    "slit": "both"
+   },
+   {
+    "part": "cape",
+    "hood": true,
+    "hood_mat": "trim",
+    "open": 0.2
+   },
+   {
+    "part": "shoes",
+    "mat": "boots"
+   }
+  ],
+  "extras": [
+   {
+    "kind": "halo",
+    "radius": 0.09
+   }
+  ]
+ },
+ "calyptra": {
+  "build": {
+   "cup": 0.75,
+   "waist": 0.78,
+   "hips": 0.45,
+   "seat": 0.45,
+   "legs": 0.55,
+   "tall": 0.6,
+   "slim": 0.55
+  },
+  "colors": {
+   "eye_white": "f4eaee",
+   "lash": "1a0710",
+   "skin": "ecc8c0",
+   "lips": "9a0a4a",
+   "hair": "240a1c",
+   "iris": "ff4ab0",
+   "outfit_main": "4a0a36",
+   "trim": "d4a83a",
+   "skirt": "9a1a6a",
+   "gloves": "240a1c",
+   "boots": "240a1c",
+   "glow": "ff5ac0"
+  },
+  "hair": {
+   "style": "buns",
+   "bangs": 0.06,
+   "part": 0.5
+  },
+  "outfit": [
+   {
+    "part": "top",
+    "kind": "corset",
+    "mat": "outfit_main",
+    "trim": true
+   },
+   {
+    "part": "skirt",
+    "length": "ankle",
+    "mat": "skirt",
+    "flare": 0.15,
+    "slit": true
+   },
+   {
+    "part": "gloves",
+    "kind": "opera"
+   },
+   {
+    "part": "legwear",
+    "kind": "stockings",
+    "mat": "gloves"
+   },
+   {
+    "part": "shoes",
+    "mat": "boots"
+   },
+   {
+    "part": "choker"
+   },
+   {
+    "part": "prop",
+    "kind": "dice"
+   }
+  ],
+  "extras": [
+   {
+    "kind": "earrings",
+    "mat": "trim"
+   }
+  ]
+ },
+ "solara": {
+  "build": {
+   "cup": 0.8,
+   "waist": 0.72,
+   "hips": 0.5,
+   "seat": 0.45,
+   "legs": 0.55,
+   "tall": 0.65,
+   "slim": 0.5
+  },
+  "colors": {
+   "eye_white": "f4eaee",
+   "lash": "1a0710",
+   "skin": "d6a47c",
+   "lips": "a8452a",
+   "hair": "ffd76a",
+   "iris": "ffcc33",
+   "outfit_main": "f7f0e0",
+   "trim": "f0b030",
+   "skirt": "fff6e6",
+   "cape": "f0b030",
+   "boots": "f0b030",
+   "glow": "fff0a0"
+  },
+  "hair": {
+   "style": "long",
+   "bangs": 0.06,
+   "part": 0.4,
+   "locks": 20
+  },
+  "outfit": [
+   {
+    "part": "top",
+    "kind": "corset",
+    "mat": "outfit_main",
+    "trim": true
+   },
+   {
+    "part": "skirt",
+    "length": "ankle",
+    "mat": "skirt",
+    "flare": 0.22,
+    "slit": "both"
+   },
+   {
+    "part": "cape",
+    "open": 0.4
+   },
+   {
+    "part": "shoes",
+    "mat": "boots"
+   },
+   {
+    "part": "belt"
+   },
+   {
+    "part": "crown",
+    "spikes": 13,
+    "height": 0.11,
+    "mat": "glow"
+   },
+   {
+    "part": "prop",
+    "kind": "staff",
+    "mat": "trim"
+   }
+  ],
+  "extras": []
+ },
+ "isolde": {
+  "build": {
+   "cup": 0.7,
+   "waist": 0.75,
+   "hips": 0.4,
+   "seat": 0.4,
+   "legs": 0.6,
+   "tall": 0.7,
+   "slim": 0.6
+  },
+  "colors": {
+   "eye_white": "f4eaee",
+   "lash": "1a0710",
+   "skin": "eef4fa",
+   "lips": "8aa0d0",
+   "hair": "f4f8ff",
+   "iris": "9ad8ff",
+   "outfit_main": "cfe8ff",
+   "trim": "8ac8ff",
+   "skirt": "e6f4ff",
+   "boots": "8ac8ff",
+   "glow": "b8f0ff"
+  },
+  "hair": {
+   "style": "long",
+   "bangs": 0.05,
+   "part": 0.5,
+   "locks": 20
+  },
+  "outfit": [
+   {
+    "part": "top",
+    "kind": "dress",
+    "mat": "outfit_main",
+    "trim": true
+   },
+   {
+    "part": "skirt",
+    "length": "ankle",
+    "mat": "skirt",
+    "flare": 0.14,
+    "slit": true
+   },
+   {
+    "part": "sleeves",
+    "kind": "long",
+    "mat": "skirt"
+   },
+   {
+    "part": "shoes",
+    "mat": "boots"
+   },
+   {
+    "part": "crown",
+    "spikes": 7,
+    "height": 0.13,
+    "mat": "glow",
+    "gem": false
+   },
+   {
+    "part": "prop",
+    "kind": "staff",
+    "mat": "trim"
+   }
+  ],
+  "extras": []
+ },
+ "aurelia": {
+  "build": {
+   "cup": 0.95,
+   "waist": 0.6,
+   "hips": 0.75,
+   "seat": 0.7,
+   "legs": 0.45,
+   "tall": 0.55,
+   "slim": 0.35
+  },
+  "colors": {
+   "eye_white": "f4eaee",
+   "lash": "1a0710",
+   "skin": "c48a5c",
+   "lips": "8a2a1a",
+   "hair": "20140c",
+   "iris": "ffcf4a",
+   "outfit_main": "2a1a0c",
+   "trim": "f2c040",
+   "skirt": "d4a030",
+   "boots": "f2c040",
+   "glow": "ffe070"
+  },
+  "hair": {
+   "style": "wavy",
+   "bangs": 0.05,
+   "part": 0.35,
+   "locks": 20
+  },
+  "outfit": [
+   {
+    "part": "top",
+    "kind": "corset",
+    "mat": "outfit_main",
+    "trim": true
+   },
+   {
+    "part": "skirt",
+    "length": "ankle",
+    "mat": "skirt",
+    "flare": 0.18,
+    "slit": "both"
+   },
+   {
+    "part": "gloves",
+    "kind": "short",
+    "mat": "trim"
+   },
+   {
+    "part": "shoes",
+    "mat": "boots"
+   },
+   {
+    "part": "belt"
+   },
+   {
+    "part": "choker"
+   },
+   {
+    "part": "crown",
+    "spikes": 7,
+    "height": 0.08
+   }
+  ],
+  "extras": [
+   {
+    "kind": "earrings",
+    "mat": "trim"
+   }
+  ]
+ },
+ "somnia": {
+  "build": {
+   "cup": 1.0,
+   "waist": 0.3,
+   "hips": 0.8,
+   "seat": 0.75,
+   "legs": 0.4,
+   "tall": 0.5,
+   "slim": 0.1
+  },
+  "colors": {
+   "eye_white": "f4eaee",
+   "lash": "1a0710",
+   "skin": "f0dcec",
+   "lips": "a04a8a",
+   "hair": "9a6ad8",
+   "iris": "d8b0ff",
+   "outfit_main": "6a4ab8",
+   "trim": "f0c870",
+   "skirt": "8a6ad8",
+   "cloud": "c8b4f0",
+   "boots": "f0c870",
+   "glow": "f4e8ff"
+  },
+  "hair": {
+   "style": "wavy",
+   "bangs": 0.06,
+   "part": 0.4,
+   "locks": 22
+  },
+  "outfit": [
+   {
+    "part": "top",
+    "kind": "dress",
+    "mat": "outfit_main",
+    "trim": true
+   },
+   {
+    "part": "skirt",
+    "length": "ankle",
+    "mat": "skirt",
+    "flare": 0.28
+   },
+   {
+    "part": "sleeves",
+    "kind": "puff",
+    "mat": "skirt"
+   },
+   {
+    "part": "shoes",
+    "mat": "boots"
+   },
+   {
+    "part": "clouds"
+   }
+  ],
+  "extras": [
+   {
+    "kind": "halo",
+    "radius": 0.1
+   }
+  ]
+ },
+ "noctissa": {
+  "build": {
+   "cup": 0.75,
+   "waist": 0.78,
+   "hips": 0.5,
+   "seat": 0.5,
+   "legs": 0.65,
+   "tall": 0.65,
+   "slim": 0.6
+  },
+  "colors": {
+   "eye_white": "f4eaee",
+   "lash": "1a0710",
+   "skin": "d8d0e0",
+   "lips": "3a1a4a",
+   "hair": "0c0a1a",
+   "iris": "a0a8ff",
+   "outfit_main": "0c0a1a",
+   "trim": "8a8ac8",
+   "cape": "141a3a",
+   "boots": "0c0a1a",
+   "glow": "c8d0ff"
+  },
+  "hair": {
+   "style": "bob",
+   "bangs": 0.08,
+   "part": 0.6,
+   "locks": 14
+  },
+  "outfit": [
+   {
+    "part": "top",
+    "kind": "bodysuit",
+    "mat": "outfit_main",
+    "trim": true
+   },
+   {
+    "part": "cape",
+    "hood": true,
+    "open": 0.25
+   },
+   {
+    "part": "legwear",
+    "kind": "thigh_boots",
+    "mat": "boots"
+   },
+   {
+    "part": "shoes",
+    "mat": "boots"
+   },
+   {
+    "part": "belt",
+    "mat": "trim"
+   }
+  ],
+  "extras": []
+ },
+ "vespera": {
+  "build": {
+   "cup": 0.75,
+   "waist": 0.78,
+   "hips": 0.5,
+   "seat": 0.5,
+   "legs": 0.65,
+   "tall": 0.6,
+   "slim": 0.55
+  },
+  "colors": {
+   "eye_white": "f4eaee",
+   "lash": "1a0710",
+   "skin": "c49270",
+   "lips": "5a0a2a",
+   "hair": "0a0a12",
+   "iris": "c8d8ff",
+   "outfit_main": "0a0a12",
+   "trim": "c8d0e0",
+   "skirt": "1a1a2a",
+   "gloves": "0a0a12",
+   "boots": "0a0a12",
+   "glow": "e0f0ff"
+  },
+  "hair": {
+   "style": "bob",
+   "bangs": 0.1,
+   "part": 0.2,
+   "locks": 14
+  },
+  "outfit": [
+   {
+    "part": "top",
+    "kind": "corset",
+    "mat": "outfit_main",
+    "trim": true
+   },
+   {
+    "part": "skirt",
+    "length": "midi",
+    "mat": "skirt",
+    "flare": 0.12,
+    "slit": true
+   },
+   {
+    "part": "gloves",
+    "kind": "opera"
+   },
+   {
+    "part": "legwear",
+    "kind": "stockings",
+    "mat": "outfit_main"
+   },
+   {
+    "part": "shoes",
+    "mat": "boots"
+   },
+   {
+    "part": "choker"
+   },
+   {
+    "part": "prop",
+    "kind": "mirror",
+    "mat": "trim"
+   }
+  ],
+  "extras": [
+   {
+    "kind": "earrings",
+    "mat": "trim"
+   }
+  ]
+ },
+ "lilith": {
+  "build": {
+   "cup": 0.95,
+   "waist": 0.75,
+   "hips": 0.55,
+   "seat": 0.55,
+   "legs": 0.6,
+   "tall": 0.75,
+   "slim": 0.5
+  },
+  "colors": {
+   "eye_white": "f4eaee",
+   "lash": "1a0710",
+   "skin": "f2d6d0",
+   "lips": "9a0a1a",
+   "hair": "6a0a14",
+   "iris": "ff2a3a",
+   "outfit_main": "1a0408",
+   "trim": "c81a2a",
+   "skirt": "5a0812",
+   "gloves": "1a0408",
+   "boots": "1a0408",
+   "horn": "1a0408",
+   "wing": "4a0610",
+   "glow": "ff2a3a"
+  },
+  "hair": {
+   "style": "wavy",
+   "bangs": 0.06,
+   "part": 0.45,
+   "locks": 22
+  },
+  "outfit": [
+   {
+    "part": "top",
+    "kind": "corset",
+    "mat": "outfit_main",
+    "trim": true
+   },
+   {
+    "part": "skirt",
+    "length": "ankle",
+    "mat": "skirt",
+    "flare": 0.2,
+    "slit": "both"
+   },
+   {
+    "part": "gloves",
+    "kind": "opera"
+   },
+   {
+    "part": "legwear",
+    "kind": "thigh_boots",
+    "mat": "boots"
+   },
+   {
+    "part": "shoes",
+    "mat": "boots"
+   },
+   {
+    "part": "choker"
+   },
+   {
+    "part": "crown",
+    "spikes": 9,
+    "height": 0.07,
+    "mat": "trim"
+   }
+  ],
+  "extras": [
+   {
+    "kind": "horns",
+    "length": 0.2,
+    "curl": 0.8
+   },
+   {
+    "kind": "wings",
+    "span": 0.75
+   },
+   {
+    "kind": "tail"
+   },
+   {
+    "kind": "earrings",
+    "mat": "trim"
+   }
+  ],
+  "neckline": 0.04
+ },
+ "seraphine": {
+  "build": {
+   "cup": 0.8,
+   "waist": 0.72,
+   "hips": 0.5,
+   "seat": 0.5,
+   "legs": 0.6,
+   "tall": 0.75,
+   "ethnicity": "african",
+   "slim": 0.5
+  },
+  "colors": {
+   "eye_white": "f4eaee",
+   "lash": "1a0710",
+   "skin": "5e3a26",
+   "lips": "4a1a1a",
+   "hair": "f4f2ee",
+   "iris": "ffd86a",
+   "outfit_main": "141414",
+   "trim": "e6c060",
+   "skirt": "f4f0e8",
+   "boots": "141414",
+   "wing": "1a1a1a",
+   "glow": "fff2b0"
+  },
+  "hair": {
+   "style": "long",
+   "bangs": 0.06,
+   "part": 0.45,
+   "locks": 22
+  },
+  "outfit": [
+   {
+    "part": "top",
+    "kind": "corset",
+    "mat": "outfit_main",
+    "trim": true
+   },
+   {
+    "part": "skirt",
+    "length": "ankle",
+    "mat": "skirt",
+    "flare": 0.18,
+    "slit": "both"
+   },
+   {
+    "part": "armour",
+    "mat": "trim"
+   },
+   {
+    "part": "legwear",
+    "kind": "thigh_boots",
+    "mat": "boots"
+   },
+   {
+    "part": "shoes",
+    "mat": "boots"
+   },
+   {
+    "part": "prop",
+    "kind": "spear",
+    "mat": "trim"
+   }
+  ],
+  "extras": [
+   {
+    "kind": "halo",
+    "radius": 0.12
+   },
+   {
+    "kind": "wings",
+    "span": 0.8,
+    "feathered": true
+   }
+  ]
+ },
+ "lady_luckless": {
+  "build": {
+   "cup": 0.75,
+   "waist": 0.75,
+   "hips": 0.5,
+   "seat": 0.5,
+   "legs": 0.6,
+   "tall": 0.6,
+   "slim": 0.55
+  },
+  "colors": {
+   "eye_white": "f4eaee",
+   "lash": "1a0710",
+   "skin": "d8b8c8",
+   "lips": "5a0a3a",
+   "hair": "3a1a4a",
+   "iris": "e97cff",
+   "outfit_main": "1a0a24",
+   "trim": "ffe36e",
+   "skirt": "4a1a6a",
+   "gloves": "f4f0e8",
+   "boots": "1a0a24",
+   "glow": "e97cff"
+  },
+  "hair": {
+   "style": "ponytail",
+   "length": 0.5,
+   "bangs": 0.08,
+   "part": 0.3
+  },
+  "outfit": [
+   {
+    "part": "top",
+    "kind": "corset",
+    "mat": "outfit_main",
+    "trim": true
+   },
+   {
+    "part": "skirt",
+    "length": "mini",
+    "flare": 0.1,
+    "mat": "skirt"
+   },
+   {
+    "part": "gloves",
+    "kind": "short",
+    "mat": "gloves"
+   },
+   {
+    "part": "legwear",
+    "kind": "stockings",
+    "mat": "outfit_main"
+   },
+   {
+    "part": "shoes",
+    "mat": "boots"
+   },
+   {
+    "part": "choker",
+    "mat": "trim"
+   },
+   {
+    "part": "prop",
+    "kind": "dice",
+    "glow": "glow"
+   }
+  ],
+  "extras": [
+   {
+    "kind": "earrings",
+    "mat": "trim"
+   },
+   {
+    "kind": "tiara",
+    "mat": "trim"
+   }
+  ]
+ },
+ "dream_girl": {
+  "build": {
+   "cup": 0.7,
+   "waist": 0.7,
+   "hips": 0.5,
+   "seat": 0.45,
+   "legs": 0.55,
+   "tall": 0.5,
+   "slim": 0.55
+  },
+  "colors": {
+   "eye_white": "f4eaee",
+   "lash": "1a0710",
+   "skin": "f6dccc",
+   "lips": "d0607a",
+   "hair": "ffd8a0",
+   "iris": "7ac8ff",
+   "outfit_main": "ffd8f5",
+   "trim": "ffffff",
+   "skirt": "ffc0e8",
+   "boots": "ffffff",
+   "glow": "ffd8f5"
+  },
+  "hair": {
+   "style": "long",
+   "bangs": 0.07,
+   "part": 0.4,
+   "locks": 18
+  },
+  "outfit": [
+   {
+    "part": "top",
+    "kind": "dress",
+    "mat": "outfit_main",
+    "trim": true,
+    "straps": true
+   },
+   {
+    "part": "skirt",
+    "length": "midi",
+    "flare": 0.22,
+    "mat": "skirt"
+   },
+   {
+    "part": "shoes",
+    "mat": "boots",
+    "heel": false
+   }
+  ],
+  "extras": [
+   {
+    "kind": "earrings",
+    "mat": "trim"
+   }
+  ]
+ },
+ "lilith_daughters": {
+  "build": {
+   "cup": 0.8,
+   "waist": 0.75,
+   "hips": 0.5,
+   "seat": 0.5,
+   "legs": 0.6,
+   "tall": 0.6,
+   "slim": 0.5
+  },
+  "colors": {
+   "eye_white": "f4eaee",
+   "lash": "1a0710",
+   "skin": "e8c4c0",
+   "lips": "8a0a1a",
+   "hair": "2a0408",
+   "iris": "ff2a3a",
+   "outfit_main": "3a0610",
+   "trim": "d4a83a",
+   "skirt": "7a0a1a",
+   "gloves": "1a0408",
+   "boots": "1a0408",
+   "horn": "1a0408",
+   "wing": "4a0610"
+  },
+  "hair": {
+   "style": "twintails",
+   "length": 0.45,
+   "bangs": 0.07,
+   "part": 0.5
+  },
+  "outfit": [
+   {
+    "part": "top",
+    "kind": "bodysuit",
+    "mat": "outfit_main",
+    "trim": true
+   },
+   {
+    "part": "gloves",
+    "kind": "opera",
+    "mat": "gloves"
+   },
+   {
+    "part": "legwear",
+    "kind": "thigh_boots",
+    "mat": "boots"
+   },
+   {
+    "part": "shoes",
+    "mat": "boots"
+   },
+   {
+    "part": "belt",
+    "mat": "trim"
+   }
+  ],
+  "extras": [
+   {
+    "kind": "horns",
+    "length": 0.13,
+    "curl": 1.0
+   },
+   {
+    "kind": "wings",
+    "span": 0.5
+   },
+   {
+    "kind": "tail"
+   }
+  ]
+ }
 }

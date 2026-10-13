@@ -8,6 +8,7 @@ var _current: Node
 
 func _ready() -> void:
 	Store.restore()
+	add_child(TouchControls.new())
 	_show_title()
 
 

@@ -18,6 +18,8 @@ const HEIGHT: float = 128.0
 const ONE_WAY_LAYER: int = 6
 const HURT_KNOCKBACK: Vector2 = Vector2(420.0, -520.0)
 const PERFECT_DODGE_COOLDOWN: float = 0.7
+## Share of normal grip left on ice (acceleration; friction gets a quarter of this).
+const ICE_GRIP: float = 0.3
 
 @export var tuning: MovementTuning
 
@@ -45,6 +47,16 @@ var hurt_timer: float = 0.0
 var perfect_dodge_cooldown: float = 0.0
 ## False while a cutscene, menu or death animation owns Milo.
 var controllable: bool = true
+## Acceleration from room mechanics (currents, vents) this tick; zones set it, step() spends it.
+var push: Vector2 = Vector2.ZERO
+## True while standing on ice: slow to start, slow to stop.
+var on_ice: bool = false
+## Asked before a hit lands; returns true when a Special soaks it (barrier, halo).
+var shield_check: Callable = Callable()
+## Seconds since the last dash ended (Vespera widens the Perfect Dodge after it).
+var since_dash: float = INF
+## Dash speed for a Special's pounce (0 = the normal dash).
+var _dash_speed_override: float = 0.0
 
 
 func _ready() -> void:
@@ -90,12 +102,22 @@ func take_damage(amount: float, source_x: float) -> bool:
 			perfect_dodged.emit()
 			CombatFeedback.perfect_dodge(self)
 		return false
+	if since_dash < BoonEffects.dodge_grace() and perfect_dodge_cooldown <= 0.0:
+		perfect_dodge_cooldown = PERFECT_DODGE_COOLDOWN
+		Game.add_energy(8.0)
+		perfect_dodged.emit()
+		CombatFeedback.perfect_dodge(self)
+		return false
+	if shield_check.is_valid() and bool(shield_check.call()):
+		invulnerable_timer = 0.3
+		return false
 	var taken: float = Game.hurt(amount)
 	invulnerable_timer = Game.HURT_INVULNERABLE_SECONDS
-	hurt_timer = 0.18
+	var recovery: float = BoonEffects.hurt_recovery()
+	hurt_timer = 0.18 * recovery
 	dash_timer = 0.0
 	var away: float = signf(global_position.x - source_x) if global_position.x != source_x else float(-facing)
-	velocity = Vector2(HURT_KNOCKBACK.x * away, HURT_KNOCKBACK.y)
+	velocity = Vector2(HURT_KNOCKBACK.x * away, HURT_KNOCKBACK.y) * recovery
 	hurt.emit(taken)
 	CombatFeedback.milo_hurt(self, taken)
 	return true
@@ -117,6 +139,8 @@ func step(input: MiloInput, delta: float) -> void:
 	_run(input, delta, was_on_floor)
 	_jump(input, delta, was_on_floor)
 	_fall(input, delta)
+	velocity += push * delta
+	push = Vector2.ZERO
 	var fall_speed: float = velocity.y
 	_move()
 	if not was_on_floor and is_on_floor():
@@ -129,6 +153,7 @@ func _tick_timers(delta: float) -> void:
 	invulnerable_timer = maxf(0.0, invulnerable_timer - delta)
 	hurt_timer = maxf(0.0, hurt_timer - delta)
 	perfect_dodge_cooldown = maxf(0.0, perfect_dodge_cooldown - delta)
+	since_dash = 0.0 if is_dashing() else since_dash + delta
 	jump_buffer_timer = maxf(0.0, jump_buffer_timer - delta)
 	if drop_timer > 0.0:
 		drop_timer = maxf(0.0, drop_timer - delta)
@@ -155,9 +180,22 @@ func _start_dash(input: MiloInput) -> void:
 	dashed.emit(dash_direction)
 
 
+## A Special's lunge: an invulnerable dash at its own speed.
+func pounce(direction: Vector2, speed: float, seconds: float) -> void:
+	dash_direction = direction.normalized()
+	if dash_direction.x != 0.0:
+		facing = 1 if dash_direction.x > 0.0 else -1
+	dash_timer = seconds
+	_dash_speed_override = speed
+	invulnerable_timer = maxf(invulnerable_timer, seconds + 0.15)
+	dashed.emit(dash_direction)
+
+
 func _dash_step(delta: float) -> void:
 	dash_timer = maxf(0.0, dash_timer - delta)
-	velocity = dash_direction * tuning.dash_speed
+	velocity = dash_direction * (_dash_speed_override if _dash_speed_override > 0.0 else tuning.dash_speed)
+	if dash_timer <= 0.0:
+		_dash_speed_override = 0.0
 	_move()
 	if is_on_floor() and dash_direction.y >= tuning.waveland_min_down:
 		dash_timer = 0.0
@@ -177,6 +215,8 @@ func _run(input: MiloInput, delta: float, on_floor: bool) -> void:
 		var acceleration: float = tuning.ground_acceleration if on_floor else tuning.air_acceleration
 		if turning_around:
 			acceleration = tuning.turnaround_acceleration
+		if on_floor and on_ice:
+			acceleration *= ICE_GRIP
 		velocity.x += move_x * acceleration * delta
 		var cap: float = tuning.wave_slide_speed_cap if is_wave_sliding() else tuning.run_speed * BoonEffects.move_speed_multiplier()
 		velocity.x = clampf(velocity.x, -cap, cap)
@@ -187,7 +227,7 @@ func _run(input: MiloInput, delta: float, on_floor: bool) -> void:
 	if is_wave_sliding():
 		friction = tuning.wave_slide_friction
 	elif on_floor:
-		friction = tuning.ground_friction
+		friction = tuning.ground_friction * (ICE_GRIP * 0.25 if on_ice else 1.0)
 	velocity.x = move_toward(velocity.x, 0.0, friction * delta)
 
 
@@ -229,14 +269,18 @@ func _fall(input: MiloInput, delta: float) -> void:
 	var fast_falling: bool = input.move.y > 0 and velocity.y > 30.0
 	var extra: float = tuning.fast_fall_gravity if fast_falling else 0.0
 	var cap: float = tuning.fast_fall_speed_cap if input.move.y > 0 else tuning.fall_speed_cap
-	velocity.y = minf(velocity.y + (tuning.gravity + extra) * delta, cap)
+	velocity.y = minf(velocity.y + (tuning.gravity * RoomRules.gravity_scale() + extra) * delta, cap)
 
 
 func _move() -> void:
 	move_and_slide()
 	standing_on_one_way = false
+	var iced: bool = false
 	for i: int in get_slide_collision_count():
 		var collision: KinematicCollision2D = get_slide_collision(i)
 		var collider: Node = collision.get_collider() as Node
-		if collision.get_normal().y < -0.7 and collider != null and collider.is_in_group("one_way"):
-			standing_on_one_way = true
+		if collision.get_normal().y < -0.7 and collider != null:
+			standing_on_one_way = standing_on_one_way or collider.is_in_group("one_way")
+			iced = iced or collider.is_in_group("ice")
+	if is_on_floor():
+		on_ice = iced

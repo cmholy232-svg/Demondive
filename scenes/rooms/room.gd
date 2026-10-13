@@ -9,6 +9,9 @@ signal cage_freed(boon: StringName)
 signal boss_spawned(boss: Boss)
 
 const WAVE_DELAY: float = 0.8
+## The Self Below's Sevenfold Reckoning: the Demon Lords return one by one.
+const RUSH: Array[StringName] = [&"belladonna", &"nerissa", &"roxyne", &"calyptra", &"isolde", &"somnia", &"vespera"]
+const RUSH_HEALTH: float = 0.32
 
 var data: RoomData
 var builder: RoomBuilder = RoomBuilder.new()
@@ -18,6 +21,13 @@ var door_rewards: Array[StringName] = []
 var wave: int = 0
 var is_clear: bool = false
 var boss: Boss = null
+## Level roster: archetype -> this level's variant (from levels.json).
+var roster: Dictionary = {}
+## Boss kinds for this level's miniboss and boss rooms (from levels.json).
+var miniboss_kind: StringName = &"bartender"
+var boss_kind: StringName = &"belladonna"
+## Lords still to come in a boss rush (empty otherwise).
+var rush_queue: Array[StringName] = []
 var _wave_timer: float = -1.0
 var _started: bool = false
 
@@ -67,6 +77,8 @@ func _physics_process(delta: float) -> void:
 			_spawn_wave(wave + 1)
 		return
 	if enemies_left() == 0 and _wave_timer < 0.0:
+		if not rush_queue.is_empty():
+			return
 		if boss != null or wave >= data.wave_count():
 			_set_clear()
 		else:
@@ -88,7 +100,8 @@ func _spawn_wave(index: int) -> void:
 	for spawn: Dictionary in data.spawns:
 		if int(spawn["wave"]) != index:
 			continue
-		var enemy: Enemy = EnemyFactory.make(spawn["kind"] as StringName)
+		var kind: StringName = spawn["kind"] as StringName
+		var enemy: Enemy = EnemyFactory.make(StringName(str(roster.get(String(kind), kind))))
 		enemy.position = spawn["at"] as Vector2
 		enemy.aggro = index > 1
 		_scale_enemy(enemy)
@@ -99,21 +112,48 @@ func _spawn_wave(index: int) -> void:
 
 ## Later levels and deeper rooms hit a little harder.
 func _scale_enemy(enemy: Enemy) -> void:
-	var depth: float = (Game.level - 1) * 0.35 + Game.room_index * 0.03
-	enemy.max_health *= 1.0 + depth
-	enemy.contact_damage *= 1.0 + depth * 0.5
+	var depth: float = (Game.level - 1) * 0.25 + Game.room_index * 0.03
+	enemy.health_scale = 1.0 + depth
+	enemy.damage_scale = (1.0 + depth * 0.5) * RoomRules.enemy_damage()
+	enemy.tempo_scale = RoomRules.enemy_speed()
+	enemy.shard_scale = RoomRules.shard_scale()
 
 
 func _spawn_boss() -> void:
-	var kind: StringName = &"bartender" if data.kind == &"miniboss" else &"belladonna"
+	var kind: StringName = miniboss_kind if data.kind == &"miniboss" else boss_kind
 	if data.boss_kind != &"":
 		kind = data.boss_kind
+	if kind == &"rush":
+		rush_queue = RUSH.duplicate()
+		_spawn_next_lord()
+		return
+	_spawn_boss_kind(kind, 1.0)
+
+
+func _spawn_boss_kind(kind: StringName, health_scale: float) -> void:
 	boss = EnemyFactory.make(kind) as Boss
 	boss.position = data.boss_spawn
 	boss.arena = Rect2(Vector2(RoomData.TILE, 0.0), data.size_px() - Vector2(RoomData.TILE * 2.0, RoomData.TILE * 2.0))
 	boss.aggro = true
+	boss.health_scale = health_scale
 	add_child(boss)
 	boss_spawned.emit(boss)
+
+
+func _spawn_next_lord() -> void:
+	var kind: StringName = rush_queue.pop_front()
+	_spawn_boss_kind(kind, RUSH_HEALTH)
+	BossAnnouncer.say(get_tree(), Strings.text("boss.%s.name" % kind))
+	boss.died.connect(func(_e: Enemy) -> void:
+		if not rush_queue.is_empty():
+			await get_tree().create_timer(1.6).timeout
+			if is_inside_tree():
+				_spawn_next_lord())
+
+
+## True while a boss rush still has Lords to send.
+func rush_active() -> bool:
+	return not rush_queue.is_empty()
 
 
 func _place_cage() -> void:

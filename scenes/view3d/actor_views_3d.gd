@@ -12,6 +12,13 @@ var _enemies: Dictionary = {}
 var _doors: Dictionary = {}
 var _cages: Dictionary = {}
 var _flash: ShaderMaterial
+## Status -> translucent overlay (frost, charm, vines, gold, shade).
+var _status_overlays: Dictionary = {}
+const STATUS_COLORS: Dictionary = {
+	&"frozen": Color(0.55, 0.85, 1.0, 0.55), &"chilled": Color(0.6, 0.85, 1.0, 0.22),
+	&"charmed": Color(1.0, 0.45, 0.8, 0.35), &"rooted": Color(0.35, 0.75, 0.3, 0.35),
+	&"blind": Color(1.0, 0.85, 0.35, 0.3), &"wounded": Color(0.45, 0.2, 0.7, 0.3),
+}
 var _time: float = 0.0
 
 
@@ -20,6 +27,14 @@ func _ready() -> void:
 	shader.code = FLASH_SHADER
 	_flash = ShaderMaterial.new()
 	_flash.shader = shader
+	for id: StringName in STATUS_COLORS:
+		var tint := StandardMaterial3D.new()
+		tint.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+		tint.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+		tint.albedo_color = STATUS_COLORS[id]
+		tint.emission_enabled = true
+		tint.emission = Color(STATUS_COLORS[id]).lerp(Color.WHITE, 0.2)
+		_status_overlays[id] = tint
 
 
 func bind_room(room: Room) -> void:
@@ -52,15 +67,7 @@ func _sync_enemies(delta: float) -> void:
 			continue
 		alive[enemy] = true
 		if not _enemies.has(enemy):
-			var model: Node3D
-			if CharacterModels.has(enemy.kind):
-				# Drawn a little taller than the hitbox so bosses tower over Milo.
-				var tall: float = enemy.size.y / Kit3D.PX_PER_M * BOSS_PRESENCE
-				model = CharacterModels.make(enemy.kind, tall)
-				# Bosses get their own key light so they read against busy rooms.
-				Kit3D.omni(model, Vector3(0.9, tall * 0.75, 2.2), Color(1.0, 0.88, 0.92), 2.4, 6.0)
-			else:
-				model = CreatureModels.make(enemy.kind)
+			var model: Node3D = _make_model(enemy)
 			add_child(model)
 			_enemies[enemy] = model
 		_pose(_enemies[enemy] as Node3D, enemy, delta)
@@ -68,6 +75,29 @@ func _sync_enemies(delta: float) -> void:
 		if not alive.has(enemy):
 			(_enemies[enemy] as Node3D).queue_free()
 			_enemies.erase(enemy)
+
+
+## Rigged glb for goddesses and Demon Lords, Milo's own model for Better Milo
+## and The Hollow, otherwise a primitive creature in the variant's colours.
+func _make_model(enemy: Enemy) -> Node3D:
+	var spec: Dictionary = (enemy as PatternBoss).spec if enemy is PatternBoss else {}
+	var look: StringName = StringName(str(spec.get("look", enemy.kind)))
+	var model: Node3D
+	if CharacterModels.has(look):
+		# Drawn a little taller than the hitbox so bosses tower over Milo.
+		var tall: float = enemy.size.y / Kit3D.PX_PER_M * (BOSS_PRESENCE if enemy.is_boss else 1.0)
+		model = CharacterModels.make(look, tall, CharacterModels.TINTS.get(str(spec.get("tint", "")), {}) as Dictionary)
+		if enemy.is_boss:
+			# Bosses get their own key light so they read against busy rooms.
+			Kit3D.omni(model, Vector3(0.9, tall * 0.75, 2.2), Color(1.0, 0.88, 0.92), 2.4, 6.0)
+		return model
+	var base: StringName = look
+	if enemy.variant != &"":
+		base = StringName(str(EnemyFactory.variant(enemy.variant).get("base", enemy.kind)))
+	model = CreatureModels.make(base, enemy.palette)
+	var grow: float = float(spec.get("scale", EnemyFactory.variant(enemy.variant).get("scale", 1.0) if enemy.variant != &"" else 1.0))
+	model.scale = Vector3.ONE * grow
+	return model
 
 
 func _pose(model: Node3D, enemy: Enemy, delta: float) -> void:
@@ -78,12 +108,15 @@ func _pose(model: Node3D, enemy: Enemy, delta: float) -> void:
 	var pose: String = String(enemy.attack_pose)
 	if model.has_meta("animator"):
 		var moving: bool = absf(enemy.velocity.x) > 30.0 and not pose.begins_with("windup") and not pose.begins_with("attack")
-		CharacterModels.animate(model, "move" if moving and (pose == "idle" or pose == "move") else pose)
+		CharacterModels.animate(model, "move" if moving and (pose == "idle" or pose == "move") else pose, 0.0 if enemy.status.is_frozen() else enemy.status.speed_factor())
+	model.visible = enemy.aggro or not ThornCover.hides(get_tree(), enemy.global_position)
 	var squash := Vector3.ONE
 	var lean: float = 0.0
 	var lift: float = 0.0
 	var tell: float = 1.0
 	var phase: float = _time * 6.0 + float(enemy.get_instance_id() % 100)
+	if enemy.status.is_frozen():
+		pose = "frozen"
 	if enemy.spawn_timer > 0.0:
 		var grow: float = 1.0 - enemy.spawn_timer / Enemy.SPAWN_SECONDS
 		squash = Vector3.ONE * maxf(0.05, grow)
@@ -97,6 +130,8 @@ func _pose(model: Node3D, enemy: Enemy, delta: float) -> void:
 		squash = Vector3(1.15, 0.95, 0.95)
 		lean = 0.3
 		tell = 2.5
+	elif pose == "frozen":
+		squash = Vector3.ONE
 	elif pose == "hurt":
 		lean = -0.2
 	elif pose == "move" or absf(enemy.velocity.x) > 30.0:
@@ -115,7 +150,8 @@ func _pose(model: Node3D, enemy: Enemy, delta: float) -> void:
 		var mesh := node as MeshInstance3D
 		if mesh == null:
 			continue
-		mesh.material_overlay = _flash if enemy.is_flashing() else null
+		var shown: StringName = enemy.status.shown()
+		mesh.material_overlay = _flash if enemy.is_flashing() else (_status_overlays.get(shown) as Material if shown != &"" else null)
 		if mesh.is_in_group(&"tell"):
 			mesh.scale = Vector3.ONE * lerpf(mesh.scale.x, tell, clampf(10.0 * delta, 0.0, 1.0))
 

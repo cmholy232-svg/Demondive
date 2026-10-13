@@ -12,46 +12,70 @@ var ledges: Array[Rect2] = []
 var spikes: Array[Rect2] = []
 var lava: Array[Rect2] = []
 var movers: Array[MovingPlatform] = []
+## Solid ice blocks, kept apart from solids so the view can frost them.
+var ice: Array[Rect2] = []
+## Level mechanics (currents, vents, cover, rails, icicles, portals, mirrors, corruption).
+var mechanics: RoomMechanics = RoomMechanics.new()
 
 
 func build(data: RoomData, parent: Node2D) -> void:
-	_build_solids(data, parent)
+	_build_solids(data, parent, "#", solids, &"")
+	_build_solids(data, parent, "-", ice, &"ice")
 	_build_runs(data, parent, "=", _add_ledge)
 	_build_runs(data, parent, "^", _add_spikes)
 	_build_runs(data, parent, "~", _add_lava)
 	_build_movers(data, parent)
 	_build_bounds(data, parent)
+	mechanics.build(data, parent)
 
 
-## Greedy merge: horizontal runs of solid tiles, then stack equal runs downward.
-func _build_solids(data: RoomData, parent: Node2D) -> void:
+## Greedy merge: horizontal runs of one solid symbol, then stack equal runs downward.
+func _build_solids(data: RoomData, parent: Node2D, symbol: String, into: Array[Rect2], group: StringName) -> void:
 	var used: Dictionary = {}
 	for y: int in data.height:
 		var x: int = 0
 		while x < data.width:
-			if not data.is_solid(x, y) or used.has(Vector2i(x, y)):
+			if data.tile(x, y) != symbol or used.has(Vector2i(x, y)):
 				x += 1
 				continue
 			var run: int = 0
-			while x + run < data.width and data.is_solid(x + run, y) and not used.has(Vector2i(x + run, y)):
+			while x + run < data.width and data.tile(x + run, y) == symbol and not used.has(Vector2i(x + run, y)):
 				run += 1
 			var rows: int = 1
-			while y + rows < data.height and _row_matches(data, used, x, y + rows, run):
+			while y + rows < data.height and _row_matches(data, used, x, y + rows, run, symbol):
 				rows += 1
 			for yy: int in rows:
 				for xx: int in run:
 					used[Vector2i(x + xx, y + yy)] = true
 			var rect := Rect2(x * T, y * T, run * T, rows * T)
-			solids.append(rect)
-			_add_body(parent, rect, PhysicsLayers.WORLD, false)
+			into.append(rect)
+			var body: StaticBody2D = _add_body(parent, rect, PhysicsLayers.WORLD, false)
+			if group != &"":
+				body.add_to_group(group)
 			x += run
 
 
-func _row_matches(data: RoomData, used: Dictionary, x: int, y: int, run: int) -> bool:
+func _row_matches(data: RoomData, used: Dictionary, x: int, y: int, run: int, symbol: String) -> bool:
 	for xx: int in run:
-		if not data.is_solid(x + xx, y) or used.has(Vector2i(x + xx, y)):
+		if data.tile(x + xx, y) != symbol or used.has(Vector2i(x + xx, y)):
 			return false
 	return true
+
+
+static func runs(data: RoomData, symbol: String) -> Array[Rect2]:
+	var out: Array[Rect2] = []
+	for y: int in data.height:
+		var x: int = 0
+		while x < data.width:
+			if data.tile(x, y) != symbol:
+				x += 1
+				continue
+			var run: int = 0
+			while data.tile(x + run, y) == symbol:
+				run += 1
+			out.append(Rect2(x * T, y * T, run * T, T))
+			x += run
+	return out
 
 
 func _build_runs(data: RoomData, parent: Node2D, symbol: String, add: Callable) -> void:

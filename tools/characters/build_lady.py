@@ -13,6 +13,7 @@ import bmesh  # noqa: E402  (bpy must load first)
 from mathutils import Vector
 
 sys.path.insert(0, os.path.dirname(__file__))
+import adornments  # noqa: E402
 import animate  # noqa: E402
 import mh_base  # noqa: E402
 import outfit  # noqa: E402
@@ -30,9 +31,11 @@ HEAD_BONES = ("head", "special03", "special04", "temporalis01.L", "temporalis01.
 
 
 def rgb(hex_or_list):
+    """cast.json colours are sRGB hex; Blender and glTF want linear."""
     if isinstance(hex_or_list, str):
         h = hex_or_list.lstrip("#")
-        return tuple(int(h[i:i + 2], 16) / 255.0 for i in (0, 2, 4))
+        srgb = [int(h[i:i + 2], 16) / 255.0 for i in (0, 2, 4)]
+        return tuple(c / 12.92 if c <= 0.04045 else ((c + 0.055) / 1.055) ** 2.4 for c in srgb)
     return tuple(hex_or_list)
 
 
@@ -64,6 +67,7 @@ class Lady:
         self.body, self.rig, _verts, _remap = mh_base.build_body(DATA, body_targets(SPEC.get("build", {})), CHAR_ID + "_body")
         self.body.data.materials.append(self.mats["skin"])
         self.bones = outfit.dominant_bones(self.body)
+        self.char_id, self.torso, self.legs, self.head_bones = CHAR_ID, TORSO, LEGS, HEAD_BONES
         self.co = [v.co.copy() for v in self.body.data.vertices]
         self.normals = {v.index: v.normal.copy() for v in self.body.data.vertices}
         b = self.rig.data.bones
@@ -181,8 +185,10 @@ class Lady:
         for r in range(rings):
             for s in range(segments):
                 a = math.tau * (s + 0.5) / segments
-                front_left = slit and r >= rings * 0.45 and 0.3 < math.sin(a) < 0.72 and math.cos(a) > 0.3
-                if front_left:
+                # A left-leg slit, or "both": open sides leaving front and back panels.
+                if slit is True and r >= rings * 0.45 and 0.3 < math.sin(a) < 0.72 and math.cos(a) > 0.3:
+                    continue
+                if slit == "both" and r >= rings * 0.15 and abs(math.sin(a)) > 0.42:
                     continue
                 bm.faces.new((grid[r][s], grid[r][(s + 1) % segments], grid[r + 1][(s + 1) % segments], grid[r + 1][s]))
         mesh = bpy.data.meshes.new(CHAR_ID + "_skirt")
@@ -365,74 +371,6 @@ class Lady:
                 outfit.add_sphere(bm, p, r, Vector((1, 1, 1)), 10, 6)
         outfit.rigid_part(self.rig, self.body, f"{CHAR_ID}_tail_hair_{swing_x:.2f}", "head", build, mat)
 
-    # --- extras --------------------------------------------------------------
-    def extras(self):
-        for extra in SPEC.get("extras", []):
-            kind = extra["kind"]
-            mat = self.mat(extra.get("mat", "horn"), "trim")
-            if kind == "horns":
-                curl = extra.get("curl", 1.0)
-                length = extra.get("length", 0.16)
-                for sx in (1, -1):
-                    def build(bm, sx=sx):
-                        base = Vector((sx * 0.045, self.head_center.y - 0.015, self.crown_z - 0.03))
-                        p = base
-                        d = Vector((sx * 0.45, 0.25, 1.0)).normalized()
-                        steps = 7
-                        for k in range(steps):
-                            t = k / steps
-                            r = 0.032 * (1.0 - t) + 0.005
-                            outfit.add_sphere(bm, p, r, Vector((1, 1, 1)), 10, 6)
-                            p = p + d * (length / steps)
-                            d = (d + Vector((sx * 0.25 * curl, 0.35 * curl, -0.35 * curl * t))).normalized()
-                    outfit.rigid_part(self.rig, self.body, f"{CHAR_ID}_horn_{sx}", "head", build, mat)
-            elif kind == "halo":
-                def halo(bm):
-                    res = bmesh.ops.create_circle(bm, cap_ends=False, segments=32, radius=0.11)
-                    ring = res["verts"]
-                    for v in ring:
-                        v.co = Vector((v.co.x, v.co.y * 0.35 + self.head_center.y + 0.02, self.crown_z + 0.07))
-                    edges = list({e for v in ring for e in v.link_edges})
-                    ext = bmesh.ops.extrude_edge_only(bm, edges=edges)
-                    for v in [e for e in ext["geom"] if isinstance(e, bmesh.types.BMVert)]:
-                        v.co.z += 0.018
-                outfit.rigid_part(self.rig, self.body, CHAR_ID + "_halo", "head", halo, self.mat("glow", "trim"))
-            elif kind == "tiara":
-                def tiara(bm):
-                    for k in range(7):
-                        a = math.radians(-60 + k * 20)
-                        p = Vector((math.sin(a) * (self.head_half + 0.012), self.head_center.y - math.cos(a) * 0.09, self.crown_z - 0.035 + (0.025 if k == 3 else 0.012)))
-                        outfit.add_box(bm, p, Vector((0.012, 0.006, 0.03 if k == 3 else 0.018)))
-                outfit.rigid_part(self.rig, self.body, CHAR_ID + "_tiara", "head", tiara, mat)
-            elif kind == "wings":
-                span = extra.get("span", 0.55)
-                for sx in (1, -1):
-                    def wing(bm, sx=sx):
-                        spine = self.b["spine02"].head_local
-                        root = Vector((sx * 0.05, spine.y + 0.1, spine.z + 0.02))
-                        pts = [root, root + Vector((sx * span * 0.45, 0.12, span * 0.55)), root + Vector((sx * span, 0.16, span * 0.35)),
-                               root + Vector((sx * span * 0.85, 0.15, -span * 0.1)), root + Vector((sx * span * 0.55, 0.13, -span * 0.25)),
-                               root + Vector((sx * span * 0.3, 0.12, -span * 0.3))]
-                        verts = [bm.verts.new(p) for p in pts]
-                        for k in range(1, len(verts) - 1):
-                            bm.faces.new((verts[0], verts[k], verts[k + 1]))
-                    obj = outfit.rigid_part(self.rig, self.body, f"{CHAR_ID}_wing_{sx}", "spine02", wing, self.mat(extra.get("mat", "wing"), "horn"))
-                    obj.modifiers.new("Thickness", "SOLIDIFY").thickness = 0.008
-            elif kind == "tail":
-                def tail(bm):
-                    root = self.b["root"].head_local + Vector((0, 0.09, -0.04))
-                    for k in range(14):
-                        t = k / 13
-                        p = root + Vector((0.08 * math.sin(t * 3.0), 0.12 + t * 0.32, -0.25 * t + 0.18 * t * t))
-                        outfit.add_sphere(bm, p, 0.016 * (1.0 - 0.4 * t), Vector((1, 1, 1)), 8, 5)
-                    tip = root + Vector((0.08 * math.sin(3.0), 0.44, -0.07))
-                    outfit.add_box(bm, tip, Vector((0.05, 0.012, 0.05)), 0.78)
-                outfit.rigid_part(self.rig, self.body, CHAR_ID + "_tail", "root", tail, mat)
-            elif kind == "earrings":
-                for sx in (1, -1):
-                    outfit.rigid_part(self.rig, self.body, f"{CHAR_ID}_earring_{sx}", "head",
-                                      lambda bm, sx=sx: outfit.add_sphere(bm, Vector((sx * (self.head_half - 0.002), self.eye_l.y + 0.06, self.eye_l.z - 0.05)), 0.009), mat)
-
     def build(self):
         self.lips()
         for piece in SPEC.get("outfit", []):
@@ -449,9 +387,12 @@ class Lady:
                 self.gloves(piece)
             elif part == "choker":
                 self.choker(piece)
+            else:
+                adornments.PIECES[part](self, piece)
         self.hair()
         self.eyes()
-        self.extras()
+        for extra in SPEC.get("extras", []):
+            adornments.EXTRAS[extra["kind"]](self, extra, self.mat(extra.get("mat", "horn"), "trim"))
         self.rig.location.z = -self.ground_z
         bpy.context.view_layer.update()
         animate.build_lady(self.rig)
@@ -491,11 +432,29 @@ def render_preview(path: str) -> None:
     rig.animation_data.action = None
 
 
+def slim_for_export() -> None:
+    """Keeps the web download small: thin shells instead of solidified ones,
+    and the skinned meshes decimated (the toon shader hides the facets)."""
+    ratio = SPEC.get("decimate", 0.5)
+    for obj in bpy.data.objects:
+        if obj.type != "MESH":
+            continue
+        for mod in list(obj.modifiers):
+            if mod.type == "SOLIDIFY":
+                obj.modifiers.remove(mod)
+        if len(obj.data.vertices) > 600:
+            dec = obj.modifiers.new("Decimate", "DECIMATE")
+            dec.ratio = ratio
+            obj.modifiers.move(len(obj.modifiers) - 1, 0)
+
+
 def export(path: str) -> None:
     os.makedirs(os.path.dirname(path), exist_ok=True)
+    slim_for_export()
     bpy.ops.export_scene.gltf(filepath=path, export_format="GLB", export_animations=True,
-                              export_animation_mode="ACTIONS", export_skins=True, export_apply=False,
-                              export_force_sampling=True, export_yup=True)
+                              export_animation_mode="ACTIONS", export_skins=True, export_apply=True,
+                              export_texcoords=False, export_force_sampling=True, export_yup=True,
+                              export_optimize_animation_size=True)
 
 
 if __name__ == "__main__":

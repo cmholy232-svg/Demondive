@@ -1,0 +1,1512 @@
+{
+ "fan_club": {
+  "size": [
+   104,
+   170
+  ],
+  "health": 760,
+  "contact": 16,
+  "move": "walk",
+  "speed": 120,
+  "milestones": [
+   0.6,
+   0.3
+  ],
+  "look": "siren",
+  "palette": {
+   "main": "#3fb6d6",
+   "dark": "#0c3440",
+   "eye": "#ff9be6"
+  },
+  "scale": 1.6,
+  "colors": {
+   "a": "#5fe0ff",
+   "b": "#ff9be6",
+   "c": "#ffffff"
+  },
+  "think": [
+   1.4,
+   0.2
+  ],
+  "minions": {
+   "enemy": "drowned_fan",
+   "every": 6.0,
+   "max": 3
+  },
+  "attacks": [
+   {
+    "kind": "fan",
+    "windup": 0.5,
+    "color": "a",
+    "pose": "windup",
+    "count": 4,
+    "spread": 0.2,
+    "speed": 380,
+    "damage": 11,
+    "count+phase": 1
+   },
+   {
+    "kind": "charge",
+    "windup": 0.7,
+    "color": "b",
+    "pose": "windup",
+    "speed": 720,
+    "time": 0.8
+   },
+   {
+    "kind": "homing",
+    "windup": 0.6,
+    "color": "b",
+    "pose": "windup",
+    "count": 2,
+    "speed": 280,
+    "turn": 1.4,
+    "count+phase": 1
+   },
+   {
+    "kind": "ring",
+    "windup": 0.75,
+    "color": "a",
+    "pose": "windup",
+    "count": 10,
+    "speed": 300,
+    "from_phase": 1
+   }
+  ],
+  "events": [
+   {
+    "phase": 1,
+    "say": "boss.fan_club.encore",
+    "do": "summon",
+    "enemy": "spotlight_dancer",
+    "count": 2,
+    "max": 5
+   },
+   {
+    "phase": 2,
+    "say": "boss.fan_club.stage_dive",
+    "do": "summon",
+    "enemy": "drowned_fan",
+    "count": 3,
+    "max": 6
+   }
+  ]
+ },
+ "nerissa": {
+  "size": [
+   132,
+   202
+  ],
+  "health": 1500,
+  "contact": 22,
+  "move": "hover",
+  "hover_height": 260,
+  "speed": 95,
+  "milestones": [
+   0.7,
+   0.35
+  ],
+  "colors": {
+   "a": "#36c9ff",
+   "b": "#ff9be6",
+   "c": "#ffffff"
+  },
+  "think": [
+   1.45,
+   0.22
+  ],
+  "attacks": [
+   {
+    "kind": "homing",
+    "windup": 0.55,
+    "color": "b",
+    "pose": "windup_song",
+    "count": 3,
+    "speed": 300,
+    "turn": 1.7,
+    "count+phase": 1
+   },
+   {
+    "kind": "rain",
+    "windup": 0.7,
+    "color": "a",
+    "pose": "windup",
+    "spacing": 150,
+    "speed": 330
+   },
+   {
+    "kind": "fan",
+    "windup": 0.45,
+    "color": "a",
+    "pose": "windup",
+    "count": 5,
+    "spread": 0.16,
+    "speed": 420,
+    "damage": 12,
+    "count+phase": 2
+   },
+   {
+    "kind": "vortex",
+    "windup": 0.8,
+    "color": "b",
+    "pose": "windup",
+    "pull": 600,
+    "time": 1.6,
+    "count": 10,
+    "speed": 300
+   },
+   {
+    "kind": "delayed",
+    "windup": 0.6,
+    "color": "a",
+    "pose": "windup",
+    "count": 6,
+    "delay": 0.9,
+    "speed": 520,
+    "from_phase": 1
+   }
+  ],
+  "minions": {
+   "enemy": "chorus_wisp",
+   "every": 9.0,
+   "max": 2
+  },
+  "events": [
+   {
+    "phase": 1,
+    "say": "boss.nerissa.encore",
+    "do": "summon",
+    "enemy": "court_cantor",
+    "count": 2,
+    "max": 4
+   },
+   {
+    "phase": 2,
+    "say": "boss.nerissa.flood",
+    "do": "attack",
+    "kind": "rain",
+    "spacing": 110,
+    "speed": 360,
+    "color": "a"
+   }
+  ]
+ },
+ "perfect_prey": {
+  "size": [
+   126,
+   188
+  ],
+  "health": 820,
+  "contact": 20,
+  "move": "keep_away",
+  "speed": 170,
+  "milestones": [
+   0.6,
+   0.3
+  ],
+  "look": "hellhound",
+  "palette": {
+   "main": "#6a3a1e",
+   "dark": "#f0e0c0",
+   "eye": "#ffef8a",
+   "accent": "#64d879"
+  },
+  "scale": 1.9,
+  "colors": {
+   "a": "#c8ff5a",
+   "b": "#e35b58",
+   "c": "#ffffff"
+  },
+  "think": [
+   1.3,
+   0.2
+  ],
+  "attacks": [
+   {
+    "kind": "charge",
+    "windup": 0.65,
+    "color": "b",
+    "pose": "windup",
+    "speed": 900,
+    "time": 0.85
+   },
+   {
+    "kind": "leap",
+    "windup": 0.6,
+    "color": "a",
+    "pose": "windup",
+    "height": 700,
+    "steps": 4,
+    "width": 140,
+    "damage": 14
+   },
+   {
+    "kind": "fan",
+    "windup": 0.45,
+    "color": "a",
+    "pose": "windup",
+    "count": 3,
+    "spread": 0.25,
+    "speed": 480
+   },
+   {
+    "kind": "pillars",
+    "windup": 0.5,
+    "color": "a",
+    "pose": "windup",
+    "count": 3,
+    "width": 110,
+    "gap": 300,
+    "warn": 0.85,
+    "look": "thorn",
+    "from_phase": 1
+   }
+  ],
+  "events": [
+   {
+    "phase": 1,
+    "say": "boss.perfect_prey.bolt",
+    "do": "summon",
+    "enemy": "thorn_stalker",
+    "count": 2,
+    "max": 4
+   },
+   {
+    "phase": 2,
+    "say": "boss.perfect_prey.cornered",
+    "do": "attack",
+    "kind": "shockwave",
+    "steps": 7,
+    "color": "b"
+   }
+  ]
+ },
+ "roxyne": {
+  "size": [
+   148,
+   218
+  ],
+  "health": 1650,
+  "contact": 24,
+  "move": "walk",
+  "speed": 135,
+  "milestones": [
+   0.7,
+   0.35
+  ],
+  "colors": {
+   "a": "#e35b58",
+   "b": "#ffc7a5",
+   "c": "#c8ff5a"
+  },
+  "think": [
+   1.35,
+   0.22
+  ],
+  "attacks": [
+   {
+    "kind": "teleport",
+    "windup": 0.55,
+    "color": "a",
+    "pose": "windup_pounce",
+    "count": 3,
+    "spread": 0.14,
+    "speed": 520,
+    "damage": 13
+   },
+   {
+    "kind": "charge",
+    "windup": 0.6,
+    "color": "a",
+    "pose": "windup",
+    "speed": 980,
+    "time": 0.8
+   },
+   {
+    "kind": "leap",
+    "windup": 0.55,
+    "color": "b",
+    "pose": "windup",
+    "height": 850,
+    "steps": 5,
+    "width": 150,
+    "damage": 15
+   },
+   {
+    "kind": "pillars",
+    "windup": 0.5,
+    "color": "c",
+    "pose": "windup",
+    "count": 3,
+    "width": 120,
+    "gap": 280,
+    "look": "thorn",
+    "warn": 0.8
+   },
+   {
+    "kind": "fan",
+    "windup": 0.4,
+    "color": "b",
+    "pose": "windup",
+    "count": 5,
+    "spread": 0.12,
+    "speed": 560,
+    "from_phase": 1
+   }
+  ],
+  "minions": {
+   "enemy": "razor_boar",
+   "every": 10.0,
+   "max": 1
+  },
+  "events": [
+   {
+    "phase": 1,
+    "say": "boss.roxyne.mark",
+    "do": "summon",
+    "enemy": "thorn_archer",
+    "count": 2,
+    "max": 3
+   },
+   {
+    "phase": 2,
+    "say": "boss.roxyne.frenzy",
+    "do": "attack",
+    "kind": "shockwave",
+    "steps": 8,
+    "color": "a"
+   }
+  ]
+ },
+ "lady_luckless": {
+  "size": [
+   118,
+   184
+  ],
+  "health": 880,
+  "contact": 18,
+  "move": "keep_away",
+  "speed": 110,
+  "milestones": [
+   0.6,
+   0.3
+  ],
+  "colors": {
+   "a": "#e97cff",
+   "b": "#ffe36e",
+   "c": "#ffffff"
+  },
+  "think": [
+   1.35,
+   0.2
+  ],
+  "attacks": [
+   {
+    "kind": "fan",
+    "windup": 0.5,
+    "color": "b",
+    "pose": "windup",
+    "count": 4,
+    "spread": 0.2,
+    "speed": 430
+   },
+   {
+    "kind": "pillars",
+    "windup": 0.5,
+    "color": "a",
+    "pose": "windup",
+    "count": 2,
+    "width": 130,
+    "gap": 420,
+    "look": "rail",
+    "warn": 0.85
+   },
+   {
+    "kind": "lances",
+    "windup": 0.55,
+    "color": "b",
+    "pose": "windup",
+    "heights": [
+     40,
+     170
+    ],
+    "speed": 600
+   },
+   {
+    "kind": "homing",
+    "windup": 0.55,
+    "color": "a",
+    "pose": "windup",
+    "count": 2,
+    "speed": 300,
+    "turn": 1.6,
+    "from_phase": 1
+   }
+  ],
+  "minions": {
+   "enemy": "jackpot_gremlin",
+   "every": 7.0,
+   "max": 2
+  },
+  "events": [
+   {
+    "phase": 1,
+    "say": "boss.lady_luckless.bad_beat",
+    "do": "summon",
+    "enemy": "card_dealer",
+    "count": 2,
+    "max": 4
+   },
+   {
+    "phase": 2,
+    "say": "boss.lady_luckless.all_in",
+    "do": "attack",
+    "kind": "ring",
+    "count": 14,
+    "speed": 320,
+    "color": "b"
+   }
+  ]
+ },
+ "calyptra": {
+  "size": [
+   152,
+   222
+  ],
+  "health": 1700,
+  "contact": 22,
+  "move": "hover",
+  "hover_height": 300,
+  "speed": 90,
+  "milestones": [
+   0.7,
+   0.35
+  ],
+  "colors": {
+   "a": "#e97cff",
+   "b": "#ffe36e",
+   "c": "#ffffff"
+  },
+  "think": [
+   1.4,
+   0.22
+  ],
+  "attacks": [
+   {
+    "kind": "gamble",
+    "windup": 0.5,
+    "color": "a",
+    "pose": "windup_roll",
+    "pool": [
+     {
+      "kind": "rain",
+      "windup": 0.85,
+      "color": "b",
+      "pose": "windup",
+      "spacing": 130,
+      "speed": 360,
+      "name": "boss.calyptra.roll_rain"
+     },
+     {
+      "kind": "ring",
+      "windup": 0.85,
+      "color": "a",
+      "pose": "windup",
+      "count": 16,
+      "speed": 320,
+      "name": "boss.calyptra.roll_ring"
+     },
+     {
+      "kind": "pillars",
+      "windup": 0.85,
+      "color": "b",
+      "pose": "windup",
+      "count": 4,
+      "width": 120,
+      "gap": 260,
+      "look": "rail",
+      "name": "boss.calyptra.roll_rails"
+     },
+     {
+      "kind": "homing",
+      "windup": 0.85,
+      "color": "a",
+      "pose": "windup",
+      "count": 4,
+      "speed": 290,
+      "turn": 1.8,
+      "name": "boss.calyptra.roll_hunt"
+     }
+    ]
+   },
+   {
+    "kind": "fan",
+    "windup": 0.45,
+    "color": "b",
+    "pose": "windup",
+    "count": 5,
+    "spread": 0.15,
+    "speed": 440,
+    "count+phase": 1
+   },
+   {
+    "kind": "beam",
+    "windup": 0.6,
+    "color": "a",
+    "pose": "windup",
+    "warn": 0.8,
+    "active": 0.35,
+    "thick": 90
+   },
+   {
+    "kind": "gamble",
+    "windup": 0.5,
+    "color": "a",
+    "pose": "windup_roll",
+    "from_phase": 1,
+    "pool": [
+     {
+      "kind": "delayed",
+      "windup": 0.85,
+      "color": "b",
+      "pose": "windup",
+      "count": 8,
+      "delay": 1.0,
+      "speed": 540,
+      "name": "boss.calyptra.roll_snake_eyes"
+     },
+     {
+      "kind": "lances",
+      "windup": 0.85,
+      "color": "b",
+      "pose": "windup",
+      "heights": [
+       40,
+       140,
+       240
+      ],
+      "speed": 620,
+      "name": "boss.calyptra.roll_house"
+     }
+    ]
+   }
+  ],
+  "minions": {
+   "enemy": "rail_wisp",
+   "every": 10.0,
+   "max": 2
+  },
+  "events": [
+   {
+    "phase": 1,
+    "say": "boss.calyptra.raise",
+    "do": "summon",
+    "enemy": "slot_mimic",
+    "count": 1,
+    "max": 3
+   },
+   {
+    "phase": 2,
+    "say": "boss.calyptra.jackpot",
+    "do": "attack",
+    "kind": "rain",
+    "spacing": 105,
+    "speed": 380,
+    "color": "b"
+   }
+  ]
+ },
+ "memory_golem": {
+  "size": [
+   136,
+   194
+  ],
+  "health": 980,
+  "contact": 24,
+  "move": "walk",
+  "speed": 70,
+  "milestones": [
+   0.6,
+   0.3
+  ],
+  "look": "golem",
+  "palette": {
+   "main": "#8aa8c8",
+   "dark": "#2a3a5a",
+   "eye": "#8ee7ff",
+   "accent": "#c8e0ff"
+  },
+  "scale": 1.0,
+  "colors": {
+   "a": "#aef0ff",
+   "b": "#ffffff",
+   "c": "#5ab8ff"
+  },
+  "think": [
+   1.6,
+   0.22
+  ],
+  "attacks": [
+   {
+    "kind": "leap",
+    "windup": 0.8,
+    "color": "a",
+    "pose": "windup",
+    "height": 600,
+    "steps": 6,
+    "width": 150,
+    "damage": 16
+   },
+   {
+    "kind": "delayed",
+    "windup": 0.7,
+    "color": "b",
+    "pose": "windup",
+    "count": 5,
+    "delay": 1.2,
+    "speed": 480
+   },
+   {
+    "kind": "pillars",
+    "windup": 0.7,
+    "color": "a",
+    "pose": "windup",
+    "count": 3,
+    "width": 140,
+    "gap": 300,
+    "look": "ice",
+    "warn": 1.1
+   },
+   {
+    "kind": "lances",
+    "windup": 0.6,
+    "color": "c",
+    "pose": "windup",
+    "heights": [
+     40,
+     140
+    ],
+    "speed": 520,
+    "from_phase": 1
+   }
+  ],
+  "events": [
+   {
+    "phase": 1,
+    "say": "boss.memory_golem.remember",
+    "do": "summon",
+    "enemy": "ice_penitent",
+    "count": 2,
+    "max": 4
+   },
+   {
+    "phase": 2,
+    "say": "boss.memory_golem.shatter",
+    "do": "attack",
+    "kind": "ring",
+    "count": 16,
+    "speed": 300,
+    "color": "a"
+   }
+  ]
+ },
+ "isolde": {
+  "size": [
+   156,
+   226
+  ],
+  "health": 1800,
+  "contact": 22,
+  "move": "hover",
+  "hover_height": 280,
+  "speed": 80,
+  "milestones": [
+   0.7,
+   0.35
+  ],
+  "colors": {
+   "a": "#8ee7ff",
+   "b": "#ffffff",
+   "c": "#5ab8ff"
+  },
+  "think": [
+   1.5,
+   0.22
+  ],
+  "attacks": [
+   {
+    "kind": "delayed",
+    "windup": 0.6,
+    "color": "a",
+    "pose": "windup_preserve",
+    "count": 7,
+    "delay": 1.1,
+    "speed": 540,
+    "count+phase": 1
+   },
+   {
+    "kind": "pillars",
+    "windup": 0.6,
+    "color": "b",
+    "pose": "windup",
+    "count": 4,
+    "width": 110,
+    "gap": 260,
+    "look": "ice",
+    "warn": 1.15
+   },
+   {
+    "kind": "ring",
+    "windup": 0.7,
+    "color": "a",
+    "pose": "windup",
+    "count": 14,
+    "speed": 310
+   },
+   {
+    "kind": "beam",
+    "windup": 0.6,
+    "color": "b",
+    "pose": "windup",
+    "warn": 0.9,
+    "active": 0.4,
+    "thick": 100
+   },
+   {
+    "kind": "rain",
+    "windup": 0.7,
+    "color": "c",
+    "pose": "windup",
+    "spacing": 140,
+    "speed": 320,
+    "from_phase": 1
+   }
+  ],
+  "minions": {
+   "enemy": "choir_shard",
+   "every": 10.0,
+   "max": 2
+  },
+  "events": [
+   {
+    "phase": 1,
+    "say": "boss.isolde.preserve",
+    "do": "summon",
+    "enemy": "reliquary_knight",
+    "count": 1,
+    "max": 3
+   },
+   {
+    "phase": 2,
+    "say": "boss.isolde.frozen",
+    "do": "attack",
+    "kind": "delayed",
+    "count": 12,
+    "delay": 1.3,
+    "speed": 560,
+    "color": "a"
+   }
+  ]
+ },
+ "dream_girl": {
+  "size": [
+   124,
+   186
+  ],
+  "health": 900,
+  "contact": 18,
+  "move": "walk",
+  "speed": 100,
+  "milestones": [
+   0.6,
+   0.3
+  ],
+  "colors": {
+   "a": "#ffd8f5",
+   "b": "#bc7cff",
+   "c": "#ffffff"
+  },
+  "think": [
+   1.4,
+   0.2
+  ],
+  "attacks": [
+   {
+    "kind": "delayed",
+    "windup": 0.5,
+    "color": "a",
+    "pose": "windup",
+    "count": 5,
+    "delay": 0.9,
+    "speed": 480
+   },
+   {
+    "kind": "teleport",
+    "windup": 0.55,
+    "color": "b",
+    "pose": "windup",
+    "count": 3,
+    "spread": 0.18,
+    "speed": 440
+   },
+   {
+    "kind": "homing",
+    "windup": 0.55,
+    "color": "b",
+    "pose": "windup",
+    "count": 3,
+    "speed": 260,
+    "turn": 1.5
+   },
+   {
+    "kind": "vortex",
+    "windup": 0.7,
+    "color": "a",
+    "pose": "windup",
+    "pull": 480,
+    "time": 1.4,
+    "count": 8,
+    "speed": 280,
+    "from_phase": 1
+   }
+  ],
+  "minions": {
+   "enemy": "sleepwalker",
+   "every": 9.0,
+   "max": 2
+  },
+  "events": [
+   {
+    "phase": 1,
+    "say": "boss.dream_girl.stay",
+    "do": "summon",
+    "enemy": "luggage_imp",
+    "count": 2,
+    "max": 4
+   },
+   {
+    "phase": 2,
+    "say": "boss.dream_girl.forever",
+    "do": "attack",
+    "kind": "delayed",
+    "count": 10,
+    "delay": 1.1,
+    "speed": 520,
+    "color": "b"
+   }
+  ]
+ },
+ "somnia": {
+  "size": [
+   158,
+   228
+  ],
+  "health": 1850,
+  "contact": 22,
+  "move": "hover",
+  "hover_height": 260,
+  "speed": 85,
+  "milestones": [
+   0.7,
+   0.35
+  ],
+  "colors": {
+   "a": "#bc7cff",
+   "b": "#ffd8f5",
+   "c": "#ffffff"
+  },
+  "think": [
+   1.45,
+   0.22
+  ],
+  "attacks": [
+   {
+    "kind": "teleport",
+    "windup": 0.6,
+    "color": "a",
+    "pose": "windup_feint",
+    "count": 4,
+    "spread": 0.16,
+    "speed": 440
+   },
+   {
+    "kind": "delayed",
+    "windup": 0.6,
+    "color": "b",
+    "pose": "windup",
+    "count": 8,
+    "delay": 1.0,
+    "speed": 520,
+    "count+phase": 1
+   },
+   {
+    "kind": "homing",
+    "windup": 0.6,
+    "color": "a",
+    "pose": "windup",
+    "count": 3,
+    "speed": 280,
+    "turn": 1.6,
+    "count+phase": 1
+   },
+   {
+    "kind": "rain",
+    "windup": 0.7,
+    "color": "b",
+    "pose": "windup",
+    "spacing": 140,
+    "speed": 300
+   },
+   {
+    "kind": "vortex",
+    "windup": 0.8,
+    "color": "a",
+    "pose": "windup",
+    "pull": 560,
+    "time": 1.6,
+    "count": 12,
+    "speed": 300,
+    "from_phase": 1
+   }
+  ],
+  "minions": {
+   "enemy": "night_moth",
+   "every": 9.0,
+   "max": 2
+  },
+  "events": [
+   {
+    "phase": 1,
+    "say": "boss.somnia.deeper",
+    "do": "summon",
+    "enemy": "sleepwalker",
+    "count": 2,
+    "max": 4
+   },
+   {
+    "phase": 2,
+    "say": "boss.somnia.never_wake",
+    "do": "attack",
+    "kind": "delayed",
+    "count": 14,
+    "delay": 1.2,
+    "speed": 560,
+    "color": "a"
+   }
+  ]
+ },
+ "better_milo": {
+  "size": [
+   92,
+   158
+  ],
+  "health": 940,
+  "contact": 18,
+  "move": "keep_away",
+  "speed": 200,
+  "milestones": [
+   0.6,
+   0.3
+  ],
+  "look": "milo",
+  "tint": "better",
+  "colors": {
+   "a": "#ffe9a0",
+   "b": "#ffffff",
+   "c": "#d7b7ff"
+  },
+  "think": [
+   1.15,
+   0.18
+  ],
+  "attacks": [
+   {
+    "kind": "copy",
+    "windup": 0.35,
+    "color": "a",
+    "pose": "windup",
+    "count": 3,
+    "speed": 780,
+    "damage": 11
+   },
+   {
+    "kind": "charge",
+    "windup": 0.45,
+    "color": "b",
+    "pose": "windup",
+    "speed": 1100,
+    "time": 0.35
+   },
+   {
+    "kind": "copy",
+    "windup": 0.35,
+    "color": "a",
+    "pose": "windup",
+    "count": 4,
+    "speed": 800,
+    "damage": 10
+   },
+   {
+    "kind": "teleport",
+    "windup": 0.45,
+    "color": "c",
+    "pose": "windup",
+    "count": 3,
+    "spread": 0.1,
+    "speed": 620,
+    "from_phase": 1
+   }
+  ],
+  "events": [
+   {
+    "phase": 1,
+    "say": "boss.better_milo.better",
+    "do": "attack",
+    "kind": "ring",
+    "count": 12,
+    "speed": 360,
+    "color": "a"
+   },
+   {
+    "phase": 2,
+    "say": "boss.better_milo.perfect",
+    "do": "summon",
+    "enemy": "mirror_punk",
+    "count": 2,
+    "max": 3
+   }
+  ]
+ },
+ "vespera": {
+  "size": [
+   162,
+   230
+  ],
+  "health": 1900,
+  "contact": 22,
+  "move": "walk",
+  "speed": 100,
+  "milestones": [
+   0.7,
+   0.35
+  ],
+  "colors": {
+   "a": "#d7b7ff",
+   "b": "#ffffff",
+   "c": "#e0f0ff"
+  },
+  "think": [
+   1.4,
+   0.22
+  ],
+  "attacks": [
+   {
+    "kind": "reflect",
+    "windup": 0.4,
+    "color": "c",
+    "pose": "windup_mirror",
+    "time": 1.6,
+    "time+phase": 0.3
+   },
+   {
+    "kind": "copy",
+    "windup": 0.45,
+    "color": "a",
+    "pose": "windup",
+    "count": 4,
+    "speed": 760
+   },
+   {
+    "kind": "fan",
+    "windup": 0.5,
+    "color": "b",
+    "pose": "windup",
+    "count": 6,
+    "spread": 0.14,
+    "speed": 430
+   },
+   {
+    "kind": "teleport",
+    "windup": 0.55,
+    "color": "a",
+    "pose": "windup",
+    "count": 4,
+    "spread": 0.14,
+    "speed": 460
+   },
+   {
+    "kind": "lances",
+    "windup": 0.55,
+    "color": "c",
+    "pose": "windup",
+    "heights": [
+     40,
+     150,
+     260
+    ],
+    "speed": 640,
+    "from_phase": 1
+   }
+  ],
+  "minions": {
+   "enemy": "prism_wisp",
+   "every": 10.0,
+   "max": 2
+  },
+  "events": [
+   {
+    "phase": 1,
+    "say": "boss.vespera.faces",
+    "do": "summon",
+    "enemy": "faceless_striker",
+    "count": 2,
+    "max": 4
+   },
+   {
+    "phase": 2,
+    "say": "boss.vespera.thousand",
+    "do": "attack",
+    "kind": "ring",
+    "count": 18,
+    "speed": 340,
+    "color": "a"
+   }
+  ]
+ },
+ "lilith_daughters": {
+  "size": [
+   112,
+   180
+  ],
+  "health": 1100,
+  "contact": 20,
+  "move": "walk",
+  "speed": 130,
+  "milestones": [
+   0.75,
+   0.5,
+   0.25
+  ],
+  "colors": {
+   "a": "#ff2a5a",
+   "b": "#ff9aa9",
+   "c": "#ffd04a"
+  },
+  "think": [
+   1.3,
+   0.15
+  ],
+  "attacks": [
+   {
+    "kind": "fan",
+    "windup": 0.45,
+    "color": "a",
+    "pose": "windup",
+    "count": 5,
+    "spread": 0.16,
+    "speed": 460,
+    "from_phase": 0
+   },
+   {
+    "kind": "charge",
+    "windup": 0.5,
+    "color": "b",
+    "pose": "windup",
+    "speed": 950,
+    "time": 0.7,
+    "from_phase": 1
+   },
+   {
+    "kind": "pillars",
+    "windup": 0.55,
+    "color": "c",
+    "pose": "windup",
+    "count": 3,
+    "width": 120,
+    "gap": 280,
+    "warn": 0.8,
+    "from_phase": 2
+   },
+   {
+    "kind": "homing",
+    "windup": 0.55,
+    "color": "b",
+    "pose": "windup",
+    "count": 3,
+    "speed": 300,
+    "turn": 1.7,
+    "from_phase": 3
+   },
+   {
+    "kind": "shockwave",
+    "windup": 0.6,
+    "color": "a",
+    "pose": "windup",
+    "steps": 6,
+    "width": 150
+   }
+  ],
+  "events": [
+   {
+    "phase": 1,
+    "say": "boss.lilith_daughters.defense",
+    "do": "summon",
+    "enemy": "throne_legionary",
+    "count": 1,
+    "max": 3
+   },
+   {
+    "phase": 2,
+    "say": "boss.lilith_daughters.movement",
+    "do": "summon",
+    "enemy": "portal_hound",
+    "count": 2,
+    "max": 4
+   },
+   {
+    "phase": 3,
+    "say": "boss.lilith_daughters.energy",
+    "do": "attack",
+    "kind": "ring",
+    "count": 16,
+    "speed": 330,
+    "color": "b"
+   }
+  ]
+ },
+ "lilith": {
+  "size": [
+   174,
+   244
+  ],
+  "health": 2300,
+  "contact": 26,
+  "move": "hover",
+  "hover_height": 300,
+  "speed": 100,
+  "milestones": [
+   0.75,
+   0.5,
+   0.25
+  ],
+  "colors": {
+   "a": "#ff2a3a",
+   "b": "#ff9aa9",
+   "c": "#ffd04a"
+  },
+  "think": [
+   1.35,
+   0.18
+  ],
+  "attacks": [
+   {
+    "kind": "fan",
+    "windup": 0.45,
+    "color": "a",
+    "pose": "windup_decree",
+    "count": 6,
+    "spread": 0.14,
+    "speed": 460,
+    "count+phase": 1
+   },
+   {
+    "kind": "pillars",
+    "windup": 0.6,
+    "color": "a",
+    "pose": "windup",
+    "count": 4,
+    "width": 120,
+    "gap": 260,
+    "look": "blood",
+    "warn": 0.85
+   },
+   {
+    "kind": "homing",
+    "windup": 0.6,
+    "color": "b",
+    "pose": "windup",
+    "count": 3,
+    "speed": 300,
+    "turn": 1.8,
+    "count+phase": 1
+   },
+   {
+    "kind": "vortex",
+    "windup": 0.75,
+    "color": "a",
+    "pose": "windup",
+    "pull": 620,
+    "time": 1.6,
+    "count": 14,
+    "speed": 320
+   },
+   {
+    "kind": "beam",
+    "windup": 0.55,
+    "color": "c",
+    "pose": "windup",
+    "warn": 0.75,
+    "active": 0.4,
+    "thick": 100,
+    "from_phase": 1
+   },
+   {
+    "kind": "rain",
+    "windup": 0.7,
+    "color": "b",
+    "pose": "windup",
+    "spacing": 130,
+    "speed": 360,
+    "from_phase": 2
+   },
+   {
+    "kind": "delayed",
+    "windup": 0.6,
+    "color": "a",
+    "pose": "windup",
+    "count": 10,
+    "delay": 1.0,
+    "speed": 560,
+    "from_phase": 3
+   }
+  ],
+  "minions": {
+   "enemy": "charm_acolyte",
+   "every": 11.0,
+   "max": 2
+  },
+  "events": [
+   {
+    "phase": 1,
+    "say": "boss.lilith.kneel",
+    "do": "summon",
+    "enemy": "hollow_succubus",
+    "count": 2,
+    "max": 4
+   },
+   {
+    "phase": 2,
+    "say": "boss.lilith.pact",
+    "do": "attack",
+    "kind": "ring",
+    "count": 20,
+    "speed": 330,
+    "color": "a"
+   },
+   {
+    "phase": 3,
+    "say": "boss.lilith.queen",
+    "do": "summon",
+    "enemy": "blood_bat",
+    "count": 3,
+    "max": 5
+   }
+  ]
+ },
+ "hollow": {
+  "size": [
+   150,
+   240
+  ],
+  "health": 2600,
+  "contact": 26,
+  "move": "walk",
+  "speed": 110,
+  "milestones": [
+   0.66,
+   0.33
+  ],
+  "look": "milo",
+  "tint": "hollow",
+  "colors": {
+   "a": "#9a8aff",
+   "b": "#5a4aff",
+   "c": "#ffffff"
+  },
+  "think": [
+   1.3,
+   0.15
+  ],
+  "attacks": [
+   {
+    "kind": "copy",
+    "windup": 0.45,
+    "color": "a",
+    "pose": "windup",
+    "count": 4,
+    "speed": 760,
+    "damage": 13
+   },
+   {
+    "kind": "shockwave",
+    "windup": 0.6,
+    "color": "b",
+    "pose": "windup",
+    "steps": 7,
+    "width": 150
+   },
+   {
+    "kind": "homing",
+    "windup": 0.55,
+    "color": "a",
+    "pose": "windup",
+    "count": 3,
+    "speed": 300,
+    "turn": 1.7,
+    "count+phase": 2
+   },
+   {
+    "kind": "teleport",
+    "windup": 0.5,
+    "color": "b",
+    "pose": "windup",
+    "count": 5,
+    "spread": 0.13,
+    "speed": 480
+   },
+   {
+    "kind": "pillars",
+    "windup": 0.6,
+    "color": "a",
+    "pose": "windup",
+    "count": 4,
+    "width": 120,
+    "gap": 260,
+    "warn": 0.8,
+    "from_phase": 2
+   },
+   {
+    "kind": "delayed",
+    "windup": 0.6,
+    "color": "c",
+    "pose": "windup",
+    "count": 10,
+    "delay": 1.0,
+    "speed": 560,
+    "from_phase": 2
+   },
+   {
+    "kind": "rain",
+    "windup": 0.65,
+    "color": "b",
+    "pose": "windup",
+    "spacing": 120,
+    "speed": 360,
+    "from_phase": 2
+   }
+  ],
+  "events": [
+   {
+    "phase": 1,
+    "say": "boss.hollow.strip",
+    "do": "suppress"
+   },
+   {
+    "phase": 2,
+    "say": "boss.hollow.restore",
+    "do": "restore",
+    "heal": 0.5
+   }
+  ]
+ }
+}

@@ -22,6 +22,8 @@ var fade: ScreenFade
 var pending_reward: StringName = &""
 var _index: int = -1
 var _ending: bool = false
+## The Forever Motel replays one cleared room per level ("false awakening").
+var _woke_this_level: bool = false
 
 
 func _ready() -> void:
@@ -36,6 +38,7 @@ func _ready() -> void:
 	camera.target = milo
 	specials = Specials.new()
 	specials.milo = milo
+	milo.shield_check = specials.absorbs_hit
 	add_child(specials)
 	view = RoomView3D.new()
 	add_child(view)
@@ -79,8 +82,12 @@ func _enter_room(index: int) -> void:
 	camera.focus = null
 	var data: RoomData = plan.rooms[index]
 	_assign_cage(data)
+	_roll_house_rule(data, index)
 	room = Room.new()
 	room.setup(data, plan.door_rewards(index, data.exits.size(), Game.rng))
+	room.roster = plan.config.get("roster", {}) as Dictionary
+	room.miniboss_kind = StringName(str(plan.config.get("miniboss", "bartender")))
+	room.boss_kind = StringName(str(plan.config.get("boss", "belladonna")))
 	room.cleared.connect(_on_room_cleared)
 	room.exit_chosen.connect(_on_exit_chosen)
 	room.cage_freed.connect(_on_cage_freed)
@@ -101,7 +108,16 @@ func _enter_room(index: int) -> void:
 	_play_room_music(data)
 	fade.fade_in(ROOM_FADE)
 	await _play_room_beat(data, index)
+	if RoomRules.current != &"":
+		BossAnnouncer.say(get_tree(), Strings.text("rule.announce") % Strings.text("rule.%s" % RoomRules.current))
 	room.start()
+
+
+## The Thunder Jackpot: every fight after the first rolls a house rule, shown before it starts.
+func _roll_house_rule(data: RoomData, index: int) -> void:
+	RoomRules.clear()
+	if bool(plan.config.get("house_rules", false)) and index > 0 and (data.kind == &"combat" or data.kind == &"entry"):
+		RoomRules.roll(Game.rng)
 
 
 func _assign_cage(data: RoomData) -> void:
@@ -156,7 +172,21 @@ func _on_exit_chosen(reward: StringName) -> void:
 	milo.controllable = false
 	await fade.fade_out(ROOM_FADE)
 	milo.controllable = true
+	if _false_awakening():
+		_enter_room(_index)
+		hud.callout(Strings.text("room.false_awakening"), 2.4)
+		return
 	_enter_room(_index + 1)
+
+
+func _false_awakening() -> bool:
+	var chance: float = float(plan.config.get("false_awakening", 0.0))
+	if _woke_this_level or chance <= 0.0 or _index == 0 or room.data.kind != &"combat":
+		return false
+	if Game.rng.randf() >= chance:
+		return false
+	_woke_this_level = true
+	return true
 
 
 func _on_cage_freed(boon: StringName) -> void:
@@ -169,6 +199,9 @@ func _on_cage_freed(boon: StringName) -> void:
 
 
 func _on_boss_defeated(boss: Boss) -> void:
+	if room.rush_active():
+		hud.callout(Strings.text("boss.rush.next") % room.rush_queue.size(), 1.2)
+		return
 	for node: Node in get_tree().get_nodes_in_group(Enemy.GROUP):
 		var minion := node as Enemy
 		if minion != null and minion != boss and not minion.dead:
@@ -204,6 +237,7 @@ func _finish_level() -> void:
 	if LevelPlan.has_level(Game.level + 1):
 		Game.level += 1
 		plan = LevelPlan.make(Game.level, Game.rng)
+		_woke_this_level = false
 		_ending = false
 		await fade.fade_out(ROOM_FADE)
 		_enter_room(0)
@@ -224,6 +258,7 @@ func _on_milo_died() -> void:
 
 
 func _end(won: bool) -> void:
+	RoomRules.clear()
 	Game.end_run(won)
 	Audio.play_music(&"victory" if won else &"hub")
 	results.show_results(won)
@@ -245,7 +280,8 @@ func _clear_leftovers() -> void:
 
 
 ## Debug builds only, with the F3 panel open: F6 clears the room, F7 skips
-## to the next one, F8 jumps to the boss.
+## to the next one, F8 jumps to the boss, F10 skips to the next level,
+## F5 makes Milo very hard to kill for the rest of the run.
 func _unhandled_input(event: InputEvent) -> void:
 	if not Debug.enabled or not Debug.overlay_visible or not event is InputEventKey or not event.is_pressed():
 		return
@@ -259,3 +295,8 @@ func _unhandled_input(event: InputEvent) -> void:
 		KEY_F8:
 			_index = plan.room_count() - 2
 			_on_exit_chosen(&"boss")
+		KEY_F10:
+			if not _ending:
+				_finish_level()
+		KEY_F5:
+			Game.raise_max_health(99999.0)

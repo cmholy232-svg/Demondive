@@ -6,8 +6,8 @@ extends RefCounted
 
 static func enemy_hit(enemy: Enemy, hit: Hit, killed: bool) -> void:
 	var tree: SceneTree = enemy.get_tree()
-	if hit.source == &"burn":
-		Game.fx(&"ember", enemy.center(), BoonCatalog.color(&"pyrra"), 0.6)
+	if hit.source == &"burn" or hit.source == &"wound":
+		Game.fx(&"ember", enemy.center(), BoonCatalog.color(&"pyrra" if hit.source == &"burn" else &"noctissa"), 0.6)
 		if killed:
 			_kill(enemy, tree, hit)
 		return

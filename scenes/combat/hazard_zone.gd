@@ -14,6 +14,11 @@ var warn_seconds: float = 0.0
 var active_seconds: float = -1.0
 var color: Color = Color(1.0, 0.3, 0.4)
 var age: float = 0.0
+## Timed rails: seconds live, then seconds off (the last WARN of off flickers).
+var cycle_on: float = 0.0
+var cycle_off: float = 0.0
+var cycle_offset: float = 0.0
+const CYCLE_WARN: float = 0.6
 
 
 static func make(new_kind: StringName, area: Rect2, amount: float, warn: float = 0.0, active: float = -1.0) -> HazardZone:
@@ -40,16 +45,27 @@ func _ready() -> void:
 
 
 func is_warning() -> bool:
+	if cycle_on > 0.0:
+		var t: float = _cycle_time()
+		return t >= cycle_on + cycle_off - CYCLE_WARN
 	return age < warn_seconds
 
 
 func is_live() -> bool:
+	if cycle_on > 0.0:
+		return _cycle_time() < cycle_on
 	return not is_warning() and (active_seconds < 0.0 or age < warn_seconds + active_seconds)
 
 
 ## 0 at the start of the warning, 1 when it becomes dangerous.
 func warning_progress() -> float:
+	if cycle_on > 0.0:
+		return clampf((_cycle_time() - (cycle_on + cycle_off - CYCLE_WARN)) / CYCLE_WARN, 0.0, 1.0)
 	return 1.0 if warn_seconds <= 0.0 else clampf(age / warn_seconds, 0.0, 1.0)
+
+
+func _cycle_time() -> float:
+	return fmod(age + cycle_offset, cycle_on + cycle_off)
 
 
 func _physics_process(delta: float) -> void:

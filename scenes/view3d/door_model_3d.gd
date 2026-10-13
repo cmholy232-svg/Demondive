@@ -54,12 +54,7 @@ static func make_cage(cage: BoonCage) -> Node3D:
 	for i: int in 12:
 		var angle: float = TAU * i / 12.0
 		Kit3D.cylinder(root, Vector3(cos(angle) * 0.72, 1.2, sin(angle) * 0.72), 0.025, 0.025, 2.2, gold, 6)
-	var figure: Node3D = CreatureModels.make(&"siren")
-	figure.scale = Vector3.ONE * 1.5
-	figure.rotation.y = PI * 0.5
-	root.add_child(figure)
-	for node: Node in figure.find_children("*", "MeshInstance3D", true, false):
-		(node as MeshInstance3D).material_override = Kit3D.toon(color.lerp(Color.WHITE, 0.15), 0.015, 1.2)
+	root.add_child(CharacterModels.figure(cage.boon, 1.8, color))
 	Kit3D.omni(root, Vector3(0.0, 1.5, 0.9), color, 1.5, 3.5)
 	Kit3D.sign_text(root, BoonCatalog.text(cage.boon, "name"), Vector3(0.0, 2.85, 0.3), color, 0.006, 96)
 	return root

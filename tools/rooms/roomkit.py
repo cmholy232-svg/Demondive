@@ -83,6 +83,60 @@ class Room:
     def put(self, c, x, y=0):
         self.set(x, y, c)
 
+    # --- Level mechanics ------------------------------------------------------
+    def current(self, x, y, w, h, right=True):
+        """A band of water current pushing Milo sideways."""
+        for yy in range(y, y + h):
+            for xx in range(x, x + w):
+                if self.get(xx, yy) == " ":
+                    self.set(xx, yy, ">" if right else "<")
+        # The tide carries Milo across the band in its direction.
+        start, end = (x - 1, x + w) if right else (x + w, x - 1)
+        here = [(start + d, yy) for d in (-1, 0) for yy in range(y - 1, y + h + 3)]
+        there = [(end + d, yy) for d in (0, 1, -1) for yy in range(y - 2, y + h + 3)]
+        if not right:
+            here = [(start - d, yy) for d in (-1, 0) for yy in range(y - 1, y + h + 3)]
+            there = [(end - d, yy) for d in (0, 1, -1) for yy in range(y - 2, y + h + 3)]
+        self.rides.append((here, there))
+
+    def vent(self, x, y=0, w=2, rise=8):
+        """Bubble vent on a surface at height y: lifts Milo up its column."""
+        self.block(x, y, w, 1, "*")
+        here = [(xx, y) for xx in range(x, x + w)]
+        self.rides.append((here, [(xx, yy) for xx in range(x - 1, x + w + 1) for yy in range(y, y + rise + 1)]))
+
+    def cover(self, x, y, w):
+        """Thorn thicket (two tiles tall) that swallows enemy shots."""
+        self.block(x, y, w, 1, "%")
+
+    def rail(self, x, y, w):
+        """A floor rail that switches on and off."""
+        self.block(x, y, w, 1, "!")
+
+    def ice(self, x, y, w, h=1):
+        self.block(x, y, w, h, "-")
+
+    def icicles(self, x, y, w):
+        """Icicles hanging in the air row y (put them right under a ceiling)."""
+        self.block(x, y, w, 1, "Y")
+
+    def portals(self, a, b, pair=1):
+        """Linked motel doors at (x, y) a and b; pair 1 uses 1/2, pair 2 uses 3/4."""
+        ca, cb = ("1", "2") if pair == 1 else ("3", "4")
+        self.set(a[0], a[1], ca)
+        self.set(b[0], b[1], cb)
+        self.rides.append(([a], [b]))
+        self.rides.append(([b], [a]))
+
+    def mirror(self, x, y, h):
+        for yy in range(y, y + h):
+            self.set(x, yy, "/")
+
+    def corruption(self, x, w):
+        """A pool of corruption in a shallow floor dip."""
+        for xx in range(x, x + w):
+            self.set(xx, -1, "&")
+
     def enemies(self, spec):
         """spec: list of (letter, x, y)."""
         for c, x, y in spec:
@@ -101,12 +155,12 @@ class Room:
                     yield x, self.h - self.floor - 1 - r
 
     def solid_at(self, x, y):
-        return self.get(x, y) in "#"
+        return self.get(x, y) in "#-"
 
     def standable(self, x, y):
         below = self.get(x, y - 1)
-        here_free = self.get(x, y) not in "#" and self.get(x, y + 1) not in "#"
-        return here_free and below in "#=MV|:" and self.get(x, y) not in "^~"
+        here_free = self.get(x, y) not in "#-" and self.get(x, y + 1) not in "#-"
+        return here_free and below in "#-=MV|:&" and self.get(x, y) not in "^~"
 
     def reachable_exit(self):
         start = next(self.find("P"))

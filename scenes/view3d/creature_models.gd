@@ -2,36 +2,49 @@ class_name CreatureModels
 extends RefCounted
 ## Cel-shaded creature models built from primitives, facing +x with feet at
 ## the origin. Each returns a root with a "Body" node to squash and lunge, and
-## "Tell" nodes (glowing eyes) that flare during wind-ups.
+## "Tell" nodes (glowing eyes) that flare during wind-ups. A palette from
+## data/enemies/variants.json recolours an archetype for each level:
+## main, dark, eye and accent (hex strings); missing keys keep the default.
 
 const OUTLINE: float = 0.02
 
 
-static func make(kind: StringName) -> Node3D:
+static func make(kind: StringName, palette: Dictionary = {}) -> Node3D:
 	var root := Node3D.new()
 	var body := Node3D.new()
 	body.name = "Body"
 	root.add_child(body)
+	var p: Dictionary = palette
 	match kind:
 		&"imp":
-			_imp(body)
+			_imp(body, p)
 		&"floater":
-			_floater(body)
+			_floater(body, p)
 		&"succubus":
-			_succubus(body, Color(0.55, 0.25, 0.6), Color(1.0, 0.35, 0.7), 0.96)
+			_succubus(body, _c(p, "main", Color(0.55, 0.25, 0.6)), _c(p, "eye", Color(1.0, 0.35, 0.7)), 0.96, _c(p, "dark", Color(0.12, 0.05, 0.14)))
 		&"siren":
-			_succubus(body, Color(0.85, 0.35, 0.55), Color(1.0, 0.75, 0.35), 1.05)
+			_succubus(body, _c(p, "main", Color(0.85, 0.35, 0.55)), _c(p, "eye", Color(1.0, 0.75, 0.35)), 1.05, _c(p, "dark", Color(0.12, 0.05, 0.14)))
 		&"hellhound":
-			_hound(body)
+			_hound(body, p)
 		&"crawler":
-			_crawler(body)
+			_crawler(body, p)
+		&"lobber":
+			_lobber(body, p)
+		&"diver":
+			_diver(body, p)
+		&"golem":
+			_golem(body, p)
 		&"bartender":
 			_bartender(body)
 		&"belladonna":
 			_belladonna(body)
 		_:
-			Kit3D.capsule(body, Vector3(0.0, 0.5, 0.0), 0.25, 1.0, Kit3D.toon(Color.RED, OUTLINE))
+			Kit3D.capsule(body, Vector3(0.0, 0.5, 0.0), 0.25, 1.0, Kit3D.toon(_c(p, "main", Color.RED), OUTLINE))
 	return root
+
+
+static func _c(palette: Dictionary, key: String, fallback: Color) -> Color:
+	return Color.html(str(palette[key])) if palette.has(key) else fallback
 
 
 static func _eye(parent: Node3D, at: Vector3, radius: float, color: Color) -> void:
@@ -44,15 +57,17 @@ static func _horn(parent: Node3D, base: Vector3, length: float, tilt_z: float, c
 	Kit3D.cone(parent, base, length * 0.22, length, Kit3D.toon(color, OUTLINE * 0.6), Vector3(0.0, 0.0, tilt_z))
 
 
-static func _imp(body: Node3D) -> void:
-	var skin: Material = Kit3D.toon(Color(0.85, 0.18, 0.16), OUTLINE)
-	var dark: Material = Kit3D.toon(Color(0.35, 0.06, 0.08), OUTLINE)
+static func _imp(body: Node3D, p: Dictionary) -> void:
+	var skin: Material = Kit3D.toon(_c(p, "main", Color(0.85, 0.18, 0.16)), OUTLINE)
+	var dark: Material = Kit3D.toon(_c(p, "dark", Color(0.35, 0.06, 0.08)), OUTLINE)
+	var horn: Color = _c(p, "accent", Color(0.95, 0.85, 0.7))
+	var eye: Color = _c(p, "eye", Color(1.0, 0.9, 0.2))
 	Kit3D.capsule(body, Vector3(0.0, 0.36, 0.0), 0.2, 0.52, skin)
 	Kit3D.sphere(body, Vector3(0.06, 0.74, 0.0), 0.2, skin)
-	_horn(body, Vector3(0.0, 0.88, 0.1), 0.2, 0.5, Color(0.95, 0.85, 0.7))
-	_horn(body, Vector3(0.0, 0.88, -0.1), 0.2, 0.5, Color(0.95, 0.85, 0.7))
-	_eye(body, Vector3(0.22, 0.78, 0.08), 0.045, Color(1.0, 0.9, 0.2))
-	_eye(body, Vector3(0.22, 0.78, -0.08), 0.045, Color(1.0, 0.9, 0.2))
+	_horn(body, Vector3(0.0, 0.88, 0.1), 0.2, 0.5, horn)
+	_horn(body, Vector3(0.0, 0.88, -0.1), 0.2, 0.5, horn)
+	_eye(body, Vector3(0.22, 0.78, 0.08), 0.045, eye)
+	_eye(body, Vector3(0.22, 0.78, -0.08), 0.045, eye)
 	for z: float in [0.1, -0.1]:
 		Kit3D.capsule(body, Vector3(0.0, 0.1, z), 0.07, 0.24, dark)
 		Kit3D.capsule(body, Vector3(0.14, 0.42, z * 2.2), 0.05, 0.3, skin)
@@ -61,23 +76,23 @@ static func _imp(body: Node3D) -> void:
 	Kit3D.cone(body, Vector3(-0.42, 0.45, 0.0), 0.06, 0.12, dark, Vector3(0.0, 0.0, 1.0))
 
 
-static func _floater(body: Node3D) -> void:
-	var shell: Material = Kit3D.toon(Color(0.45, 0.2, 0.7), OUTLINE)
+static func _floater(body: Node3D, p: Dictionary) -> void:
+	var shell: Material = Kit3D.toon(_c(p, "main", Color(0.45, 0.2, 0.7)), OUTLINE)
 	Kit3D.sphere(body, Vector3(0.0, 0.45, 0.0), 0.38, shell)
-	Kit3D.sphere(body, Vector3(0.24, 0.48, 0.0), 0.22, Kit3D.toon(Color(0.95, 0.92, 0.88), OUTLINE * 0.5))
-	_eye(body, Vector3(0.42, 0.48, 0.0), 0.09, Color(0.75, 0.4, 1.0))
+	Kit3D.sphere(body, Vector3(0.24, 0.48, 0.0), 0.22, Kit3D.toon(_c(p, "accent", Color(0.95, 0.92, 0.88)), OUTLINE * 0.5))
+	_eye(body, Vector3(0.42, 0.48, 0.0), 0.09, _c(p, "eye", Color(0.75, 0.4, 1.0)))
 	Kit3D.sphere(body, Vector3(0.49, 0.48, 0.0), 0.045, Kit3D.material(Color.BLACK, 0.3))
 	for i: int in 5:
 		var angle: float = TAU * i / 5.0
 		Kit3D.cone(body, Vector3(cos(angle) * 0.18, 0.15, sin(angle) * 0.18), 0.06, 0.32, shell, Vector3(PI, 0.0, cos(angle) * 0.3))
 	for z: float in [0.36, -0.36]:
-		var wing: MeshInstance3D = Kit3D.box(body, Vector3(-0.05, 0.62, z), Vector3(0.38, 0.04, 0.3), Kit3D.toon(Color(0.25, 0.08, 0.35), OUTLINE * 0.5))
+		var wing: MeshInstance3D = Kit3D.box(body, Vector3(-0.05, 0.62, z), Vector3(0.38, 0.04, 0.3), Kit3D.toon(_c(p, "dark", Color(0.25, 0.08, 0.35)), OUTLINE * 0.5))
 		wing.rotation.x = 0.5 * signf(z)
 
 
-static func _succubus(body: Node3D, skin_color: Color, eye_color: Color, height: float) -> void:
+static func _succubus(body: Node3D, skin_color: Color, eye_color: Color, height: float, dress_color: Color = Color(0.12, 0.05, 0.14)) -> void:
 	var skin: Material = Kit3D.toon(skin_color, OUTLINE)
-	var dress: Material = Kit3D.toon(Color(0.12, 0.05, 0.14), OUTLINE)
+	var dress: Material = Kit3D.toon(dress_color, OUTLINE)
 	var hair: Material = Kit3D.toon(eye_color.darkened(0.25), OUTLINE)
 	var s: float = height
 	Kit3D.cylinder(body, Vector3(0.0, 0.3 * s, 0.0), 0.12 * s, 0.26 * s, 0.6 * s, dress, 14)
@@ -96,40 +111,91 @@ static func _succubus(body: Node3D, skin_color: Color, eye_color: Color, height:
 		wing.rotation = Vector3(0.0, 0.5 * signf(z), 0.4)
 
 
-static func _hound(body: Node3D) -> void:
-	var fur: Material = Kit3D.toon(Color(0.22, 0.08, 0.08), OUTLINE)
-	var bone: Material = Kit3D.toon(Color(0.9, 0.8, 0.65), OUTLINE * 0.6)
+static func _hound(body: Node3D, p: Dictionary) -> void:
+	var fur: Material = Kit3D.toon(_c(p, "main", Color(0.22, 0.08, 0.08)), OUTLINE)
+	var bone: Material = Kit3D.toon(_c(p, "dark", Color(0.9, 0.8, 0.65)), OUTLINE * 0.6)
 	var torso: MeshInstance3D = Kit3D.capsule(body, Vector3(-0.05, 0.48, 0.0), 0.2, 0.85, fur)
 	torso.rotation.z = PI * 0.5
 	Kit3D.sphere(body, Vector3(0.42, 0.6, 0.0), 0.17, fur)
 	Kit3D.box(body, Vector3(0.58, 0.55, 0.0), Vector3(0.2, 0.12, 0.14), fur)
 	Kit3D.box(body, Vector3(0.62, 0.48, 0.0), Vector3(0.16, 0.04, 0.12), bone)
-	_eye(body, Vector3(0.52, 0.66, 0.08), 0.035, Color(1.0, 0.5, 0.1))
-	_eye(body, Vector3(0.52, 0.66, -0.08), 0.035, Color(1.0, 0.5, 0.1))
+	_eye(body, Vector3(0.52, 0.66, 0.08), 0.035, _c(p, "eye", Color(1.0, 0.5, 0.1)))
+	_eye(body, Vector3(0.52, 0.66, -0.08), 0.035, _c(p, "eye", Color(1.0, 0.5, 0.1)))
 	for x: float in [0.28, -0.32]:
 		for z: float in [0.12, -0.12]:
 			Kit3D.capsule(body, Vector3(x, 0.2, z), 0.06, 0.4, fur)
-	var flame: Material = Kit3D.neon(Color(1.0, 0.45, 0.1), 3.0)
+	var flame: Material = Kit3D.neon(_c(p, "accent", Color(1.0, 0.45, 0.1)), 3.0)
 	for i: int in 5:
 		Kit3D.cone(body, Vector3(0.25 - i * 0.12, 0.66, 0.0), 0.07, 0.22 + (i % 2) * 0.08, flame, Vector3(0.0, 0.0, 0.4))
 
 
-static func _crawler(body: Node3D) -> void:
-	var shell: Material = Kit3D.toon(Color(0.25, 0.12, 0.3), OUTLINE)
-	var belly: Material = Kit3D.toon(Color(0.5, 0.2, 0.25), OUTLINE)
+static func _crawler(body: Node3D, p: Dictionary) -> void:
+	var shell: Material = Kit3D.toon(_c(p, "main", Color(0.25, 0.12, 0.3)), OUTLINE)
+	var belly: Material = Kit3D.toon(_c(p, "dark", Color(0.5, 0.2, 0.25)), OUTLINE)
 	Kit3D.sphere(body, Vector3(0.0, 0.42, 0.0), 0.6, shell, 0.62)
 	Kit3D.sphere(body, Vector3(0.0, 0.3, 0.0), 0.5, belly, 0.4)
 	Kit3D.sphere(body, Vector3(0.55, 0.36, 0.0), 0.2, shell)
-	_eye(body, Vector3(0.7, 0.42, 0.09), 0.04, Color(0.3, 1.0, 0.5))
-	_eye(body, Vector3(0.7, 0.42, -0.09), 0.04, Color(0.3, 1.0, 0.5))
+	_eye(body, Vector3(0.7, 0.42, 0.09), 0.04, _c(p, "eye", Color(0.3, 1.0, 0.5)))
+	_eye(body, Vector3(0.7, 0.42, -0.09), 0.04, _c(p, "eye", Color(0.3, 1.0, 0.5)))
 	for z: float in [0.1, -0.1]:
 		Kit3D.cone(body, Vector3(0.72, 0.3, z), 0.04, 0.22, Kit3D.toon(Color(0.9, 0.85, 0.7), OUTLINE * 0.5), Vector3(0.0, 0.0, -1.3))
 	for i: int in 4:
-		Kit3D.cone(body, Vector3(-0.3 + i * 0.2, 0.72, 0.0), 0.08, 0.26, Kit3D.toon(Color(0.9, 0.3, 0.5), OUTLINE * 0.5))
+		Kit3D.cone(body, Vector3(-0.3 + i * 0.2, 0.72, 0.0), 0.08, 0.26, Kit3D.toon(_c(p, "accent", Color(0.9, 0.3, 0.5)), OUTLINE * 0.5))
 	for i: int in 3:
 		for z: float in [0.42, -0.42]:
 			var leg: MeshInstance3D = Kit3D.capsule(body, Vector3(-0.3 + i * 0.3, 0.16, z), 0.05, 0.4, shell)
 			leg.rotation.x = 0.7 * signf(z)
+
+
+## Area denial: a squat pod with a gaping mouth that lobs arcing globs.
+static func _lobber(body: Node3D, p: Dictionary) -> void:
+	var hide: Material = Kit3D.toon(_c(p, "main", Color(0.3, 0.55, 0.25)), OUTLINE)
+	var lip: Material = Kit3D.toon(_c(p, "dark", Color(0.55, 0.12, 0.2)), OUTLINE)
+	Kit3D.sphere(body, Vector3(0.0, 0.42, 0.0), 0.46, hide, 0.85)
+	Kit3D.cylinder(body, Vector3(0.0, 0.08, 0.0), 0.42, 0.5, 0.16, Kit3D.toon(_c(p, "dark", Color(0.2, 0.3, 0.12)), OUTLINE), 14)
+	var mouth: MeshInstance3D = Kit3D.cylinder(body, Vector3(0.12, 0.8, 0.0), 0.2, 0.15, 0.16, lip, 14)
+	mouth.rotation.z = -0.5
+	_eye(body, Vector3(0.18, 0.86, 0.0), 0.07, _c(p, "eye", Color(1.0, 0.9, 0.3)))
+	for i: int in 6:
+		var a: float = TAU * i / 6.0
+		Kit3D.cone(body, Vector3(cos(a) * 0.4, 0.3, sin(a) * 0.4), 0.06, 0.24, Kit3D.toon(_c(p, "accent", Color(0.95, 0.5, 0.6)), OUTLINE * 0.5), Vector3(sin(a) * 0.9, 0.0, -cos(a) * 0.9))
+
+
+## Skirmisher: a long finned flier (eel, moth, bat) that hangs back and swoops.
+static func _diver(body: Node3D, p: Dictionary) -> void:
+	var skin: Material = Kit3D.toon(_c(p, "main", Color(0.2, 0.5, 0.6)), OUTLINE)
+	var fin: Material = Kit3D.toon(_c(p, "dark", Color(0.1, 0.2, 0.3)), OUTLINE * 0.5)
+	var torso: MeshInstance3D = Kit3D.capsule(body, Vector3(0.0, 0.45, 0.0), 0.16, 0.9, skin)
+	torso.rotation.z = PI * 0.5
+	Kit3D.sphere(body, Vector3(0.42, 0.47, 0.0), 0.15, skin)
+	_eye(body, Vector3(0.52, 0.52, 0.07), 0.04, _c(p, "eye", Color(1.0, 0.95, 0.4)))
+	_eye(body, Vector3(0.52, 0.52, -0.07), 0.04, _c(p, "eye", Color(1.0, 0.95, 0.4)))
+	for z: float in [0.3, -0.3]:
+		var wing: MeshInstance3D = Kit3D.box(body, Vector3(0.0, 0.6, z), Vector3(0.5, 0.03, 0.45), fin)
+		wing.rotation.x = 0.6 * signf(z)
+	Kit3D.cone(body, Vector3(-0.5, 0.45, 0.0), 0.1, 0.3, Kit3D.neon(_c(p, "accent", Color(0.3, 1.0, 0.9)), 2.0), Vector3(0.0, 0.0, PI * 0.5))
+
+
+## The Memory Golem: a reliquary of stacked ice blocks around a glowing heart.
+static func _golem(body: Node3D, p: Dictionary) -> void:
+	var stone: Material = Kit3D.toon(_c(p, "main", Color(0.55, 0.65, 0.78)), OUTLINE)
+	var dark: Material = Kit3D.toon(_c(p, "dark", Color(0.16, 0.22, 0.35)), OUTLINE)
+	var glow: Material = Kit3D.neon(_c(p, "eye", Color(0.55, 0.9, 1.0)), 3.0)
+	for z: float in [0.22, -0.22]:
+		Kit3D.box(body, Vector3(0.0, 0.42, z), Vector3(0.36, 0.84, 0.3), dark)
+	Kit3D.box(body, Vector3(0.0, 1.25, 0.0), Vector3(0.9, 0.85, 0.75), stone)
+	Kit3D.box(body, Vector3(0.05, 1.82, 0.0), Vector3(0.5, 0.4, 0.45), stone)
+	var heart: MeshInstance3D = Kit3D.sphere(body, Vector3(0.46, 1.3, 0.0), 0.16, glow)
+	heart.name = "Tell"
+	heart.add_to_group(&"tell")
+	_eye(body, Vector3(0.31, 1.86, 0.1), 0.045, _c(p, "eye", Color(0.55, 0.9, 1.0)))
+	_eye(body, Vector3(0.31, 1.86, -0.1), 0.045, _c(p, "eye", Color(0.55, 0.9, 1.0)))
+	for z: float in [0.6, -0.6]:
+		Kit3D.box(body, Vector3(0.1, 1.3, z), Vector3(0.32, 0.36, 0.32), stone)
+		Kit3D.box(body, Vector3(0.18, 0.82, z), Vector3(0.3, 0.6, 0.3), dark)
+		Kit3D.box(body, Vector3(0.24, 0.42, z), Vector3(0.42, 0.34, 0.4), stone)
+	for i: int in 5:
+		Kit3D.cone(body, Vector3(-0.2 + i * 0.1, 2.05, 0.0), 0.06, 0.2 + (i % 2) * 0.12, Kit3D.toon(_c(p, "accent", Color(0.85, 0.95, 1.0)), OUTLINE * 0.5))
 
 
 static func _bartender(body: Node3D) -> void:

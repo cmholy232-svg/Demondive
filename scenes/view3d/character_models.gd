@@ -9,9 +9,15 @@ const TOON_SHADER: Shader = preload("res://art/shaders/toon.gdshader")
 const OUTLINE_SHADER: Shader = preload("res://art/shaders/outline.gdshader")
 const OUTLINE_M: float = 0.012
 
-## Gameplay pose prefix -> animation name.
+## Gameplay pose prefix -> animation names to try, in order.
 const POSE_ANIMATIONS: Dictionary = {
-	"idle": "idle", "move": "walk", "windup": "windup", "attack": "attack", "hurt": "hurt",
+	"idle": ["idle"], "move": ["walk", "run"], "windup": ["windup", "cast_up", "idle"],
+	"attack": ["attack", "cast_forward", "dash"], "hurt": ["hurt", "fall", "idle"],
+}
+## Material recolours by material name ("*" for every material).
+const TINTS: Dictionary = {
+	"better": {"jacket": "#f4efe6", "jacket_patch": "#ffd76a", "tank": "#ffffff", "jeans": "#e6dccb", "shoe": "#ffd76a", "hair": "#f2e2b0"},
+	"hollow": {"*": "#16141f", "eye_white": "#9a8aff", "iris": "#ffffff"},
 }
 
 static var _scenes: Dictionary = {}
@@ -26,7 +32,7 @@ static func has(id: StringName) -> bool:
 
 
 ## A root facing +x with a "Body" child holding the model, scaled to height_m.
-static func make(id: StringName, height_m: float) -> Node3D:
+static func make(id: StringName, height_m: float, tint: Dictionary = {}) -> Node3D:
 	if not _scenes.has(id):
 		_scenes[id] = load(path(id))
 	var root := Node3D.new()
@@ -37,7 +43,7 @@ static func make(id: StringName, height_m: float) -> Node3D:
 	model.rotation.y = PI * 0.5
 	body.add_child(model)
 	fit_height(model, height_m)
-	toonify(model)
+	toonify(model, tint)
 	var player := model.find_child("AnimationPlayer", true, false) as AnimationPlayer
 	if player != null:
 		for name: String in player.get_animation_list():
@@ -48,15 +54,32 @@ static func make(id: StringName, height_m: float) -> Node3D:
 	return root
 
 
+## A boon-giver standing for the camera: her own model, turned three-quarters
+## toward the viewer, or a tinted stand-in while her model isn't built.
+static func figure(id: StringName, height_m: float, color: Color, turn: float = 0.0) -> Node3D:
+	if has(id):
+		var root: Node3D = make(id, height_m)
+		root.rotation.y = -PI * 0.5 + turn
+		return root
+	var stand_in: Node3D = CreatureModels.make(&"siren")
+	stand_in.scale = Vector3.ONE * height_m / 1.2
+	stand_in.rotation.y = PI * 0.5 + turn
+	for node: Node in stand_in.find_children("*", "MeshInstance3D", true, false):
+		(node as MeshInstance3D).material_override = Kit3D.toon(color.lerp(Color.WHITE, 0.15), 0.015, 1.2)
+	return stand_in
+
+
 ## Plays the animation for a gameplay pose ("windup_kiss" -> "windup").
 static func animate(root: Node3D, pose: String, speed: float = 1.0) -> void:
 	if not root.has_meta("animator"):
 		return
 	var player := root.get_meta("animator") as AnimationPlayer
 	var key: String = pose.get_slice("_", 0)
-	var anim: String = str(POSE_ANIMATIONS.get(key, "idle"))
-	if not player.has_animation(anim):
-		anim = "idle"
+	var anim: String = "idle"
+	for name: Variant in POSE_ANIMATIONS.get(key, ["idle"]) as Array:
+		if player.has_animation(str(name)):
+			anim = str(name)
+			break
 	if player.current_animation != anim:
 		player.play(anim, 0.15)
 	player.speed_scale = speed
@@ -78,12 +101,17 @@ static func fit_height(model: Node3D, height_m: float) -> void:
 
 
 ## Cel shading with an outline for every surface; materials named "glow*" shine instead.
-static func toonify(model: Node3D) -> void:
+static func toonify(model: Node3D, tint: Dictionary = {}) -> void:
 	for node: Node in model.find_children("*", "MeshInstance3D", true, false):
 		var instance := node as MeshInstance3D
 		for surface: int in instance.mesh.get_surface_count():
 			var source := instance.mesh.surface_get_material(surface) as BaseMaterial3D
 			var color: Color = source.albedo_color if source != null else Color.WHITE
+			var mat_name: String = source.resource_name if source != null else ""
+			if tint.has(mat_name):
+				color = Color.html(str(tint[mat_name]))
+			elif tint.has("*") and not mat_name.begins_with("glow"):
+				color = Color.html(str(tint["*"]))
 			if source != null and source.resource_name.begins_with("glow"):
 				instance.set_surface_override_material(surface, Kit3D.neon(color, 3.0))
 				continue
