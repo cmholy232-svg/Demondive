@@ -1,0 +1,31 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scenes/player/milo.gd" id="1_milo"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_body"]
+size = Vector2(96, 256)
+
+[node name="Milo" type="CharacterBody2D"]
+collision_layer = 2
+collision_mask = 1
+script = ExtResource("1_milo")
+
+[node name="Body" type="CollisionShape2D" parent="."]
+position = Vector2(0, -128)
+shape = SubResource("RectangleShape2D_body")
+
+[node name="Placeholder" type="ColorRect" parent="."]
+offset_left = -48.0
+offset_top = -256.0
+offset_right = 48.0
+color = Color(0.36, 0.78, 0.55, 1)
+
+[node name="CastingHand" type="Marker2D" parent="."]
+position = Vector2(40, -150)
+
+[node name="HandMarker" type="ColorRect" parent="CastingHand"]
+offset_left = -8.0
+offset_top = -8.0
+offset_right = 8.0
+offset_bottom = 8.0
+color = Color(1, 0.55, 0.2, 1)
