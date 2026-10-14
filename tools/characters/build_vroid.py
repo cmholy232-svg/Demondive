@@ -18,6 +18,7 @@ from mathutils import Matrix, Quaternion, Vector
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.join(HERE, "vroid"))
 import extras  # noqa: E402
+import body_swap  # noqa: E402
 import garments  # noqa: E402
 import kit  # noqa: E402
 import paint  # noqa: E402
@@ -262,6 +263,9 @@ def main() -> None:
     for p in pieces:
         if p.data.shape_keys:
             p.shape_key_clear()
+    if recipe.get("body"):
+        skin = extras.material(f"Body_00_SKIN_{cid}", recipe.get("skin", "f2d6c9"), rough=0.5)
+        body_swap.swap(arm, pieces, os.path.join(HERE, "bodies", recipe["body"] + ".fbx"), skin)
     kit.cut_clothes(arm, pieces, recipe.get("cuts", []), extras.material("skin_bare", recipe.get("skin", "f2d6c9"), rough=0.5))
     kit.shape_bust(arm, pieces, recipe.get("bust", 1.0))
     kit.shape_figure(arm, pieces, recipe.get("hips", 1.0), recipe.get("waist", 1.0))

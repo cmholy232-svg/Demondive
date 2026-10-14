@@ -6,9 +6,9 @@
   "hair_color": "4a120c",
   "iris": "ff8a1e",
   "lips": "8e1a14",
-  "bust": 1.6,
-  "hips": 1.15,
-  "waist": 0.88,
+  "bust": 1.0,
+  "hips": 1.0,
+  "waist": 1.0,
   "extras": [
    {
     "kind": "garment",
@@ -16,7 +16,7 @@
     "color": "8a1008",
     "mat": "cloth_corset",
     "trim_color": "f0b030",
-    "top": 0.03
+    "top": 0.05
    },
    {
     "kind": "garment",
@@ -80,7 +80,8 @@
    "taunt",
    "wave",
    "cheer"
-  ]
+  ],
+  "body": "body_hourglass"
  },
  "milo": {
   "base": "AvatarSample_C",
@@ -325,9 +326,9 @@
   "waist": 0.9
  },
  "belladonna": {
-  "bust": 1.6,
-  "hips": 1.15,
-  "waist": 0.88,
+  "bust": 1.0,
+  "hips": 1.0,
+  "waist": 1.0,
   "base": "fem_vroid",
   "hair": "AvatarSample_B",
   "skin": "efcfc6",
@@ -410,7 +411,8 @@
     "spikes": 9,
     "height": 0.06
    }
-  ]
+  ],
+  "body": "body_hourglass"
  },
  "flora": {
   "base": "Vita",
@@ -1672,9 +1674,9 @@
   ]
  },
  "succubus": {
-  "bust": 1.6,
-  "hips": 1.15,
-  "waist": 0.88,
+  "bust": 1.0,
+  "hips": 1.0,
+  "waist": 1.0,
   "base": "fem_vroid",
   "hair": "Sendagaya_Shino",
   "skin": "f0c8d8",
@@ -1692,6 +1694,14 @@
   ],
   "tex_scale": 0.5,
   "extras": [
+   {
+    "kind": "garment",
+    "style": "collar",
+    "color": "1a0a1a",
+    "mat": "cloth_choker",
+    "trim_color": "ff3aa0",
+    "trim_glow": 1.0
+   },
    {
     "kind": "garment",
     "style": "bandeau",
@@ -1752,12 +1762,13 @@
     "mat": "horn",
     "length": 0.7
    }
-  ]
+  ],
+  "body": "body_hourglass"
  },
  "siren": {
-  "bust": 1.6,
-  "hips": 1.15,
-  "waist": 0.88,
+  "bust": 1.0,
+  "hips": 1.0,
+  "waist": 1.0,
   "base": "fem_vroid",
   "hair": "Vita",
   "skin": "e8b898",
@@ -1816,6 +1827,7 @@
     "glow": 1.5,
     "size": 0.6
    }
-  ]
+  ],
+  "body": "body_hourglass"
  }
 }

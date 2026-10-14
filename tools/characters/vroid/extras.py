@@ -276,6 +276,10 @@ def skirt(arm, body_parts, mat, top: float = 0.0, length: float = 1.0, flare: fl
         widen = min(1.0, t * 2.5)
         rx = rx0 + (max(rx1, rx0) * 1.08 - rx0) * widen + flare * t * t * 0.5
         ry = ry0 + (max(ry1, ry0) * 1.15 - ry0) * widen + flare * t * t * 0.4
+        if z > foot.z + 0.35:
+            # Never inside the body: wide hips and thighs push the cloth out.
+            bx, by = _body_ring(body_parts, z, hips)
+            rx, ry = max(rx, bx * 1.06 + 0.008), max(ry, by * 1.08 + 0.008)
         row = []
         for k in range(sides):
             a = 2 * math.pi * k / sides

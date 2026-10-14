@@ -13,7 +13,7 @@ import bpy
 from mathutils import Vector
 
 
-def _landmarks(arm) -> dict:
+def _landmarks(arm, body=None) -> dict:
     head = lambda n: arm.matrix_world @ arm.data.bones[n].head_local
     marks = {
         "neck": head("J_Bip_C_Neck"), "chest": head("J_Bip_C_UpperChest"), "spine": head("J_Bip_C_Spine"),
@@ -21,6 +21,14 @@ def _landmarks(arm) -> dict:
         "elbow": head("J_Bip_L_LowerArm"), "wrist": head("J_Bip_L_Hand"), "shoulder": head("J_Bip_L_UpperArm"),
     }
     marks["bust"] = head("J_Sec_L_Bust1") if "J_Sec_L_Bust1" in arm.data.bones else marks["chest"]
+    if body is not None:
+        # The fullest point of the chest, measured on the mesh: sculpted
+        # bodies don't put the bust where the VRoid bust bone is.
+        world = body.matrix_world
+        chest = [world @ v.co for v in body.data.vertices]
+        chest = [q for q in chest if marks["spine"].z < q.z < marks["neck"].z and q.x < 0.0]
+        if chest:
+            marks["bust"] = max(chest, key=lambda q: q.y)
     return marks
 
 
@@ -36,12 +44,12 @@ def _region(style: str, m: dict, c: Vector, arm_w: float, p: dict):
     leg_side = abs(c.x) > 0.02
     thigh_top = m["knee"].z + (m["hips"].z - m["knee"].z) * p.get("thigh", 0.55)
     if style == "corset":
-        top = m["bust"].z + p.get("top", 0.035) - (0.05 if front and abs(c.x) < 0.035 else 0.0)
+        top = m["bust"].z + p.get("top", 0.055) - (0.05 if front and abs(c.x) < 0.035 else 0.0)
         return arm_w < 0.3 and m["hips"].z - p.get("low", 0.02) < c.z < top
     if style == "bandeau":
-        return arm_w < 0.3 and m["bust"].z - p.get("below", 0.075) < c.z < m["bust"].z + p.get("top", 0.045)
+        return arm_w < 0.3 and m["bust"].z - p.get("below", 0.075) < c.z < m["bust"].z + p.get("top", 0.06)
     if style == "bodysuit":
-        top = m["bust"].z + p.get("top", 0.04) - (0.09 if front and abs(c.x) < 0.05 else 0.0)
+        top = m["bust"].z + p.get("top", 0.06) - (0.09 if front and abs(c.x) < 0.05 else 0.0)
         return arm_w < 0.3 and m["hips"].z - 0.16 < c.z < top and not (c.z < m["hips"].z - 0.05 and abs(c.x) > 0.075)
     if style == "stockings":
         return leg_side and c.z < thigh_top and c.z < m["hips"].z - 0.08
@@ -57,7 +65,7 @@ def _region(style: str, m: dict, c: Vector, arm_w: float, p: dict):
 def shell(arm, body, mat, style: str, params: dict, trim_mat=None) -> list:
     """Copies the body faces in the style's region into a new mesh, offset
     outward; adds a trim band along the top edge when trim_mat is given."""
-    marks = _landmarks(arm)
+    marks = _landmarks(arm, body)
     made = []
     garment = _cut(arm, body, mat, style, params, marks, params.get("offset", 0.004), f"garment_{style}")
     if garment is None:
