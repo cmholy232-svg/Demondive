@@ -13,6 +13,7 @@ import os
 import sys
 
 import bpy
+from bpy_extras import anim_utils
 from mathutils import Matrix, Quaternion, Vector
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -170,8 +171,37 @@ def animate(arm, recipe: dict) -> None:
         retarget.retarget(src, arm, name, (first, last), in_place=not travel, speed=speed, step=2 if last - first > 40 else 1)
         bpy.data.objects.remove(src)
         bpy.data.actions.remove(src_action)
+    if recipe.get("arm_spread"):
+        spread_arms(arm, wanted, math.radians(float(recipe["arm_spread"])))
     if recipe.get("cast"):
         cast_poses(arm)
+
+
+def spread_arms(arm, actions, angle: float) -> None:
+    """Swings both upper arms out from the body in every clip, so arms
+    animated for a slim body clear wide hips."""
+    for side, sign in (("L", 1.0), ("R", -1.0)):
+        bone = arm.data.bones[f"J_Bip_{side}_UpperArm"]
+        rest = bone.matrix_local.to_quaternion()
+        turn = rest.inverted() @ Quaternion(Vector((0.0, 1.0, 0.0)), sign * angle) @ rest
+        path = f'pose.bones["{bone.name}"].rotation_quaternion'
+        for name in actions:
+            act = bpy.data.actions.get(name)
+            if act is None:
+                continue
+            if not act.slots:
+                continue
+            bag = anim_utils.action_get_channelbag_for_slot(act, act.slots[0])
+            curves = [bag.fcurves.find(path, index=i) for i in range(4)] if bag is not None else []
+            if not curves or any(c is None for c in curves):
+                continue
+            for k in range(len(curves[0].keyframe_points)):
+                q = Quaternion([c.keyframe_points[k].co[1] for c in curves])
+                q = turn @ q
+                for i, c in enumerate(curves):
+                    c.keyframe_points[k].co[1] = q[i]
+                    c.keyframe_points[k].handle_left[1] = q[i]
+                    c.keyframe_points[k].handle_right[1] = q[i]
 
 
 UPPER_BODY = ("C_Spine", "C_Chest", "C_UpperChest", "C_Neck", "C_Head", "_Shoulder", "_UpperArm", "_LowerArm", "_Hand",

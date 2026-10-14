@@ -46,18 +46,23 @@ def _points(mesh) -> list:
     return [v.co.copy() for v in mesh.data.vertices]
 
 
+def _width(points: list, z: float, band: float, reach: float) -> float:
+    xs = [p.x for p in points if abs(p.z - z) < band and abs(p.x) < reach]
+    return max(xs) - min(xs) if len(xs) > 6 else 0.0
+
+
 def _neck_z(points: list, arm_z: float, top: float) -> float:
-    """The narrowest torso slice between the arm line and the top of the head."""
-    best_z, best_w = arm_z, 1e9
-    steps = 40
-    for i in range(1, steps):
-        z = arm_z + (top - arm_z) * i / steps
-        xs = [p.x for p in points if abs(p.z - z) < (top - arm_z) / steps and abs(p.x) < (top - arm_z)]
-        if len(xs) > 6:
-            w = max(xs) - min(xs)
-            if w < best_w:
-                best_z, best_w = z, w
-    return best_z
+    """The narrowest slice between the shoulders and the widest part of the
+    head. (Searching all the way up would find the crown of the head.)"""
+    steps = 60
+    band = (top - arm_z) / steps
+    reach = (top - arm_z) * 0.8
+    zs = [arm_z + (top - arm_z) * i / steps for i in range(1, steps)]
+    widths = [_width(points, z, band, reach) for z in zs]
+    upper = [k for k in range(len(zs)) if zs[k] > arm_z + (top - arm_z) * 0.45]
+    head = max(upper, key=lambda k: widths[k]) if upper else len(zs) - 1
+    neck = min(range(head), key=lambda k: widths[k] if widths[k] > 0.0 else 1e9) if head > 0 else 0
+    return zs[neck]
 
 
 def swap(arm, pieces: list, path: str, skin_mat) -> object:

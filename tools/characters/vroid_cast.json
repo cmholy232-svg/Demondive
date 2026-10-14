@@ -50,7 +50,8 @@
      60,
      -60
     ],
-    "slit_height": 0.95
+    "slit_height": 0.95,
+    "top": 0.12
    },
    {
     "kind": "crown",
@@ -81,7 +82,8 @@
    "wave",
    "cheer"
   ],
-  "body": "body_hourglass"
+  "body": "body_hourglass",
+  "arm_spread": 14
  },
  "milo": {
   "base": "AvatarSample_C",
@@ -390,7 +392,8 @@
      70,
      -70
     ],
-    "slit_height": 0.95
+    "slit_height": 0.95,
+    "top": 0.12
    },
    {
     "kind": "horns",
@@ -412,7 +415,8 @@
     "height": 0.06
    }
   ],
-  "body": "body_hourglass"
+  "body": "body_hourglass",
+  "arm_spread": 14
  },
  "flora": {
   "base": "Vita",
@@ -1741,7 +1745,8 @@
      90,
      -90
     ],
-    "slit_height": 0.6
+    "slit_height": 0.6,
+    "top": 0.12
    },
    {
     "kind": "horns",
@@ -1763,7 +1768,8 @@
     "length": 0.7
    }
   ],
-  "body": "body_hourglass"
+  "body": "body_hourglass",
+  "arm_spread": 14
  },
  "siren": {
   "bust": 1.0,
@@ -1817,7 +1823,8 @@
      50,
      -50
     ],
-    "slit_height": 0.85
+    "slit_height": 0.85,
+    "top": 0.12
    },
    {
     "kind": "horns",
@@ -1828,6 +1835,7 @@
     "size": 0.6
    }
   ],
-  "body": "body_hourglass"
+  "body": "body_hourglass",
+  "arm_spread": 14
  }
 }

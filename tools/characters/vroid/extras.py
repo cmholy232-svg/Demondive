@@ -259,7 +259,7 @@ def _body_ring(body_parts, z: float, centre: Vector) -> tuple:
 
 
 def skirt(arm, body_parts, mat, top: float = 0.0, length: float = 1.0, flare: float = 0.25,
-          slits=(math.pi * 0.5, -math.pi * 0.5), slit_height: float = 0.75, rows: int = 14, sides: int = 40,
+          slits=(math.pi * 0.5, -math.pi * 0.5), slit_height: float = 0.75, rows: int = 26, sides: int = 40,
           slit_width: float = 0.3):
     """A long flared skirt from the waist; slits open at the given angles (0 = front)."""
     hips = bone_head(arm, "J_Bip_C_Hips")
@@ -270,21 +270,27 @@ def skirt(arm, body_parts, mat, top: float = 0.0, length: float = 1.0, flare: fl
     rx1, ry1 = _body_ring(body_parts, hips.z - 0.08, hips)
     bm = bmesh.new()
     grid = []
+    skin = [m.matrix_world @ v.co for m in body_parts for v in m.data.vertices]
+    hang = [0.0] * sides
     for r in range(rows + 1):
         t = r / rows
         z = z_top + (z_bot - z_top) * t
         widen = min(1.0, t * 2.5)
         rx = rx0 + (max(rx1, rx0) * 1.08 - rx0) * widen + flare * t * t * 0.5
         ry = ry0 + (max(ry1, ry0) * 1.15 - ry0) * widen + flare * t * t * 0.4
-        if z > foot.z + 0.35:
-            # Never inside the body: wide hips and thighs push the cloth out.
-            bx, by = _body_ring(body_parts, z, hips)
-            rx, ry = max(rx, bx * 1.06 + 0.008), max(ry, by * 1.08 + 0.008)
+        band = [(q.x - hips.x, q.y - hips.y) for q in skin if abs(q.z - z) < 0.02] if z > foot.z + 0.35 else []
         row = []
         for k in range(sides):
             a = 2 * math.pi * k / sides
+            d = (math.sin(a), math.cos(a))
+            radius = math.hypot(rx * d[0], ry * d[1]) if t > 0.0 else 0.0
+            ellipse = (rx * ry) / max(1e-6, math.hypot(ry * d[0], rx * d[1]))
+            # Never inside the body in this direction (big hips and bottom push
+            # the cloth out only where they are), and below that it hangs.
+            reach = max((p[0] * d[0] + p[1] * d[1] for p in band), default=0.0)
+            hang[k] = max(hang[k] if t > 0.0 else 0.0, ellipse * (0.85 if band else 1.0), reach * 1.05 + 0.008)
             wave = 1.0 + 0.04 * t * math.sin(a * 9)
-            row.append(bm.verts.new((hips.x + rx * math.sin(a) * wave, hips.y + ry * math.cos(a) * wave, z)))
+            row.append(bm.verts.new((hips.x + hang[k] * d[0] * wave, hips.y + hang[k] * d[1] * wave, z)))
         grid.append(row)
     for r in range(rows):
         t = (r + 0.5) / rows
