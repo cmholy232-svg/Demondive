@@ -20,6 +20,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.join(HERE, "vroid"))
 import extras  # noqa: E402
 import body_swap  # noqa: E402
+import drapes  # noqa: E402
 import garments  # noqa: E402
 import sculpt_face  # noqa: E402
 import sculpt_hair  # noqa: E402
@@ -148,7 +149,7 @@ def add_extras(arm, pieces, recipe: dict) -> list:
             made.append(extras.wings(arm, mat, e.get("span", 0.55), e.get("feathered", False)))
         elif kind == "skirt":
             slits = [math.radians(a) for a in e.get("slits", [90, -90])]
-            made.append(extras.skirt(arm, body, mat, e.get("top", 0.0), e.get("length", 0.95), e.get("flare", 0.25), slits, e.get("slit_height", 0.75),
+            made.append(drapes.skirt(arm, body, mat, e.get("top", 0.0), e.get("length", 0.95), e.get("flare", 0.25), slits, e.get("slit_height", 0.75),
                                        slit_width=e.get("slit_width", 0.3), at_waist=e.get("at_waist", False)))
         elif kind == "garment":
             skin = next((p for p in pieces if kit.kind_of(p) == "SKIN" and "Body" in p.name), None)
@@ -156,7 +157,7 @@ def add_extras(arm, pieces, recipe: dict) -> list:
             if skin is not None:
                 made.extend(garments.shell(arm, skin, mat, e["style"], e, trim))
         elif kind == "cape":
-            made.append(extras.cape(arm, body, mat, e.get("length", 0.85), e.get("width", 0.5)))
+            made.append(drapes.cape(arm, body, mat, e.get("length", 0.85), e.get("width", 0.5)))
         elif kind == "band":
             made.append(extras.ring_around(arm, e["bone"], mat, e.get("radius", 0.05), offset=e.get("offset", 0.5)))
         elif kind == "weapon":
