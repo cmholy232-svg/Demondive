@@ -18,6 +18,13 @@ const BURSTS: Dictionary = {
 	&"halo": [28, 2.0, 0.05, 0.6, true],
 }
 
+## Particle sprites (Kenney Particle Pack, CC0).
+const GLOW: String = "res://art/fx/fx_glow_soft.png"
+const CORE: String = "res://art/fx/fx_bolt_core.png"
+const SPARKLE: String = "res://art/fx/fx_bolt_sparkle.png"
+const SPARK: String = "res://art/fx/fx_spark_star.png"
+const RING: String = "res://art/fx/fx_ring_wave.png"
+
 var _room: Room
 var _bolts: Dictionary = {}
 var _shots: Dictionary = {}
@@ -66,7 +73,9 @@ func _make_bolt(node: Node) -> Node3D:
 	var root := Node3D.new()
 	var color: Color = bolt.stats.color if bolt != null else Color(0.8, 0.6, 1.0)
 	var radius: float = (bolt.radius if bolt != null else 10.0) / Kit3D.PX_PER_M
-	Kit3D.sphere(root, Vector3.ZERO, radius * 1.2, Kit3D.material(Color.WHITE, 0.2, color.lerp(Color.WHITE, 0.4), 6.0))
+	Kit3D.billboard(root, Vector3.ZERO, radius * 9.0, Kit3D.sprite(GLOW, color, 1.6))
+	Kit3D.billboard(root, Vector3(0.0, 0.0, 0.01), radius * 6.0, Kit3D.sprite(CORE, color.lerp(Color.WHITE, 0.5), 2.5))
+	Kit3D.billboard(root, Vector3(0.0, 0.0, 0.02), radius * 7.0, Kit3D.sprite(SPARKLE, color, 2.0))
 	var trail := CPUParticles3D.new()
 	trail.amount = 18
 	trail.lifetime = 0.22
@@ -74,15 +83,11 @@ func _make_bolt(node: Node) -> Node3D:
 	trail.gravity = Vector3.ZERO
 	trail.initial_velocity_min = 0.0
 	trail.initial_velocity_max = 0.2
-	trail.scale_amount_min = radius * 1.4
-	trail.scale_amount_max = radius * 1.8
-	var mesh := SphereMesh.new()
-	mesh.radius = 0.5
-	mesh.height = 1.0
-	mesh.radial_segments = 8
-	mesh.rings = 4
+	trail.scale_amount_min = radius * 3.0
+	trail.scale_amount_max = radius * 4.5
+	var mesh := QuadMesh.new()
 	var trail_color: Color = color if bolt == null or bolt.stats.trail_colors.is_empty() else bolt.stats.trail_colors[0]
-	mesh.material = Kit3D.neon(trail_color, 3.0)
+	mesh.material = Kit3D.sprite(GLOW, trail_color, 1.4)
 	trail.mesh = mesh
 	var curve := Curve.new()
 	curve.add_point(Vector2(0.0, 1.0))
@@ -101,8 +106,8 @@ func _make_shot(node: Node) -> Node3D:
 	var shot := node as EnemyShot
 	var root := Node3D.new()
 	var radius: float = shot.radius / Kit3D.PX_PER_M
-	Kit3D.sphere(root, Vector3.ZERO, radius * 1.3, Kit3D.material(shot.color, 0.3, shot.color, 4.0))
-	Kit3D.sphere(root, Vector3.ZERO, radius * 2.1, _translucent(shot.color, 0.28))
+	Kit3D.sphere(root, Vector3.ZERO, radius * 1.1, Kit3D.material(shot.color, 0.3, shot.color, 4.0))
+	Kit3D.billboard(root, Vector3.ZERO, radius * 7.0, Kit3D.sprite(GLOW, shot.color, 1.5))
 	return root
 
 
@@ -185,15 +190,15 @@ func _burst(kind: StringName, at: Vector2, color: Color, size: float) -> void:
 	particles.initial_velocity_min = float(spec[1]) * 0.4 * size
 	particles.initial_velocity_max = float(spec[1]) * size
 	particles.gravity = Vector3(0.0, -6.0, 0.0)
-	particles.scale_amount_min = float(spec[2]) * 0.6
-	particles.scale_amount_max = float(spec[2]) * 1.3
-	var mesh := SphereMesh.new()
-	mesh.radius = 0.5
-	mesh.height = 1.0
-	mesh.radial_segments = 6
-	mesh.rings = 3
-	mesh.material = Kit3D.neon(color, 4.0)
+	particles.scale_amount_min = float(spec[2]) * 2.0
+	particles.scale_amount_max = float(spec[2]) * 4.0
+	var mesh := QuadMesh.new()
+	mesh.material = Kit3D.sprite(SPARK, color, 2.2)
 	particles.mesh = mesh
+	var fade := Curve.new()
+	fade.add_point(Vector2(0.0, 1.0))
+	fade.add_point(Vector2(1.0, 0.0))
+	particles.scale_amount_curve = fade
 	add_child(particles)
 	particles.emitting = true
 	if bool(spec[4]):
@@ -202,18 +207,8 @@ func _burst(kind: StringName, at: Vector2, color: Color, size: float) -> void:
 
 
 func _ring(at: Vector3, color: Color, size: float) -> void:
-	var ring := MeshInstance3D.new()
-	var torus := TorusMesh.new()
-	torus.inner_radius = 0.9
-	torus.outer_radius = 1.0
-	torus.rings = 24
-	torus.ring_segments = 6
-	ring.mesh = torus
-	ring.material_override = Kit3D.neon(color, 5.0)
-	ring.position = at
-	ring.rotation.x = PI * 0.5
+	var ring: MeshInstance3D = Kit3D.billboard(self, at, 2.0, Kit3D.sprite(RING, color, 2.5))
 	ring.scale = Vector3.ONE * 0.1
-	add_child(ring)
 	var tween := create_tween()
 	tween.tween_property(ring, "scale", Vector3.ONE * maxf(0.6, size) * 1.4, 0.3).set_ease(Tween.EASE_OUT)
 	tween.tween_callback(ring.queue_free)

@@ -11,8 +11,10 @@ const OUTLINE_M: float = 0.012
 
 ## Gameplay pose prefix -> animation names to try, in order.
 const POSE_ANIMATIONS: Dictionary = {
-	"idle": ["idle"], "move": ["walk", "run"], "windup": ["windup", "cast_up", "idle"],
-	"attack": ["attack", "cast_forward", "dash"], "hurt": ["hurt", "fall", "idle"],
+	"idle": ["idle", "Idle", "Flying_Idle"], "move": ["walk", "run", "Walk", "Fast_Flying", "Flying_Idle"],
+	"windup": ["windup", "cast_up", "Duck", "Yes", "idle", "Idle", "Flying_Idle"],
+	"attack": ["attack", "cast_forward", "dash", "Punch", "Bite_Front", "Headbutt"],
+	"hurt": ["hurt", "fall", "HitReact", "HitRecieve", "idle", "Idle", "Flying_Idle"],
 }
 ## Material recolours by material name ("*" for every material).
 const TINTS: Dictionary = {
@@ -40,7 +42,8 @@ static func make(id: StringName, height_m: float, tint: Dictionary = {}) -> Node
 	body.name = "Body"
 	root.add_child(body)
 	var model: Node3D = (_scenes[id] as PackedScene).instantiate() as Node3D
-	model.rotation.y = PI * 0.5
+	# Exported models face -z; turn them to face +x.
+	model.rotation.y = -PI * 0.5
 	body.add_child(model)
 	fit_height(model, height_m)
 	toonify(model, tint)
@@ -48,8 +51,9 @@ static func make(id: StringName, height_m: float, tint: Dictionary = {}) -> Node
 	if player != null:
 		for name: String in player.get_animation_list():
 			player.get_animation(name).loop_mode = Animation.LOOP_LINEAR
-		player.play("idle")
-		player.seek(randf() * 2.0, true)
+		if player.has_animation("idle"):
+			player.play("idle")
+			player.seek(randf() * 2.0, true)
 		root.set_meta("animator", player)
 	return root
 

@@ -1,0 +1,37 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://devrppkt4g67y"
+path="res://.godot/imported/chr_clubber_a_N00_000_00_EyeWhite_00_EYE_(Instance)_clubber_a.png-40cad3fcdb2fdf10e3d3e4e8f47b9e76.ctex"
+metadata={
+"vram_texture": false
+}
+generator_parameters={
+"md5": "3c310c8c96fc73b5b7405a5c606abb86"
+}
+
+[deps]
+
+source_file="res://art/export/clubber_a/chr_clubber_a_N00_000_00_EyeWhite_00_EYE_(Instance)_clubber_a.png"
+dest_files=["res://.godot/imported/chr_clubber_a_N00_000_00_EyeWhite_00_EYE_(Instance)_clubber_a.png-40cad3fcdb2fdf10e3d3e4e8f47b9e76.ctex"]
+
+[params]
+
+compress/mode=1
+compress/high_quality=false
+compress/lossy_quality=0.82
+compress/hdr_compression=1
+compress/normal_map=0
+compress/channel_pack=0
+mipmaps/generate=true
+mipmaps/limit=-1
+roughness/mode=0
+roughness/src_normal=""
+process/fix_alpha_border=true
+process/premult_alpha=false
+process/normal_map_invert_y=false
+process/hdr_as_srgb=false
+process/hdr_clamp_exposure=false
+process/size_limit=0
+detect_3d/compress_to=0

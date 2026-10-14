@@ -20,7 +20,10 @@ static func build(root: Node3D, room: Room, wall_z: float, rng: RandomNumberGene
 	var size: Vector2 = data.size_px()
 	var floor_y: float = _floor_top(data, data.width / 2)
 	_wall(root, size, wall_z, floor_y)
-	_crowd(root, data, rng)
+	if ClubDancers3D.available():
+		ClubDancers3D.build(root, data, rng, [NeonMawKit.MAGENTA, NeonMawKit.CYAN, NeonMawKit.AMBER])
+	else:
+		_crowd(root, data, rng)
 	_shafts(root, size, rng)
 	_haze(root, size)
 	_foreground(root, data, size, rng)

@@ -1,0 +1,37 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://d367l1kgkyl55"
+path="res://.godot/imported/chr_clubber_a_F00_000_Hair_00_HAIR_02_clubber_a.png-37daa91fe0c4349ebd69590d91bc6587.ctex"
+metadata={
+"vram_texture": false
+}
+generator_parameters={
+"md5": "13db17adea2b233d9c7e2b345a5ce211"
+}
+
+[deps]
+
+source_file="res://art/export/clubber_a/chr_clubber_a_F00_000_Hair_00_HAIR_02_clubber_a.png"
+dest_files=["res://.godot/imported/chr_clubber_a_F00_000_Hair_00_HAIR_02_clubber_a.png-37daa91fe0c4349ebd69590d91bc6587.ctex"]
+
+[params]
+
+compress/mode=1
+compress/high_quality=false
+compress/lossy_quality=0.82
+compress/hdr_compression=1
+compress/normal_map=0
+compress/channel_pack=0
+mipmaps/generate=true
+mipmaps/limit=-1
+roughness/mode=0
+roughness/src_normal=""
+process/fix_alpha_border=true
+process/premult_alpha=false
+process/normal_map_invert_y=false
+process/hdr_as_srgb=false
+process/hdr_clamp_exposure=false
+process/size_limit=0
+detect_3d/compress_to=0

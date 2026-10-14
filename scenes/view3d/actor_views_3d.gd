@@ -6,6 +6,8 @@ extends Node3D
 
 const FLASH_SHADER: String = "shader_type spatial; render_mode unshaded, blend_add; void fragment() { ALBEDO = vec3(1.0); ALPHA = 0.85; }"
 const BOSS_PRESENCE: float = 1.3
+## Rigged humanoid enemies (succubus, siren) stand a little taller than their hitbox.
+const HUMAN_PRESENCE: float = 1.45
 
 var _room: Room
 var _enemies: Dictionary = {}
@@ -85,16 +87,16 @@ func _make_model(enemy: Enemy) -> Node3D:
 	var model: Node3D
 	if CharacterModels.has(look):
 		# Drawn a little taller than the hitbox so bosses tower over Milo.
-		var tall: float = enemy.size.y / Kit3D.PX_PER_M * (BOSS_PRESENCE if enemy.is_boss else 1.0)
+		var tall: float = enemy.size.y / Kit3D.PX_PER_M * (BOSS_PRESENCE if enemy.is_boss else HUMAN_PRESENCE)
 		model = CharacterModels.make(look, tall, CharacterModels.TINTS.get(str(spec.get("tint", "")), {}) as Dictionary)
 		if enemy.is_boss:
 			# Bosses get their own key light so they read against busy rooms.
-			Kit3D.omni(model, Vector3(0.9, tall * 0.75, 2.2), Color(1.0, 0.88, 0.92), 2.4, 6.0)
+			Kit3D.omni(model, Vector3(0.9, tall * 0.75, 2.2), Color(1.0, 0.88, 0.92), 0.6, 6.0)
 		return model
 	var base: StringName = look
 	if enemy.variant != &"":
 		base = StringName(str(EnemyFactory.variant(enemy.variant).get("base", enemy.kind)))
-	model = CreatureModels.make(base, enemy.palette)
+	model = MonsterModels.make(base) if MonsterModels.has(base) else CreatureModels.make(base, enemy.palette)
 	var grow: float = float(spec.get("scale", EnemyFactory.variant(enemy.variant).get("scale", 1.0) if enemy.variant != &"" else 1.0))
 	model.scale = Vector3.ONE * grow
 	return model

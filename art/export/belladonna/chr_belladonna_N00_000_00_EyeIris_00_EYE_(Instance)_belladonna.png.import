@@ -1,0 +1,37 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://ch0tuk4y8u4gk"
+path="res://.godot/imported/chr_belladonna_N00_000_00_EyeIris_00_EYE_(Instance)_belladonna.png-e89976de904e8b19b38514ebc9a88322.ctex"
+metadata={
+"vram_texture": false
+}
+generator_parameters={
+"md5": "a9ba543ddd5498fce1287d82c57f538e"
+}
+
+[deps]
+
+source_file="res://art/export/belladonna/chr_belladonna_N00_000_00_EyeIris_00_EYE_(Instance)_belladonna.png"
+dest_files=["res://.godot/imported/chr_belladonna_N00_000_00_EyeIris_00_EYE_(Instance)_belladonna.png-e89976de904e8b19b38514ebc9a88322.ctex"]
+
+[params]
+
+compress/mode=1
+compress/high_quality=false
+compress/lossy_quality=0.82
+compress/hdr_compression=1
+compress/normal_map=0
+compress/channel_pack=0
+mipmaps/generate=true
+mipmaps/limit=-1
+roughness/mode=0
+roughness/src_normal=""
+process/fix_alpha_border=true
+process/premult_alpha=false
+process/normal_map_invert_y=false
+process/hdr_as_srgb=false
+process/hdr_clamp_exposure=false
+process/size_limit=0
+detect_3d/compress_to=0

@@ -9,6 +9,7 @@ import os
 import shutil
 
 import bpy
+from mathutils import Vector
 
 VRM_DIR = os.environ.get("VRM_DIR", os.path.expanduser("~/ext/vrm"))
 
@@ -104,3 +105,106 @@ def remove_rig(arm, keep=()) -> None:
         if o.parent is arm and o not in keep:
             bpy.data.objects.remove(o)
     bpy.data.objects.remove(arm)
+
+
+def shape_bust(arm, pieces, scale: float = 1.35, lift: float = 0.01) -> None:
+    """Fuller chest: pushes skin and clothing weighted to the bust bones out
+    from each bust bone (and a little forward and up). Faces are +Y here."""
+    if scale == 1.0:
+        return
+    for side in ("L", "R"):
+        names = [f"J_Sec_{side}_Bust1", f"J_Sec_{side}_Bust2"]
+        if names[0] not in arm.data.bones:
+            continue
+        centre = arm.matrix_world @ arm.data.bones[names[0]].head_local
+        for p in pieces:
+            idx = {p.vertex_groups[n].index for n in names if n in p.vertex_groups}
+            if not idx:
+                continue
+            to_world = p.matrix_world
+            to_local = to_world.inverted()
+            for v in p.data.vertices:
+                w = min(1.0, sum(e.weight for e in v.groups if e.group in idx))
+                if w <= 0.02:
+                    continue
+                world = to_world @ v.co
+                grown = centre + (world - centre) * (1.0 + (scale - 1.0) * w)
+                grown += Vector((0.0, 0.045 * (scale - 1.0) * w, lift * w))
+                v.co = to_local @ grown
+
+
+def cut_clothes(arm, pieces, cuts, skin_mat=None) -> None:
+    """Opens up a covered outfit by deleting cloth faces: "sleeves" (cloth
+    weighted to the arms), "neckline" (a deep V at the front of the chest),
+    "midriff" (a band between chest and hips), "shoulders" (above the bust
+    at the back and sides). VRoid bodies have no torso under clothes, so
+    neckline and midriff turn the cloth into bare skin (skin_mat) instead of
+    leaving a hole; arms do exist, so sleeves are removed outright."""
+    import bmesh
+    if not cuts:
+        return
+    bone = lambda n: arm.matrix_world @ arm.data.bones[n].head_local
+    neck, chest, hips = bone("J_Bip_C_Neck"), bone("J_Bip_C_UpperChest"), bone("J_Bip_C_Hips")
+    bust = bone("J_Sec_L_Bust1") if "J_Sec_L_Bust1" in arm.data.bones else chest
+    arm_bones = {f"J_Bip_{s}_{b}" for s in "LR" for b in ("UpperArm", "LowerArm", "Hand", "Shoulder")}
+    for p in pieces:
+        if kind_of(p) != "CLOTH" or "shoe" in p.name.lower():
+            continue
+        groups = {g.index: g.name for g in p.vertex_groups}
+        bm = bmesh.new()
+        bm.from_mesh(p.data)
+        deform = bm.verts.layers.deform.active
+        kill = []
+        bare = []
+        for f in bm.faces:
+            c = p.matrix_world @ f.calc_center_median()
+            arm_w = 0.0
+            if deform is not None:
+                for v in f.verts:
+                    arm_w += sum(w for g, w in v[deform].items() if groups.get(g) in arm_bones) / len(f.verts)
+            front = c.y > hips.y
+            if "sleeves" in cuts and arm_w > 0.14:
+                kill.append(f)
+            elif "shoulders" in cuts and c.z > bust.z + 0.05 and arm_w > 0.05:
+                kill.append(f)
+            elif "neckline" in cuts and front and c.z > bust.z - 0.07 and abs(c.x - neck.x) < 0.01 + (c.z - (bust.z - 0.07)) * 0.6:
+                bare.append(f)
+            elif "midriff" in cuts and hips.z + 0.12 < c.z < bust.z - 0.1:
+                bare.append(f)
+        if bare and skin_mat is not None:
+            if skin_mat.name not in p.data.materials:
+                p.data.materials.append(skin_mat)
+            slot = list(p.data.materials).index(p.data.materials[skin_mat.name])
+            for f in bare:
+                f.material_index = slot
+        bmesh.ops.delete(bm, geom=kill, context="FACES")
+        bm.to_mesh(p.data)
+        bm.free()
+
+
+def shape_figure(arm, pieces, hips: float = 1.0, waist: float = 1.0) -> None:
+    """Hourglass: widens what the hips and thighs carry and pulls in the
+    waist, scaling around each bone's vertical axis (x and y only)."""
+    if hips == 1.0 and waist == 1.0:
+        return
+    targets = {"J_Bip_C_Hips": hips, "J_Bip_L_UpperLeg": 1.0 + (hips - 1.0) * 0.6,
+               "J_Bip_R_UpperLeg": 1.0 + (hips - 1.0) * 0.6, "J_Bip_C_Spine": waist}
+    centre_of = {n: arm.matrix_world @ arm.data.bones[n].head_local for n in targets if n in arm.data.bones}
+    for p in pieces:
+        groups = {g.index: g.name for g in p.vertex_groups if g.name in centre_of}
+        if not groups:
+            continue
+        to_world = p.matrix_world
+        to_local = to_world.inverted()
+        for v in p.data.vertices:
+            world = to_world @ v.co
+            shift = Vector((0.0, 0.0, 0.0))
+            for e in v.groups:
+                name = groups.get(e.group)
+                if name is None or e.weight <= 0.02:
+                    continue
+                c = centre_of[name]
+                offset = Vector((world.x - c.x, world.y - c.y, 0.0))
+                shift += offset * (targets[name] - 1.0) * e.weight
+            if shift.length > 0.0:
+                v.co = to_local @ (world + shift)

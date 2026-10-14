@@ -16,7 +16,7 @@ var _model: Node3D
 var _animation: AnimationPlayer
 var _cast_arm: CastArmModifier
 var _caster: ArcaneCaster
-var _yaw: float = PI * 0.5
+var _yaw: float = -PI * 0.5
 var _cast_timer: float = 0.0
 var _trail: CPUParticles3D
 var _burst: CPUParticles3D
@@ -127,7 +127,8 @@ func _process(delta: float) -> void:
 		return
 	position = RoomView3D.to_3d(milo.global_position)
 	_cast_timer = maxf(0.0, _cast_timer - delta)
-	var target_yaw: float = PI * 0.5 if milo.facing > 0 else -PI * 0.5
+	# The model faces -z, so -90° turns it toward +x.
+	var target_yaw: float = -PI * 0.5 if milo.facing > 0 else PI * 0.5
 	_yaw = lerp_angle(_yaw, target_yaw, clampf(TURN_SPEED * delta, 0.0, 1.0))
 	_model.rotation.y = _yaw
 	_trail.emitting = milo.is_dashing() or milo.is_wave_sliding()

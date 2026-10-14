@@ -78,6 +78,34 @@ static func surface(look: Dictionary, size: Vector3) -> ShaderMaterial:
 	return mat
 
 
+## Additive, camera-facing sprite material for a particle texture (art/fx).
+static func sprite(texture_path: String, color: Color, energy: float = 2.0) -> StandardMaterial3D:
+	var key: String = "sprite|%s|%s|%.2f" % [texture_path, color.to_html(), energy]
+	if _mat_cache.has(key):
+		return _mat_cache[key] as StandardMaterial3D
+	var mat := StandardMaterial3D.new()
+	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	mat.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
+	mat.billboard_mode = BaseMaterial3D.BILLBOARD_PARTICLES
+	mat.vertex_color_use_as_albedo = true
+	mat.albedo_texture = load(texture_path) as Texture2D
+	mat.albedo_color = Color(color.r * energy, color.g * energy, color.b * energy)
+	mat.no_depth_test = false
+	mat.cull_mode = BaseMaterial3D.CULL_DISABLED
+	_mat_cache[key] = mat
+	return mat
+
+
+## A camera-facing quad with a sprite material.
+static func billboard(parent: Node3D, at: Vector3, size: float, mat: Material) -> MeshInstance3D:
+	var quad := QuadMesh.new()
+	quad.size = Vector2(size, size)
+	var instance: MeshInstance3D = _instance(parent, quad, at, mat)
+	instance.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	return instance
+
+
 static func box(parent: Node3D, center: Vector3, size: Vector3, mat: Material) -> MeshInstance3D:
 	var mesh := BoxMesh.new()
 	mesh.size = size

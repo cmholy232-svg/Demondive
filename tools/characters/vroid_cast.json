@@ -1,30 +1,56 @@
 {
  "pyrra": {
-  "base": "Darkness_Shibu",
+  "base": "fem_vroid",
   "hair": "Sendagaya_Shino",
   "skin": "a8673f",
   "hair_color": "4a120c",
   "iris": "ff8a1e",
   "lips": "8e1a14",
-  "cloth": {
-   "*": [
-    "0a0404",
-    "2a0a08",
-    "e0a234"
-   ]
-  },
+  "bust": 1.6,
+  "hips": 1.15,
+  "waist": 0.88,
   "extras": [
    {
+    "kind": "garment",
+    "style": "corset",
+    "color": "8a1008",
+    "mat": "cloth_corset",
+    "trim_color": "f0b030",
+    "top": 0.03
+   },
+   {
+    "kind": "garment",
+    "style": "stockings",
+    "color": "5a0a06",
+    "mat": "cloth_stocking",
+    "trim_color": "f0b030",
+    "thigh": 0.6
+   },
+   {
+    "kind": "garment",
+    "style": "gloves",
+    "color": "f0b030",
+    "mat": "gold_bracer",
+    "above": 0.0
+   },
+   {
+    "kind": "garment",
+    "style": "collar",
+    "color": "f0b030",
+    "mat": "gold_collar"
+   },
+   {
     "kind": "skirt",
-    "color": "c2321a",
+    "color": "a0200c",
     "mat": "cloth_skirt",
+    "slit_width": 0.6,
     "length": 0.97,
     "flare": 0.3,
     "slits": [
-     70,
-     -70
+     60,
+     -60
     ],
-    "slit_height": 0.8
+    "slit_height": 0.95
    },
    {
     "kind": "crown",
@@ -40,20 +66,6 @@
     "color": "e0a234",
     "mat": "gold",
     "glow_color": "ff6a1a"
-   },
-   {
-    "kind": "band",
-    "bone": "J_Bip_L_UpperArm",
-    "color": "e0a234",
-    "mat": "gold",
-    "radius": 0.042
-   },
-   {
-    "kind": "band",
-    "bone": "J_Bip_R_UpperArm",
-    "color": "e0a234",
-    "mat": "gold",
-    "radius": 0.042
    }
   ],
   "clips": [
@@ -137,7 +149,7 @@
      70,
      -70
     ],
-    "slit_height": 0.8
+    "slit_height": 0.95
    },
    {
     "kind": "crown",
@@ -174,7 +186,14 @@
    "taunt",
    "wave",
    "cheer"
-  ]
+  ],
+  "bust": 1.55,
+  "cuts": [
+   "sleeves",
+   "neckline"
+  ],
+  "hips": 1.15,
+  "waist": 0.9
  },
  "gaia": {
   "base": "Vita",
@@ -241,7 +260,14 @@
    "taunt",
    "wave",
    "cheer"
-  ]
+  ],
+  "bust": 1.55,
+  "cuts": [
+   "sleeves",
+   "neckline"
+  ],
+  "hips": 1.15,
+  "waist": 0.9
  },
  "zephyra": {
   "base": "Victoria_Rubin",
@@ -289,34 +315,81 @@
    "taunt",
    "wave",
    "cheer"
-  ]
+  ],
+  "bust": 1.55,
+  "cuts": [
+   "sleeves",
+   "neckline"
+  ],
+  "hips": 1.15,
+  "waist": 0.9
  },
  "belladonna": {
-  "base": "Darkness_Shibu",
+  "bust": 1.6,
+  "hips": 1.15,
+  "waist": 0.88,
+  "base": "fem_vroid",
   "hair": "AvatarSample_B",
   "skin": "efcfc6",
   "hair_color": "2a0e34",
   "iris": "d23cff",
   "lips": "8a0a3a",
-  "cloth": {
-   "*": [
-    "0a040a",
-    "2a0a2c",
-    "d4a83a"
-   ]
-  },
+  "clips": [
+   "idle",
+   "walk",
+   "run",
+   "jump",
+   "fall",
+   "hurt",
+   "windup",
+   "attack",
+   "taunt",
+   "wave",
+   "cheer"
+  ],
   "extras": [
+   {
+    "kind": "garment",
+    "style": "corset",
+    "color": "2a0630",
+    "mat": "cloth_corset",
+    "trim_color": "d23cff",
+    "trim_glow": 1.0
+   },
+   {
+    "kind": "garment",
+    "style": "stockings",
+    "color": "140414",
+    "mat": "cloth_stocking",
+    "trim_color": "d23cff",
+    "thigh": 0.65
+   },
+   {
+    "kind": "garment",
+    "style": "gloves",
+    "color": "140414",
+    "mat": "cloth_glove",
+    "above": 0.12
+   },
+   {
+    "kind": "garment",
+    "style": "collar",
+    "color": "d23cff",
+    "mat": "glow_collar",
+    "glow": 1.0
+   },
    {
     "kind": "skirt",
     "color": "3a0a3c",
     "mat": "cloth_skirt",
+    "slit_width": 0.6,
     "length": 0.97,
     "flare": 0.35,
     "slits": [
      70,
      -70
     ],
-    "slit_height": 0.8
+    "slit_height": 0.95
    },
    {
     "kind": "horns",
@@ -337,19 +410,6 @@
     "spikes": 9,
     "height": 0.06
    }
-  ],
-  "clips": [
-   "idle",
-   "walk",
-   "run",
-   "jump",
-   "fall",
-   "hurt",
-   "windup",
-   "attack",
-   "taunt",
-   "wave",
-   "cheer"
   ]
  },
  "flora": {
@@ -414,7 +474,14 @@
    "taunt",
    "wave",
    "cheer"
-  ]
+  ],
+  "bust": 1.55,
+  "cuts": [
+   "sleeves",
+   "neckline"
+  ],
+  "hips": 1.15,
+  "waist": 0.9
  },
  "voltara": {
   "base": "AvatarSample_B",
@@ -468,7 +535,10 @@
    "taunt",
    "wave",
    "cheer"
-  ]
+  ],
+  "bust": 1.55,
+  "hips": 1.15,
+  "waist": 0.9
  },
  "nerissa": {
   "base": "Vita",
@@ -532,7 +602,14 @@
    "taunt",
    "wave",
    "cheer"
-  ]
+  ],
+  "bust": 1.55,
+  "cuts": [
+   "sleeves",
+   "neckline"
+  ],
+  "hips": 1.15,
+  "waist": 0.9
  },
  "crya": {
   "base": "Vita",
@@ -587,7 +664,14 @@
    "taunt",
    "wave",
    "cheer"
-  ]
+  ],
+  "bust": 1.55,
+  "cuts": [
+   "sleeves",
+   "neckline"
+  ],
+  "hips": 1.15,
+  "waist": 0.9
  },
  "roxyne": {
   "base": "Vita",
@@ -649,7 +733,14 @@
    "taunt",
    "wave",
    "cheer"
-  ]
+  ],
+  "bust": 1.55,
+  "cuts": [
+   "sleeves",
+   "neckline"
+  ],
+  "hips": 1.15,
+  "waist": 0.9
  },
  "luna": {
   "base": "Victoria_Rubin",
@@ -676,7 +767,7 @@
      70,
      -70
     ],
-    "slit_height": 0.8
+    "slit_height": 0.95
    },
    {
     "kind": "halo",
@@ -698,7 +789,14 @@
    "taunt",
    "wave",
    "cheer"
-  ]
+  ],
+  "bust": 1.55,
+  "cuts": [
+   "sleeves",
+   "neckline"
+  ],
+  "hips": 1.15,
+  "waist": 0.9
  },
  "calyptra": {
   "base": "Darkness_Shibu",
@@ -753,7 +851,14 @@
    "taunt",
    "wave",
    "cheer"
-  ]
+  ],
+  "bust": 1.55,
+  "cuts": [
+   "sleeves",
+   "neckline"
+  ],
+  "hips": 1.15,
+  "waist": 0.9
  },
  "solara": {
   "base": "Victoria_Rubin",
@@ -779,7 +884,7 @@
      70,
      -70
     ],
-    "slit_height": 0.8
+    "slit_height": 0.95
    },
    {
     "kind": "halo",
@@ -815,7 +920,14 @@
    "taunt",
    "wave",
    "cheer"
-  ]
+  ],
+  "bust": 1.55,
+  "cuts": [
+   "sleeves",
+   "neckline"
+  ],
+  "hips": 1.15,
+  "waist": 0.9
  },
  "isolde": {
   "base": "Vita",
@@ -842,7 +954,7 @@
      65,
      -65
     ],
-    "slit_height": 0.8
+    "slit_height": 0.95
    },
    {
     "kind": "crown",
@@ -865,7 +977,14 @@
    "taunt",
    "wave",
    "cheer"
-  ]
+  ],
+  "bust": 1.55,
+  "cuts": [
+   "sleeves",
+   "neckline"
+  ],
+  "hips": 1.15,
+  "waist": 0.9
  },
  "aurelia": {
   "base": "Darkness_Shibu",
@@ -892,7 +1011,7 @@
      70,
      -70
     ],
-    "slit_height": 0.8
+    "slit_height": 0.95
    },
    {
     "kind": "crown",
@@ -929,7 +1048,14 @@
    "taunt",
    "wave",
    "cheer"
-  ]
+  ],
+  "bust": 1.55,
+  "cuts": [
+   "sleeves",
+   "neckline"
+  ],
+  "hips": 1.15,
+  "waist": 0.9
  },
  "somnia": {
   "base": "Victoria_Rubin",
@@ -984,7 +1110,14 @@
    "taunt",
    "wave",
    "cheer"
-  ]
+  ],
+  "bust": 1.55,
+  "cuts": [
+   "sleeves",
+   "neckline"
+  ],
+  "hips": 1.15,
+  "waist": 0.9
  },
  "noctissa": {
   "base": "Vita",
@@ -1021,7 +1154,10 @@
    "taunt",
    "wave",
    "cheer"
-  ]
+  ],
+  "bust": 1.55,
+  "hips": 1.15,
+  "waist": 0.9
  },
  "vespera": {
   "base": "Darkness_Shibu",
@@ -1070,7 +1206,14 @@
    "taunt",
    "wave",
    "cheer"
-  ]
+  ],
+  "bust": 1.55,
+  "cuts": [
+   "sleeves",
+   "neckline"
+  ],
+  "hips": 1.15,
+  "waist": 0.9
  },
  "lilith": {
   "base": "Darkness_Shibu",
@@ -1138,7 +1281,14 @@
    "taunt",
    "wave",
    "cheer"
-  ]
+  ],
+  "bust": 1.55,
+  "cuts": [
+   "sleeves",
+   "neckline"
+  ],
+  "hips": 1.15,
+  "waist": 0.9
  },
  "seraphine": {
   "base": "Vita",
@@ -1165,7 +1315,7 @@
      70,
      -70
     ],
-    "slit_height": 0.8
+    "slit_height": 0.95
    },
    {
     "kind": "wings",
@@ -1207,7 +1357,14 @@
    "taunt",
    "wave",
    "cheer"
-  ]
+  ],
+  "bust": 1.55,
+  "cuts": [
+   "sleeves",
+   "neckline"
+  ],
+  "hips": 1.15,
+  "waist": 0.9
  },
  "lady_luckless": {
   "base": "Darkness_Shibu",
@@ -1234,7 +1391,7 @@
      70,
      -70
     ],
-    "slit_height": 0.8
+    "slit_height": 0.95
    },
    {
     "kind": "crown",
@@ -1257,7 +1414,14 @@
    "taunt",
    "wave",
    "cheer"
-  ]
+  ],
+  "bust": 1.55,
+  "cuts": [
+   "sleeves",
+   "neckline"
+  ],
+  "hips": 1.15,
+  "waist": 0.9
  },
  "dream_girl": {
   "base": "Victoria_Rubin",
@@ -1305,7 +1469,14 @@
    "taunt",
    "wave",
    "cheer"
-  ]
+  ],
+  "bust": 1.55,
+  "cuts": [
+   "sleeves",
+   "neckline"
+  ],
+  "hips": 1.15,
+  "waist": 0.9
  },
  "lilith_daughters": {
   "base": "Darkness_Shibu",
@@ -1331,7 +1502,7 @@
      70,
      -70
     ],
-    "slit_height": 0.8
+    "slit_height": 0.95
    },
    {
     "kind": "horns",
@@ -1353,6 +1524,298 @@
    "taunt",
    "wave",
    "cheer"
+  ],
+  "bust": 1.55,
+  "cuts": [
+   "sleeves",
+   "neckline"
+  ],
+  "hips": 1.15,
+  "waist": 0.9
+ },
+ "clubber_a": {
+  "bust": 1.6,
+  "hips": 1.15,
+  "waist": 0.88,
+  "base": "fem_vroid",
+  "hair": "Sendagaya_Shino",
+  "skin": "e8c0a8",
+  "clips": [
+   "dance",
+   "dance2",
+   "dance3",
+   "dance4",
+   "dance5",
+   "cheer",
+   "clap"
+  ],
+  "decimate": 0.35,
+  "tex_scale": 0.25,
+  "extras": [
+   {
+    "kind": "garment",
+    "style": "bandeau",
+    "color": "0a0a14",
+    "mat": "cloth_top",
+    "trim_color": "ff2a8a",
+    "trim_glow": 1.0
+   },
+   {
+    "kind": "garment",
+    "style": "stockings",
+    "color": "0a0a14",
+    "mat": "cloth_stocking",
+    "thigh": 0.6
+   },
+   {
+    "kind": "skirt",
+    "color": "ff2a8a",
+    "mat": "glow_skirt",
+    "glow": 0.4,
+    "length": 0.3,
+    "flare": 0.15,
+    "slits": [],
+    "slit_height": 0.0
+   }
+  ]
+ },
+ "clubber_b": {
+  "bust": 1.6,
+  "hips": 1.15,
+  "waist": 0.88,
+  "base": "fem_vroid",
+  "hair": "AvatarSample_B",
+  "skin": "9c6a44",
+  "clips": [
+   "dance",
+   "dance2",
+   "dance3",
+   "dance4",
+   "dance5",
+   "cheer",
+   "clap"
+  ],
+  "decimate": 0.35,
+  "tex_scale": 0.25,
+  "extras": [
+   {
+    "kind": "garment",
+    "style": "bandeau",
+    "color": "140a1a",
+    "mat": "cloth_top",
+    "trim_color": "2ae0ff",
+    "trim_glow": 1.0
+   },
+   {
+    "kind": "garment",
+    "style": "stockings",
+    "color": "140a1a",
+    "mat": "cloth_stocking",
+    "thigh": 0.6
+   },
+   {
+    "kind": "skirt",
+    "color": "2ae0ff",
+    "mat": "glow_skirt",
+    "glow": 0.4,
+    "length": 0.3,
+    "flare": 0.15,
+    "slits": [],
+    "slit_height": 0.0
+   }
+  ]
+ },
+ "clubber_c": {
+  "bust": 1.6,
+  "hips": 1.15,
+  "waist": 0.88,
+  "base": "fem_vroid",
+  "hair": "Vita",
+  "skin": "f0d0c0",
+  "clips": [
+   "dance",
+   "dance2",
+   "dance3",
+   "dance4",
+   "dance5",
+   "cheer",
+   "clap"
+  ],
+  "decimate": 0.35,
+  "tex_scale": 0.25,
+  "extras": [
+   {
+    "kind": "garment",
+    "style": "bandeau",
+    "color": "120610",
+    "mat": "cloth_top",
+    "trim_color": "ffb02a",
+    "trim_glow": 1.0
+   },
+   {
+    "kind": "garment",
+    "style": "stockings",
+    "color": "120610",
+    "mat": "cloth_stocking",
+    "thigh": 0.6
+   },
+   {
+    "kind": "skirt",
+    "color": "ffb02a",
+    "mat": "glow_skirt",
+    "glow": 0.4,
+    "length": 0.3,
+    "flare": 0.15,
+    "slits": [],
+    "slit_height": 0.0
+   }
+  ]
+ },
+ "succubus": {
+  "bust": 1.6,
+  "hips": 1.15,
+  "waist": 0.88,
+  "base": "fem_vroid",
+  "hair": "Sendagaya_Shino",
+  "skin": "f0c8d8",
+  "hair_color": "2a0a3a",
+  "iris": "ff3ab0",
+  "lips": "a0105a",
+  "clips": [
+   "idle",
+   "walk",
+   "run",
+   "hurt",
+   "windup",
+   "attack",
+   "taunt"
+  ],
+  "tex_scale": 0.5,
+  "extras": [
+   {
+    "kind": "garment",
+    "style": "bandeau",
+    "color": "1a0414",
+    "mat": "cloth_top",
+    "trim_color": "ff4ab0"
+   },
+   {
+    "kind": "garment",
+    "style": "belt",
+    "color": "ff4ab0",
+    "mat": "glow_belt",
+    "glow": 0.8
+   },
+   {
+    "kind": "garment",
+    "style": "stockings",
+    "color": "1a0414",
+    "mat": "cloth_stocking",
+    "trim_color": "ff4ab0",
+    "thigh": 0.7
+   },
+   {
+    "kind": "garment",
+    "style": "gloves",
+    "color": "1a0414",
+    "mat": "cloth_glove",
+    "above": 0.1
+   },
+   {
+    "kind": "skirt",
+    "color": "3a0630",
+    "mat": "cloth_skirt",
+    "length": 0.32,
+    "flare": 0.15,
+    "slits": [
+     90,
+     -90
+    ],
+    "slit_height": 0.6
+   },
+   {
+    "kind": "horns",
+    "style": "curved",
+    "color": "1a0410",
+    "mat": "horn",
+    "size": 0.9
+   },
+   {
+    "kind": "wings",
+    "color": "3a0630",
+    "mat": "wing",
+    "span": 0.5
+   },
+   {
+    "kind": "tail",
+    "color": "1a0410",
+    "mat": "horn",
+    "length": 0.7
+   }
+  ]
+ },
+ "siren": {
+  "bust": 1.6,
+  "hips": 1.15,
+  "waist": 0.88,
+  "base": "fem_vroid",
+  "hair": "Vita",
+  "skin": "e8b898",
+  "hair_color": "d8a030",
+  "iris": "ffd040",
+  "lips": "b0203a",
+  "clips": [
+   "idle",
+   "walk",
+   "run",
+   "hurt",
+   "windup",
+   "attack",
+   "taunt"
+  ],
+  "tex_scale": 0.5,
+  "extras": [
+   {
+    "kind": "garment",
+    "style": "bodysuit",
+    "color": "7a0818",
+    "mat": "cloth_suit",
+    "trim_color": "f0c040",
+    "trim_glow": 0.5
+   },
+   {
+    "kind": "garment",
+    "style": "gloves",
+    "color": "7a0818",
+    "mat": "cloth_glove",
+    "above": 0.15
+   },
+   {
+    "kind": "garment",
+    "style": "collar",
+    "color": "f0c040",
+    "mat": "gold_collar"
+   },
+   {
+    "kind": "skirt",
+    "color": "8a0a1e",
+    "mat": "cloth_skirt",
+    "length": 0.97,
+    "flare": 0.3,
+    "slits": [
+     50,
+     -50
+    ],
+    "slit_height": 0.85
+   },
+   {
+    "kind": "horns",
+    "style": "straight",
+    "color": "f0c040",
+    "mat": "glow_horn",
+    "glow": 1.5,
+    "size": 0.6
+   }
   ]
  }
 }

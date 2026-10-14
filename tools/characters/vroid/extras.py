@@ -259,7 +259,8 @@ def _body_ring(body_parts, z: float, centre: Vector) -> tuple:
 
 
 def skirt(arm, body_parts, mat, top: float = 0.0, length: float = 1.0, flare: float = 0.25,
-          slits=(math.pi * 0.5, -math.pi * 0.5), slit_height: float = 0.75, rows: int = 14, sides: int = 40):
+          slits=(math.pi * 0.5, -math.pi * 0.5), slit_height: float = 0.75, rows: int = 14, sides: int = 40,
+          slit_width: float = 0.3):
     """A long flared skirt from the waist; slits open at the given angles (0 = front)."""
     hips = bone_head(arm, "J_Bip_C_Hips")
     foot = bone_head(arm, "J_Bip_L_Foot")
@@ -285,7 +286,7 @@ def skirt(arm, body_parts, mat, top: float = 0.0, length: float = 1.0, flare: fl
         t = (r + 0.5) / rows
         for k in range(sides):
             a = 2 * math.pi * (k + 0.5) / sides
-            open_ = any(abs(math.atan2(math.sin(a - s), math.cos(a - s))) < 0.12 + 0.3 * t for s in slits) and t > 1.0 - slit_height
+            open_ = any(abs(math.atan2(math.sin(a - s), math.cos(a - s))) < 0.12 + slit_width * t for s in slits) and t > 1.0 - slit_height
             if not open_:
                 bm.faces.new((grid[r][k], grid[r][(k + 1) % sides], grid[r + 1][(k + 1) % sides], grid[r + 1][k]))
     bmesh.ops.solidify(bm, geom=bm.faces[:], thickness=0.004)

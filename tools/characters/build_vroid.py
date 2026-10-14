@@ -18,6 +18,7 @@ from mathutils import Quaternion, Vector
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.join(HERE, "vroid"))
 import extras  # noqa: E402
+import garments  # noqa: E402
 import kit  # noqa: E402
 import paint  # noqa: E402
 import retarget  # noqa: E402
@@ -36,12 +37,17 @@ CLIPS = {
     "dash": ("Running", 1, 20, 1.6, False),
     "flip": ("Backflip", 30, 80, 2.0, False),
     "hurt": ("Shoved", 1, 28, 1.4, False),
-    "windup": ("Threatening", 1, 60, 1.0, False),
-    "attack": ("Punching", 11, 30, 1.2, False),
+    "windup": ("MagicAttack2H", 1, 34, 1.0, False),
+    "attack": ("MagicAttack1H", 20, 58, 1.3, False),
     "taunt": ("Taunt", 1, 86, 1.0, False),
     "wave": ("Waving", 1, 143, 1.0, False),
     "cheer": ("Cheering", 1, 88, 1.0, False),
     "dance": ("Dancing", 1, 116, 1.0, False),
+    "dance2": ("BootyHipHopDance", 1, 148, 1.0, False),
+    "dance3": ("Twist_Dance", 1, 284, 1.0, False),
+    "clap": ("Clapping", 1, 36, 1.0, False),
+    "dance4": ("HipHopDancing", 1, 191, 1.0, False),
+    "dance5": ("SambaDancing", 1, 300, 1.0, False),
 }
 CAST_AIMS = {"cast_down": -90.0, "cast_down_forward": -45.0, "cast_forward": 0.0, "cast_up_forward": 45.0, "cast_up": 90.0}
 
@@ -53,7 +59,7 @@ def recolor(part, recipe: dict, tex_dir: str) -> None:
     img = paint.own_image(mat, recipe["id"])
     if img is None:
         return
-    paint.shrink(img, TEXTURE_SIZE.get(kind, 512))
+    paint.shrink(img, int(TEXTURE_SIZE.get(kind, 512) * recipe.get("tex_scale", 1.0)))
     if kind == "SKIN" and "skin" in recipe:
         paint.tint(img, recipe["skin"], q=60.0)
     elif kind == "HAIR" and "hair_color" in recipe:
@@ -137,7 +143,13 @@ def add_extras(arm, pieces, recipe: dict) -> list:
             made.append(extras.wings(arm, mat, e.get("span", 0.55), e.get("feathered", False)))
         elif kind == "skirt":
             slits = [math.radians(a) for a in e.get("slits", [90, -90])]
-            made.append(extras.skirt(arm, body, mat, e.get("top", 0.0), e.get("length", 0.95), e.get("flare", 0.25), slits, e.get("slit_height", 0.75)))
+            made.append(extras.skirt(arm, body, mat, e.get("top", 0.0), e.get("length", 0.95), e.get("flare", 0.25), slits, e.get("slit_height", 0.75),
+                                       slit_width=e.get("slit_width", 0.3)))
+        elif kind == "garment":
+            skin = next((p for p in pieces if kit.kind_of(p) == "SKIN" and "Body" in p.name), None)
+            trim = extras.material(e["mat"] + "_trim", e["trim_color"], e.get("trim_glow", 0.0), 0.6) if "trim_color" in e else None
+            if skin is not None:
+                made.extend(garments.shell(arm, skin, mat, e["style"], e, trim))
         elif kind == "cape":
             made.append(extras.cape(arm, body, mat, e.get("length", 0.85), e.get("width", 0.5)))
         elif kind == "band":
@@ -196,6 +208,17 @@ def cast_pose(arm, name: str, degrees: float) -> None:
         pb.rotation_quaternion = Quaternion()
 
 
+def decimate(arm, ratio: float) -> None:
+    """Fewer triangles for background characters (crowd dancers)."""
+    for obj in [o for o in bpy.data.objects if o.type == "MESH" and o.parent == arm]:
+        mod = obj.modifiers.new("Decimate", "DECIMATE")
+        mod.ratio = ratio
+        bpy.context.view_layer.objects.active = obj
+        with bpy.context.temp_override(object=obj, active_object=obj):
+            bpy.ops.object.modifier_move_to_index(modifier="Decimate", index=0)
+            bpy.ops.object.modifier_apply(modifier="Decimate")
+
+
 def export(path: str) -> None:
     os.makedirs(os.path.dirname(path), exist_ok=True)
     bpy.ops.export_scene.gltf(filepath=path, export_format="GLB", export_animations=True,
@@ -221,6 +244,9 @@ def main() -> None:
     for p in pieces:
         if p.data.shape_keys:
             p.shape_key_clear()
+    kit.cut_clothes(arm, pieces, recipe.get("cuts", []), extras.material("skin_bare", recipe.get("skin", "f2d6c9"), rough=0.5))
+    kit.shape_bust(arm, pieces, recipe.get("bust", 1.0))
+    kit.shape_figure(arm, pieces, recipe.get("hips", 1.0), recipe.get("waist", 1.0))
     made = add_extras(arm, pieces, recipe)
     arm.name = "rig"
     arm.data.name = "rig"
@@ -229,8 +255,9 @@ def main() -> None:
     if preview:
         import preview_render
         preview_render.render(arm, preview, os.environ.get("PREVIEW_ACTION", "idle"), int(os.environ.get("PREVIEW_FRAME", "1")))
-    # VRoid faces +Y; the game's characters face -Y in Blender (+Z in Godot).
-    arm.rotation_euler = (0.0, 0.0, math.pi)
+    # Models export facing -Z in Godot; CharacterModels/MiloView3D turn them.
+    if recipe.get("decimate"):
+        decimate(arm, float(recipe["decimate"]))
     out = os.path.join(ROOT, "art", "export", cid, f"chr_{cid}.glb")
     if os.environ.get("NO_EXPORT") != "1":
         export(out)

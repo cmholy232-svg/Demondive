@@ -90,9 +90,25 @@ static func _solid(root: Node3D, rect: Rect2, data: RoomData) -> void:
 	var tile_y: int = int(rect.position.y / RoomData.TILE)
 	if data.is_solid(tile_x, tile_y - 1):
 		return
-	# Walkable top: neon lip on the front edge, a faint strip at the back.
+	# Walkable top: light-up dance floor on wide floors, neon lip on the front
+	# edge, a faint strip at the back.
+	if s.x >= 3.0:
+		Kit3D.box(root, Vector3(c.x, top_y + 0.006, (FRONT_Z + BACK_Z) * 0.5), Vector3(s.x - 0.04, 0.012, depth - 0.1), _floor_tiles())
 	Kit3D.box(root, Vector3(c.x, top_y - 0.07, FRONT_Z + 0.01), Vector3(s.x, 0.045, 0.03), Kit3D.neon(MAGENTA, 4.5))
 	Kit3D.box(root, Vector3(c.x, top_y + 0.005, BACK_Z + 0.35), Vector3(s.x, 0.012, 0.05), Kit3D.neon(CYAN, 1.6))
+
+
+static var _floor_mat: ShaderMaterial
+
+
+static func _floor_tiles() -> ShaderMaterial:
+	if _floor_mat == null:
+		_floor_mat = ShaderMaterial.new()
+		_floor_mat.shader = _dance_shader
+		_floor_mat.set_shader_parameter("base_color", Color(0.06, 0.03, 0.09))
+		_floor_mat.set_shader_parameter("cell", 0.9)
+		_floor_mat.set_shader_parameter("energy", 1.5)
+	return _floor_mat
 
 
 static func _ledge(root: Node3D, rect: Rect2) -> void:
@@ -150,7 +166,7 @@ static func _set_dressing(root: Node3D, room: Room, size: Vector2) -> void:
 		if Backdrop3D.in_opening(x):
 			x = Backdrop3D.after_opening(x) + rng.randf_range(0.0, 1.0)
 			continue
-		var pick: int = rng.randi_range(0, 3)
+		var pick: int = rng.randi_range(0, 4)
 		var y: float = rng.randf_range(floor_y + 4.6, minf(floor_y + 8.0, top_y - 2.0))
 		if pick == 0 and (x < next_sign_x or Backdrop3D.in_opening(x + 3.0)):
 			pick = 1
@@ -163,6 +179,8 @@ static func _set_dressing(root: Node3D, room: Room, size: Vector2) -> void:
 			_pillar(root, x, floor_y, top_y, rng.randi() % 2 == 0)
 		elif pick == 2:
 			_speakers(root, x, floor_y)
+		elif pick == 4:
+			NeonArt3D.piece(root, rng.randi(), Vector3(x + 1.0, y, WALL_Z + 0.3), rng.randf_range(0.9, 1.4), [MAGENTA, CYAN, AMBER][rng.randi_range(0, 2)])
 		else:
 			_disco_ball(root, Vector3(x, top_y - 1.4, -2.2))
 		x += rng.randf_range(3.5, 6.5)
