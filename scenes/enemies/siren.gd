@@ -5,7 +5,7 @@ extends Enemy
 
 func _setup() -> void:
 	kind = &"siren"
-	size = Vector2(72.0, 105.0)
+	size = Vector2(66.0, 138.0)
 	max_health = 78.0
 	contact_damage = 15.0
 

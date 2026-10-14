@@ -39,7 +39,9 @@ void fragment() {
 
 void light() {
 	float ndl = dot(NORMAL, LIGHT);
-	float lit = smoothstep(-band_softness, band_softness, ndl) * ATTENUATION;
+	float lit = smoothstep(-band_softness, band_softness, ndl);
 	vec3 band = mix(mix(vec3(1.0), shade_tint.rgb, shade_amount) * (1.0 - shade_amount * 0.6), vec3(1.0), lit);
-	DIFFUSE_LIGHT += LIGHT_COLOR / PI * band;
+	// ATTENUATION carries distance falloff and shadow, so it scales the shaded
+	// side too; otherwise every neon light in range washes the model out.
+	DIFFUSE_LIGHT += LIGHT_COLOR / PI * band * ATTENUATION;
 }

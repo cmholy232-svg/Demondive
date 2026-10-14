@@ -5,9 +5,9 @@ extends Node3D
 ## and flaring eyes on every wind-up, a lunge on the attack, white on hits.
 
 const FLASH_SHADER: String = "shader_type spatial; render_mode unshaded, blend_add; void fragment() { ALBEDO = vec3(1.0); ALPHA = 0.85; }"
-const BOSS_PRESENCE: float = 1.3
+const BOSS_PRESENCE: float = 1.1
 ## Rigged humanoid enemies (succubus, siren) stand a little taller than their hitbox.
-const HUMAN_PRESENCE: float = 1.45
+const HUMAN_PRESENCE: float = 1.05
 
 var _room: Room
 var _enemies: Dictionary = {}
@@ -96,7 +96,10 @@ func _make_model(enemy: Enemy) -> Node3D:
 	var base: StringName = look
 	if enemy.variant != &"":
 		base = StringName(str(EnemyFactory.variant(enemy.variant).get("base", enemy.kind)))
-	model = MonsterModels.make(base) if MonsterModels.has(base) else CreatureModels.make(base, enemy.palette)
+	if MonsterModels.has(base):
+		# Fitted to the hitbox, which already includes the variant's scale.
+		return MonsterModels.make(base, enemy.size / Kit3D.PX_PER_M)
+	model = CreatureModels.make(base, enemy.palette)
 	var grow: float = float(spec.get("scale", EnemyFactory.variant(enemy.variant).get("scale", 1.0) if enemy.variant != &"" else 1.0))
 	model.scale = Vector3.ONE * grow
 	return model

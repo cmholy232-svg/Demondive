@@ -9,7 +9,7 @@ const TARGET_HEIGHT_M: float = 1.28
 ## Ground speed (px/s) at which the run clip's feet match the floor.
 const RUN_ANIMATION_SPEED: float = 520.0
 const TURN_SPEED: float = 18.0
-const CAST_POSE_SECONDS: float = 0.3
+const CAST_POSE_SECONDS: float = 0.4
 
 var milo: Milo
 var _model: Node3D
@@ -42,7 +42,10 @@ func bind(target: Milo) -> void:
 	_trail = _make_particles(Color(0.5, 0.95, 1.0), 40, 0.25, false)
 	_burst = _make_particles(Color(1.0, 0.7, 0.4), 24, 0.35, true)
 	_caster = milo.get_node("ArcaneCaster") as ArcaneCaster
-	_caster.cast.connect(func(_direction: Vector2) -> void: _cast_timer = CAST_POSE_SECONDS)
+	_caster.cast.connect(func(_direction: Vector2) -> void:
+		_cast_timer = CAST_POSE_SECONDS
+		if _cast_arm != null:
+			_cast_arm.kick())
 	milo.wavelanded.connect(func(_is_wavedash: bool) -> void: _burst.restart())
 	milo.landed.connect(func(speed: float) -> void:
 		if speed > 600.0:

@@ -33,6 +33,8 @@ var damage_scale: float = 1.0
 var tempo_scale: float = 1.0
 var shard_scale: int = 1
 var size: Vector2 = Vector2(52.0, 88.0)
+## Below this the enemy has fallen out of every room (rooms are far smaller).
+const PIT_FLOOR_Y: float = 20000.0
 var max_health: float = 40.0
 var health: float = 40.0
 var contact_damage: float = 10.0
@@ -164,6 +166,23 @@ func _physics_process(delta: float) -> void:
 	_knock = Vector2.ZERO
 	move_and_slide()
 	_touch_milo()
+	_check_pits()
+
+
+## Walkers knocked into lava or spikes, or out of the room, die there, so a
+## room can't be left waiting on an enemy nobody can reach.
+func _check_pits() -> void:
+	if flies or is_boss:
+		return
+	if global_position.y > PIT_FLOOR_Y:
+		die()
+		return
+	for node: Node in get_tree().get_nodes_in_group(HazardZone.GROUP):
+		var zone := node as HazardZone
+		if zone != null and zone.is_pit() and zone.rect.grow(-4.0).has_point(global_position + Vector2(0.0, -4.0)):
+			Game.fx_requested.emit(&"ember", global_position, zone.color, 1.5)
+			die()
+			return
 
 
 func milo() -> Milo:

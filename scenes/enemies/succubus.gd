@@ -5,7 +5,7 @@ extends Enemy
 
 func _setup() -> void:
 	kind = &"succubus"
-	size = Vector2(64.0, 96.0)
+	size = Vector2(60.0, 130.0)
 	max_health = 55.0
 	contact_damage = 10.0
 

@@ -13,7 +13,7 @@ import os
 import sys
 
 import bpy
-from mathutils import Quaternion, Vector
+from mathutils import Matrix, Quaternion, Vector
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.join(HERE, "vroid"))
@@ -170,42 +170,60 @@ def animate(arm, recipe: dict) -> None:
         bpy.data.objects.remove(src)
         bpy.data.actions.remove(src_action)
     if recipe.get("cast"):
-        for name, deg in CAST_AIMS.items():
-            cast_pose(arm, name, deg)
+        cast_poses(arm)
 
 
-def cast_pose(arm, name: str, degrees: float) -> None:
-    """Right arm straight out along the aim (model faces +Y, up is +Z)."""
-    a = math.radians(degrees)
-    aim = Vector((0.0, math.cos(a), math.sin(a)))
-    act = bpy.data.actions.new(name)
-    act.use_fake_user = True
-    arm.animation_data_create()
-    arm.animation_data.action = act
-    # glTF import guesses bone tails, so measure each segment joint to joint.
-    chain = {"J_Bip_R_UpperArm": "J_Bip_R_LowerArm", "J_Bip_R_LowerArm": "J_Bip_R_Hand", "J_Bip_R_Hand": "J_Bip_R_Middle1"}
-    for bname, child in chain.items():
-        pb = arm.pose.bones[bname]
-        b = pb.bone
-        rest_dir = (arm.data.bones[child].head_local - b.head_local).normalized()
-        world_rot = rest_dir.rotation_difference(aim)
-        rest_q = b.matrix_local.to_quaternion()
-        parent_q = Quaternion()
-        if b.parent is not None:
-            parent_q = arm.pose.bones[b.parent.name].matrix.to_quaternion()
-            rel = b.parent.matrix_local.to_quaternion().inverted() @ rest_q
-        else:
-            rel = rest_q
-        target = world_rot @ rest_q
-        basis = rel.inverted() @ parent_q.inverted() @ target
-        pb.rotation_mode = "QUATERNION"
-        pb.rotation_quaternion = basis
-        bpy.context.view_layer.update()
-        pb.keyframe_insert("rotation_quaternion", frame=1)
-        pb.keyframe_insert("rotation_quaternion", frame=2)
-    arm.animation_data.action = None
-    for pb in arm.pose.bones:
-        pb.rotation_quaternion = Quaternion()
+UPPER_BODY = ("C_Spine", "C_Chest", "C_UpperChest", "C_Neck", "C_Head", "_Shoulder", "_UpperArm", "_LowerArm", "_Hand",
+              "_Thumb", "_Index", "_Middle", "_Ring", "_Little")
+# MagicAttack1H frames: the arm drawn back, and the throw at full reach.
+CAST_PULL_FRAME = 22
+CAST_RELEASE_FRAME = 34
+
+
+def cast_poses(arm) -> None:
+    """Upper-body cast poses for each aim: the torso, both arms and head from
+    the throw in MagicAttack1H, with the right arm turned so the hand points
+    along the aim. cast_<aim> is the throw; cast_<aim>_pull the draw-back
+    before it, which the game blends in briefly as recoil on every shot."""
+    src, src_action = retarget.load_clip(os.path.join(ANIM_DIR, "MagicAttack1H.fbx"))
+    throw = retarget.retarget(src, arm, "_cast_src", (CAST_PULL_FRAME, CAST_RELEASE_FRAME), in_place=True)
+    bpy.data.objects.remove(src)
+    bpy.data.actions.remove(src_action)
+    bones = [pb for pb in arm.pose.bones if any(k in pb.name for k in UPPER_BODY) and pb.name.startswith("J_Bip")]
+    scene = bpy.context.scene
+    for name, deg in CAST_AIMS.items():
+        a = math.radians(deg)
+        aim = Vector((0.0, math.cos(a), math.sin(a)))
+        for suffix, frame in (("", 1 + CAST_RELEASE_FRAME - CAST_PULL_FRAME), ("_pull", 1)):
+            arm.animation_data.action = throw
+            scene.frame_set(frame)
+            bpy.context.view_layer.update()
+            pose = {pb.name: pb.matrix.copy() for pb in arm.pose.bones}
+            arm.animation_data.action = None
+            for pb in arm.pose.bones:
+                pb.matrix_basis = Matrix()
+            bpy.context.view_layer.update()
+            for pb in sorted(arm.pose.bones, key=lambda b: len(b.parent_recursive)):
+                pb.matrix = pose[pb.name]
+                bpy.context.view_layer.update()
+            upper = arm.pose.bones["J_Bip_R_UpperArm"]
+            reach = arm.pose.bones["J_Bip_R_Hand"].head - upper.head
+            # The draw-back keeps its bend but still points roughly along the aim.
+            turn = reach.normalized().rotation_difference(aim)
+            m = upper.matrix
+            upper.matrix = Matrix.Translation(m.translation) @ turn.to_matrix().to_4x4() @ m.to_3x3().to_4x4()
+            bpy.context.view_layer.update()
+            act = bpy.data.actions.new(name + suffix)
+            act.use_fake_user = True
+            arm.animation_data.action = act
+            for pb in bones:
+                pb.rotation_mode = "QUATERNION"
+                pb.keyframe_insert("rotation_quaternion", frame=1)
+                pb.keyframe_insert("rotation_quaternion", frame=2)
+            arm.animation_data.action = None
+            for pb in arm.pose.bones:
+                pb.matrix_basis = Matrix()
+    bpy.data.actions.remove(throw)
 
 
 def decimate(arm, ratio: float) -> None:

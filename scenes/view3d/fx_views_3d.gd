@@ -4,7 +4,7 @@ extends Node3D
 
 ## kind -> [particle count, speed, size, lifetime, ring]
 const BURSTS: Dictionary = {
-	&"hit": [14, 3.0, 0.05, 0.25, false], &"death": [40, 5.0, 0.09, 0.6, true],
+	&"hit": [8, 3.0, 0.05, 0.22, false], &"death": [40, 5.0, 0.09, 0.6, true],
 	&"hurt": [24, 4.0, 0.07, 0.4, false], &"dodge": [30, 4.5, 0.06, 0.45, true],
 	&"sparkle": [8, 1.5, 0.04, 0.35, false], &"blast": [36, 6.0, 0.1, 0.45, true],
 	&"ember": [5, 1.0, 0.04, 0.5, false], &"portal": [30, 2.0, 0.06, 0.7, true],
@@ -73,33 +73,65 @@ func _make_bolt(node: Node) -> Node3D:
 	var root := Node3D.new()
 	var color: Color = bolt.stats.color if bolt != null else Color(0.8, 0.6, 1.0)
 	var radius: float = (bolt.radius if bolt != null else 10.0) / Kit3D.PX_PER_M
-	Kit3D.billboard(root, Vector3.ZERO, radius * 9.0, Kit3D.sprite(GLOW, color, 1.6))
-	Kit3D.billboard(root, Vector3(0.0, 0.0, 0.01), radius * 6.0, Kit3D.sprite(CORE, color.lerp(Color.WHITE, 0.5), 2.5))
-	Kit3D.billboard(root, Vector3(0.0, 0.0, 0.02), radius * 7.0, Kit3D.sprite(SPARKLE, color, 2.0))
-	var trail := CPUParticles3D.new()
-	trail.amount = 18
-	trail.lifetime = 0.22
-	trail.local_coords = false
-	trail.gravity = Vector3.ZERO
-	trail.initial_velocity_min = 0.0
-	trail.initial_velocity_max = 0.2
-	trail.scale_amount_min = radius * 3.0
-	trail.scale_amount_max = radius * 4.5
-	var mesh := QuadMesh.new()
-	var trail_color: Color = color if bolt == null or bolt.stats.trail_colors.is_empty() else bolt.stats.trail_colors[0]
-	mesh.material = Kit3D.sprite(GLOW, trail_color, 1.4)
-	trail.mesh = mesh
-	var curve := Curve.new()
-	curve.add_point(Vector2(0.0, 1.0))
-	curve.add_point(Vector2(1.0, 0.0))
-	trail.scale_amount_curve = curve
-	root.add_child(trail)
-	Kit3D.omni(root, Vector3.ZERO, color, 1.2, 1.8)
+	var tail_color: Color = color if bolt == null or bolt.stats.trail_colors.is_empty() else bolt.stats.trail_colors[0]
+	# A tight comet: a tapered streak along the flight, a white-hot head and a
+	# small halo. Kept compact so a volley reads as separate shots.
+	var streak := MeshInstance3D.new()
+	streak.name = "Streak"
+	var quad := QuadMesh.new()
+	quad.size = Vector2(1.0, 1.0)
+	streak.mesh = quad
+	var mat := ShaderMaterial.new()
+	mat.shader = _streak_shader()
+	mat.set_shader_parameter("head", color.lerp(Color.WHITE, 0.35))
+	mat.set_shader_parameter("tail", tail_color)
+	streak.material_override = mat
+	streak.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	streak.set_meta("width", radius * 2.4)
+	root.add_child(streak)
+	Kit3D.billboard(root, Vector3(0.0, 0.0, 0.01), radius * 3.6, Kit3D.sprite(GLOW, color, 0.9))
+	Kit3D.billboard(root, Vector3(0.0, 0.0, 0.02), radius * 2.2, Kit3D.sprite(CORE, Color.WHITE.lerp(color, 0.25), 2.2))
 	return root
 
 
+static var _streak: Shader
+
+
+static func _streak_shader() -> Shader:
+	if _streak == null:
+		_streak = Shader.new()
+		# UV.x runs tail (0) to head (1); brightest and widest at the head.
+		_streak.code = """shader_type spatial;
+render_mode unshaded, blend_add, cull_disabled, depth_draw_never, shadows_disabled;
+uniform vec4 head : source_color;
+uniform vec4 tail : source_color;
+void fragment() {
+	float along = UV.x;
+	float across = abs(UV.y - 0.5) * 2.0;
+	float width = mix(0.15, 1.0, along * along);
+	float core = 1.0 - smoothstep(width * 0.35, width, across);
+	float fade = smoothstep(0.0, 0.9, along) * (1.0 - smoothstep(0.96, 1.0, along));
+	vec3 c = mix(tail.rgb, head.rgb, along) + vec3(1.0) * pow(core, 3.0) * along * 0.6;
+	ALBEDO = c * 2.2;
+	ALPHA = core * fade;
+}
+"""
+	return _streak
+
+
 func _update_bolt(node: Node, view: Node3D) -> void:
-	view.position = Kit3D.to_3d((node as Node2D).global_position)
+	var bolt := node as ArcaneBolt
+	view.position = Kit3D.to_3d(bolt.global_position)
+	var streak := view.get_node("Streak") as MeshInstance3D
+	var flight: Vector2 = bolt.velocity
+	if flight.length() < 1.0:
+		return
+	# Length grows with speed: about 0.07 s of travel behind the head.
+	var length: float = clampf(flight.length() / Kit3D.PX_PER_M * 0.07, 0.25, 1.1)
+	var angle: float = atan2(-flight.y, flight.x)
+	streak.rotation = Vector3(0.0, 0.0, angle)
+	streak.scale = Vector3(length, float(streak.get_meta("width")), 1.0)
+	streak.position = Vector3(-cos(angle), -sin(angle), 0.0) * length * 0.5
 
 
 func _make_shot(node: Node) -> Node3D:
@@ -190,8 +222,8 @@ func _burst(kind: StringName, at: Vector2, color: Color, size: float) -> void:
 	particles.initial_velocity_min = float(spec[1]) * 0.4 * size
 	particles.initial_velocity_max = float(spec[1]) * size
 	particles.gravity = Vector3(0.0, -6.0, 0.0)
-	particles.scale_amount_min = float(spec[2]) * 2.0
-	particles.scale_amount_max = float(spec[2]) * 4.0
+	particles.scale_amount_min = float(spec[2]) * 1.2
+	particles.scale_amount_max = float(spec[2]) * 2.4
 	var mesh := QuadMesh.new()
 	mesh.material = Kit3D.sprite(SPARK, color, 2.2)
 	particles.mesh = mesh
