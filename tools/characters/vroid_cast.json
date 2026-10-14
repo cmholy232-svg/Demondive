@@ -51,7 +51,8 @@
      -60
     ],
     "slit_height": 0.95,
-    "top": 0.12
+    "top": 0.0,
+    "at_waist": true
    },
    {
     "kind": "crown",
@@ -82,8 +83,10 @@
    "wave",
    "cheer"
   ],
-  "body": "body_hourglass",
-  "arm_spread": 14
+  "arm_spread": 14,
+  "sculpt": "body_hourglass",
+  "hair_style": "long",
+  "hair_length": 0.75
  },
  "milo": {
   "base": "AvatarSample_C",
@@ -393,7 +396,8 @@
      -70
     ],
     "slit_height": 0.95,
-    "top": 0.12
+    "top": 0.0,
+    "at_waist": true
    },
    {
     "kind": "horns",
@@ -415,8 +419,10 @@
     "height": 0.06
    }
   ],
-  "body": "body_hourglass",
-  "arm_spread": 14
+  "arm_spread": 14,
+  "sculpt": "body_hourglass",
+  "hair_style": "long",
+  "hair_length": 1.0
  },
  "flora": {
   "base": "Vita",
@@ -1746,7 +1752,8 @@
      -90
     ],
     "slit_height": 0.6,
-    "top": 0.12
+    "top": 0.0,
+    "at_waist": true
    },
    {
     "kind": "horns",
@@ -1768,8 +1775,10 @@
     "length": 0.7
    }
   ],
-  "body": "body_hourglass",
-  "arm_spread": 14
+  "arm_spread": 14,
+  "sculpt": "body_hourglass",
+  "hair_style": "ponytail",
+  "hair_length": 0.5
  },
  "siren": {
   "bust": 1.0,
@@ -1824,7 +1833,8 @@
      -50
     ],
     "slit_height": 0.85,
-    "top": 0.12
+    "top": 0.0,
+    "at_waist": true
    },
    {
     "kind": "horns",
@@ -1835,7 +1845,9 @@
     "size": 0.6
    }
   ],
-  "body": "body_hourglass",
-  "arm_spread": 14
+  "arm_spread": 14,
+  "sculpt": "body_hourglass",
+  "hair_style": "bob",
+  "hair_length": 0.5
  }
 }

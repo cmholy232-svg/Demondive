@@ -260,11 +260,17 @@ def _body_ring(body_parts, z: float, centre: Vector) -> tuple:
 
 def skirt(arm, body_parts, mat, top: float = 0.0, length: float = 1.0, flare: float = 0.25,
           slits=(math.pi * 0.5, -math.pi * 0.5), slit_height: float = 0.75, rows: int = 26, sides: int = 40,
-          slit_width: float = 0.3):
-    """A long flared skirt from the waist; slits open at the given angles (0 = front)."""
+          slit_width: float = 0.3, at_waist: bool = False):
+    """A long flared skirt from the waist; slits open at the given angles (0 = front).
+    at_waist: start at the narrowest slice between the hips and the chest
+    (measured on the body) instead of just above the hip bone."""
     hips = bone_head(arm, "J_Bip_C_Hips")
     foot = bone_head(arm, "J_Bip_L_Foot")
     z_top = hips.z + 0.06 + top
+    if at_waist:
+        chest = bone_head(arm, "J_Bip_C_Chest")
+        zs = [hips.z + (chest.z - hips.z) * i / 20 for i in range(1, 20)]
+        z_top = min(zs, key=lambda z: _body_ring(body_parts, z, hips)[0]) + top
     z_bot = z_top - (z_top - foot.z) * length
     rx0, ry0 = _body_ring(body_parts, z_top, hips)
     rx1, ry1 = _body_ring(body_parts, hips.z - 0.08, hips)

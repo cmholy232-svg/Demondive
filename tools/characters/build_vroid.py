@@ -21,6 +21,9 @@ sys.path.insert(0, os.path.join(HERE, "vroid"))
 import extras  # noqa: E402
 import body_swap  # noqa: E402
 import garments  # noqa: E402
+import sculpt_face  # noqa: E402
+import sculpt_hair  # noqa: E402
+import sculpt_rig  # noqa: E402
 import kit  # noqa: E402
 import paint  # noqa: E402
 import retarget  # noqa: E402
@@ -146,7 +149,7 @@ def add_extras(arm, pieces, recipe: dict) -> list:
         elif kind == "skirt":
             slits = [math.radians(a) for a in e.get("slits", [90, -90])]
             made.append(extras.skirt(arm, body, mat, e.get("top", 0.0), e.get("length", 0.95), e.get("flare", 0.25), slits, e.get("slit_height", 0.75),
-                                       slit_width=e.get("slit_width", 0.3)))
+                                       slit_width=e.get("slit_width", 0.3), at_waist=e.get("at_waist", False)))
         elif kind == "garment":
             skin = next((p for p in pieces if kit.kind_of(p) == "SKIN" and "Body" in p.name), None)
             trim = extras.material(e["mat"] + "_trim", e["trim_color"], e.get("trim_glow", 0.0), 0.6) if "trim_color" in e else None
@@ -284,21 +287,11 @@ def main() -> None:
     recipe = dict(recipes[cid])
     recipe["id"] = cid
     bpy.ops.wm.read_factory_settings(use_empty=True)
-    arm, pieces = assemble(recipe)
     tex_dir = f"/tmp/vroid_tex/{cid}"
-    for p in pieces:
-        if p.data.materials:
-            recolor(p, recipe, tex_dir)
-    # Facial expressions aren't used in play; dropping them saves most of the file.
-    for p in pieces:
-        if p.data.shape_keys:
-            p.shape_key_clear()
-    if recipe.get("body"):
-        skin = extras.material(f"Body_00_SKIN_{cid}", recipe.get("skin", "f2d6c9"), rough=0.5)
-        body_swap.swap(arm, pieces, os.path.join(HERE, "bodies", recipe["body"] + ".fbx"), skin)
-    kit.cut_clothes(arm, pieces, recipe.get("cuts", []), extras.material("skin_bare", recipe.get("skin", "f2d6c9"), rough=0.5))
-    kit.shape_bust(arm, pieces, recipe.get("bust", 1.0))
-    kit.shape_figure(arm, pieces, recipe.get("hips", 1.0), recipe.get("waist", 1.0))
+    if recipe.get("sculpt"):
+        arm, pieces = build_sculpt(recipe, tex_dir)
+    else:
+        arm, pieces = build_vroid_parts(recipe, tex_dir)
     made = add_extras(arm, pieces, recipe)
     arm.name = "rig"
     arm.data.name = "rig"
@@ -314,6 +307,37 @@ def main() -> None:
     if os.environ.get("NO_EXPORT") != "1":
         export(out)
         print("WROTE", out, os.path.getsize(out))
+
+
+def build_sculpt(recipe: dict, tex_dir: str):
+    """A sculpted body at its own proportions with a painted face and fitted hair."""
+    cid = recipe["id"]
+    skin = extras.material(f"Body_00_SKIN_{cid}", recipe.get("skin", "f2d6c9"), rough=0.5)
+    skin.node_tree.nodes["Principled BSDF"].inputs["Specular IOR Level"].default_value = 0.0
+    arm, body, sculpt = sculpt_rig.build(recipe.get("base", "fem_vroid"), os.path.join(HERE, "bodies", recipe["sculpt"] + ".fbx"), skin)
+    sculpt_face.paint(body, sculpt, recipe, tex_dir, cid)
+    hair_mat = extras.material(f"Hair_00_HAIR_{cid}", recipe.get("hair_color", "2a1a14"), rough=0.4)
+    hair = sculpt_hair.build(arm, body, sculpt, hair_mat, recipe.get("hair_style", "long"), float(recipe.get("hair_length", 0.6)))
+    return arm, [body, hair]
+
+
+def build_vroid_parts(recipe: dict, tex_dir: str):
+    cid = recipe["id"]
+    arm, pieces = assemble(recipe)
+    for p in pieces:
+        if p.data.materials:
+            recolor(p, recipe, tex_dir)
+    # Facial expressions aren't used in play; dropping them saves most of the file.
+    for p in pieces:
+        if p.data.shape_keys:
+            p.shape_key_clear()
+    if recipe.get("body"):
+        skin = extras.material(f"Body_00_SKIN_{cid}", recipe.get("skin", "f2d6c9"), rough=0.5)
+        body_swap.swap(arm, pieces, os.path.join(HERE, "bodies", recipe["body"] + ".fbx"), skin)
+    kit.cut_clothes(arm, pieces, recipe.get("cuts", []), extras.material("skin_bare", recipe.get("skin", "f2d6c9"), rough=0.5))
+    kit.shape_bust(arm, pieces, recipe.get("bust", 1.0))
+    kit.shape_figure(arm, pieces, recipe.get("hips", 1.0), recipe.get("waist", 1.0))
+    return arm, pieces
 
 
 if __name__ == "__main__":
