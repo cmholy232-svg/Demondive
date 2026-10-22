@@ -9,6 +9,7 @@ from . import render
 
 
 def _toon(mat, shade=(0.5, 0.42, 0.62)) -> None:
+    mat.use_backface_culling = True  # as in Godot, so inside-out faces show up here too
     nt = mat.node_tree
     bsdf = nt.nodes.get("Principled BSDF")
     base = bsdf.inputs["Base Color"]
@@ -104,7 +105,7 @@ def shoot(rig, path: str, clip: str = "idle", frame: float = 20, angles=(-25, 0,
     render.sheet(objs, path, angles=[a + 180 for a in angles], mode="toon", size=(560, 900))
     head = rig.pose.bones["J_Bip_C_Head"]
     c = rig.matrix_world @ head.head
-    focus = (c + Vector((-0.2, -0.2, -0.22)), c + Vector((0.2, 0.2, 0.2)))
+    focus = (c + Vector((-0.2, -0.2, -0.12)), c + Vector((0.2, 0.2, 0.3)))
     close = path.replace(".png", "_face.png")
     render.sheet(objs, close, angles=[a + 180 for a in (-20, 0, 30)], mode="toon", size=(600, 600), focus=focus, margin=1.0)
     return path

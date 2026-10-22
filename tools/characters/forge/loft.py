@@ -91,6 +91,20 @@ def loft(name: str, rings: list, segments: int = 16, steps: int = 4, front=(0, -
         c = bm.verts.new(pts[-1] + frames[-1][0] * 0.15 * min(dense[-1][1], dense[-1][2]))
         for k in range(segments):
             bm.faces.new((loops[-1][k], loops[-1][(k + 1) % segments], c))
+    # Cylindrical UVs: u around the tube, v along it.
+    uv = bm.loops.layers.uv.new("UVMap")
+    index = {v: (i, k) for i, loop in enumerate(loops) for k, v in enumerate(loop)}
+    for f in bm.faces:
+        ks = [index[v][1] for v in f.verts if v in index]
+        wrap = ks and max(ks) - min(ks) > segments // 2
+        for lp in f.loops:
+            if lp.vert in index:
+                i, k = index[lp.vert]
+                if wrap and k < segments // 2:
+                    k += segments
+                lp[uv].uv = (k / segments, i / max(1, count - 1))
+            else:
+                lp[uv].uv = (0.5, 0.0 if lp.vert.co == lp.vert.co else 1.0)
     bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
     bm.normal_update()
     me = bpy.data.meshes.new(name)

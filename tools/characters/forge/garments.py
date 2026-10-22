@@ -108,9 +108,24 @@ def shell(src, name: str, cuts: list, offset: float = 0.006, loose=None, thickne
             m.material_offset = 1
             m.material_offset_rim = 2
         _apply(obj, m)
+    if mats and thickness:
+        _sides(obj, src)
     for p in obj.data.polygons:
         p.use_smooth = True
     return obj
+
+
+def _sides(obj, src) -> None:
+    """Slot 0 on faces looking away from the body, slot 1 on faces looking at it; rims keep slot 2."""
+    from mathutils.bvhtree import BVHTree
+    tree = BVHTree.FromObject(src, bpy.context.evaluated_depsgraph_get())
+    for p in obj.data.polygons:
+        if p.material_index == 2:
+            continue
+        hit = tree.find_nearest(p.center)
+        if hit[0] is None:
+            continue
+        p.material_index = 0 if (p.center - hit[0]).dot(p.normal) > 0 else 1
 
 
 def trim_hidden(body, keep) -> None:

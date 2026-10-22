@@ -211,3 +211,14 @@ def reduce(obj, faces: int):
         bpy.ops.object.modifier_apply(modifier=mod.name)
     bpy.ops.object.shade_smooth()
     return obj
+
+
+def torso_at(p: dict, z: float) -> tuple:
+    """(half width, front, back) of the torso blockout at height z."""
+    rings = p["torso"]
+    z = max(rings[0][0], min(rings[-1][0], z))
+    for a, b in zip(rings, rings[1:]):
+        if a[0] <= z <= b[0]:
+            t = (z - a[0]) / (b[0] - a[0])
+            return tuple(a[i] + (b[i] - a[i]) * t for i in (1, 2, 3))
+    return rings[-1][1:4]
