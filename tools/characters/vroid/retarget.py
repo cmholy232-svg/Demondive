@@ -52,16 +52,18 @@ def _world_rest(arm) -> dict:
 
 
 def retarget(src, target, name: str, frames=None, in_place: bool = True, loop: bool = True,
-             speed: float = 1.0, step: int = 1):
+             speed: float = 1.0, step: int = 1, names: dict = None, flip: bool = True):
     """Bakes src's current action onto target as a new action called name."""
     scene = bpy.context.scene
     action = src.animation_data.action
     start, end = (int(action.frame_range[0]), int(action.frame_range[1])) if frames is None else frames
-    mapping = {t: s for s, t in ((sb.name, bone_map().get(_strip(sb.name))) for sb in src.data.bones) if t}
+    table = bone_map() if names is None else names
+    mapping = {t: s for s, t in ((sb.name, table.get(_strip(sb.name))) for sb in src.data.bones) if t}
     mapping = {t: s for t, s in mapping.items() if t in target.data.bones}
     # Face the same way while measuring: Mixamo faces -Y, VRoid +Y.
     saved = target.matrix_world.copy()
-    target.matrix_world = Matrix.Rotation(math.pi, 4, "Z") @ saved
+    if flip:
+        target.matrix_world = Matrix.Rotation(math.pi, 4, "Z") @ saved
     bpy.context.view_layer.update()
     src_rest = _world_rest(src)
     tgt_rest = _world_rest(target)

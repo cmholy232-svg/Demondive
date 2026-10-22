@@ -2,19 +2,19 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://cocdkc27651iu"
-path="res://.godot/imported/chr_milo_M00_000_00_FaceEyeline_00_FACE_milo.png-6d9de0adcff6e52be899e3946b2cf05d.ctex"
+uid="uid://baxtew8uydf1r"
+path="res://.godot/imported/chr_milo_chr_milo_face.png-00b63a28484ae0a44348f51197fa779d.ctex"
 metadata={
 "vram_texture": false
 }
 generator_parameters={
-"md5": "8a7133a06c14073b8a40481b6ded0db5"
+"md5": "76fc12f7069feea669ba2cc000232be2"
 }
 
 [deps]
 
-source_file="res://art/export/milo/chr_milo_M00_000_00_FaceEyeline_00_FACE_milo.png"
-dest_files=["res://.godot/imported/chr_milo_M00_000_00_FaceEyeline_00_FACE_milo.png-6d9de0adcff6e52be899e3946b2cf05d.ctex"]
+source_file="res://art/export/milo/chr_milo_chr_milo_face.png"
+dest_files=["res://.godot/imported/chr_milo_chr_milo_face.png-00b63a28484ae0a44348f51197fa779d.ctex"]
 
 [params]
 
