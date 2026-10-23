@@ -326,6 +326,7 @@ func die() -> void:
 	collision_layer = 0
 	Game.kills += 1
 	Pickup.drop_for(self)
+	BoonDeaths.on_death(self)
 	died.emit(self)
 	_on_died()
 	queue_free.call_deferred()

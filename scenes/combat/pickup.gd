@@ -79,6 +79,7 @@ func _physics_process(delta: float) -> void:
 func _on_body_entered(body: Node2D) -> void:
 	if not body is Milo or age < 0.2:
 		return
+	var was_full: bool = Game.health >= Game.max_health or Game.energy >= Game.max_energy
 	match kind:
 		Kind.SHARD:
 			Game.add_run_shards(int(amount))
@@ -88,6 +89,6 @@ func _on_body_entered(body: Node2D) -> void:
 			Game.heal(Game.max_health * amount * (1.0 + Upgrades.value(&"pizza_quality")))
 		Kind.COFFEE:
 			Game.add_energy(Game.max_energy * amount)
-	Game.on_pickup()
+	Game.on_pickup(was_full)
 	CombatFeedback.pickup(self)
 	queue_free()

@@ -47,3 +47,18 @@ static func thresholds(id: StringName) -> Array[int]:
 	for value: Variant in entry(id).get("thresholds", [1, 2, 4, 7]):
 		out.append(int(value))
 	return out
+
+
+## How many of the boon's stack thresholds Milo has reached: 0 without the
+## boon, 1 with its base card, then 2, 3 and 4 at the Lv 2, 4 and 7
+## behaviours (boon.<id>.rank2..rank4 in the strings file).
+static func rank(id: StringName) -> int:
+	return rank_at(id, Game.stacks(id))
+
+
+static func rank_at(id: StringName, stacks: int) -> int:
+	var reached: int = 0
+	for at: int in thresholds(id):
+		if stacks >= at:
+			reached += 1
+	return reached

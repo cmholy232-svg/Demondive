@@ -11,6 +11,10 @@ const IDS: Array[StringName] = [
 ]
 ## Calyptra's dice: outcome -> base weight; stacks move weight off "hurt".
 const DICE: Dictionary = {&"heal": 25.0, &"strike": 30.0, &"shards": 25.0, &"hurt": 15.0, &"boon": 1.0}
+## Solara Lv 2: the lance leaves a light field that strikes this many more
+## times, half a second apart, for this share of the lance.
+const LIGHT_FIELD_TICKS: int = 4
+const LIGHT_FIELD_SHARE: float = 0.3
 
 
 static func has(id: StringName) -> bool:
@@ -38,7 +42,7 @@ static func use(sp: Specials, id: StringName, power: int) -> void:
 			loaded_dice(sp, power)
 		&"isolde":
 			sp.echo_left = 5.0 + power
-			sp.echo_count = 2 if power >= 4 else 1
+			sp.echo_count = 2 if BoonCatalog.rank(&"isolde") >= 3 else 1
 			sp.echo_origin = sp.origin()
 			Game.fx(&"frost", sp.echo_origin, BoonCatalog.color(&"isolde"), 1.4)
 		&"somnia":
@@ -112,23 +116,49 @@ static func radiant_lance(sp: Specials, power: int) -> void:
 	if target == null:
 		return
 	var x: float = target.global_position.x
+	var y: float = target.center().y
 	var delay: float = maxf(0.3, 0.6 - 0.05 * power)
-	Game.fx(&"beam", Vector2(x, target.center().y), BoonCatalog.color(&"solara"), 0.4)
-	sp.get_tree().create_timer(delay, false, true).timeout.connect(func() -> void:
-		Game.fx(&"beam", Vector2(x, target.center().y if is_instance_valid(target) else 0.0), BoonCatalog.color(&"solara"), 1.6)
-		for enemy: Enemy in BoonHooks.living(sp.get_tree()):
-			if absf(enemy.global_position.x - x) < 50.0 + enemy.size.x * 0.5:
-				_hit(enemy, 60.0 + 20.0 * power, Vector2(x, -10000.0)))
+	var tree: SceneTree = sp.get_tree()
+	var field: bool = BoonCatalog.rank(&"solara") >= 2
+	Game.fx(&"beam", Vector2(x, y), BoonCatalog.color(&"solara"), 0.4)
+	tree.create_timer(delay, false, true).timeout.connect(func() -> void:
+		Game.fx(&"beam", Vector2(x, y), BoonCatalog.color(&"solara"), 1.6)
+		lance_strike(tree, x, 60.0 + 20.0 * power))
+	if not field:
+		return
+	for i: int in LIGHT_FIELD_TICKS:
+		tree.create_timer(delay + 0.5 * (i + 1), false, true).timeout.connect(func() -> void:
+			Game.fx(&"beam", Vector2(x, y), BoonCatalog.color(&"solara"), 0.5)
+			lance_strike(tree, x, (60.0 + 20.0 * power) * LIGHT_FIELD_SHARE))
+
+
+## Every enemy standing in the lance's column takes the hit.
+static func lance_strike(tree: SceneTree, x: float, amount: float) -> int:
+	var struck: int = 0
+	for enemy: Enemy in BoonHooks.living(tree):
+		if absf(enemy.global_position.x - x) < 50.0 + enemy.size.x * 0.5:
+			_hit(enemy, amount, Vector2(x, -10000.0))
+			struck += 1
+	return struck
 
 
 ## Nerissa - Siren Call: the nearest enemy is charmed; it drifts to Milo
-## without attacking and takes extra damage.
+## without attacking and takes extra damage. Lv 7 Chorus: the three nearest.
 static func siren_call(sp: Specials, power: int) -> void:
-	var target: Enemy = sp.nearest(800.0, false)
-	if target == null:
-		return
-	target.status.charm(4.0 + power)
-	Game.fx(&"charm", target.center(), BoonCatalog.color(&"nerissa"), 1.2)
+	var count: int = 3 if BoonCatalog.rank(&"nerissa") >= 4 else 1
+	var charmed: Array = []
+	for i: int in count:
+		var target: Enemy = null
+		for enemy: Enemy in sp.enemies():
+			if enemy.is_boss or charmed.has(enemy) or enemy.center().distance_to(sp.origin()) > 800.0:
+				continue
+			if target == null or enemy.center().distance_to(sp.origin()) < target.center().distance_to(sp.origin()):
+				target = enemy
+		if target == null:
+			return
+		charmed.append(target)
+		target.status.charm(4.0 + power)
+		Game.fx(&"charm", target.center(), BoonCatalog.color(&"nerissa"), 1.2)
 
 
 ## Roxyne - Predator Pounce: an invulnerable lunge through the lane; hits

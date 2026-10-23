@@ -9,6 +9,8 @@ signal run_shards_changed(amount: int)
 signal milo_hurt(amount: float)
 signal milo_died
 signal shield_changed(shield: float)
+## The shield soaked some or all of a hit (Seraphine's Retribution).
+signal shield_soaked
 ## Asks the 3D view for a one-shot effect (burst, ring, blast, shards...).
 signal fx_requested(kind: StringName, at: Vector2, color: Color, size: float)
 
@@ -47,6 +49,8 @@ var boons_suppressed: bool = false
 var wealth: int = 0
 ## Hits soak into this before Health (Seraphine's halo shield, Lilith's blood shield).
 var shield: float = 0.0
+## Lilith Lv 7 Undying: already spent in this room.
+var undying_spent: bool = false
 
 
 func _process(delta: float) -> void:
@@ -83,6 +87,7 @@ func start_run(seed_value: int = 0) -> void:
 	boons_suppressed = false
 	wealth = 0
 	shield = 0.0
+	undying_spent = false
 	max_health = BASE_HEALTH + Upgrades.value(&"vitality")
 	max_energy = BASE_ENERGY + Upgrades.value(&"reservoir")
 	health = max_health
@@ -129,8 +134,13 @@ func hurt(amount: float) -> float:
 		shield -= soaked
 		taken -= soaked
 		shield_changed.emit(shield)
+		shield_soaked.emit()
 		if taken <= 0.0:
 			return 0.0
+	if taken >= health and not undying_spent and BoonCatalog.rank(&"lilith") >= 4:
+		undying_spent = true
+		taken = health - 1.0
+		add_shield(BLOOD_SHIELD_CAP)
 	health = maxf(0.0, health - taken)
 	health_changed.emit(health, max_health)
 	milo_hurt.emit(taken)
@@ -188,7 +198,9 @@ func stacks(id: StringName) -> int:
 
 func add_boon(id: StringName) -> void:
 	var before: int = stacks(id)
+	var synergies_before: Array[StringName] = Synergies.all_active()
 	boons[id] = before + 1
+	BoonCallouts.announce(get_tree(), id, before, before + 1, synergies_before)
 	if id == &"maris":
 		raise_max_health(BoonEffects.MARIS_HEALTH_PER_STACK)
 	if special == &"":
@@ -220,12 +232,8 @@ func dominant_boon() -> StringName:
 	return best
 
 
-func on_pickup() -> void:
-	var appetite: int = stacks(&"belladonna")
-	if appetite <= 0:
-		return
-	appetite_buffs.append(3.0 + appetite * 0.5)
-	room_damage_bonus = minf(0.6, room_damage_bonus + 0.04 * appetite)
+func on_pickup(was_full: bool = false) -> void:
+	BoonEffects.on_pickup(was_full)
 
 
 func fx(kind: StringName, at: Vector2, color: Color = Color.WHITE, size: float = 1.0) -> void:
@@ -235,3 +243,4 @@ func fx(kind: StringName, at: Vector2, color: Color = Color.WHITE, size: float =
 func enter_room() -> void:
 	room_index += 1
 	room_damage_bonus = 0.0
+	undying_spent = false
