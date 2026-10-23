@@ -51,6 +51,8 @@ def _lights(scene) -> None:
 
 
 LIGHT_YAW = 0.0  # degrees; previews of models facing +Y turn the studio lights round
+# Soft-mode backdrop, which also tints the ambient light.
+SOFT_BG = (0.16, 0.16, 0.18)
 
 
 def _soft(scene, world) -> None:
@@ -59,7 +61,7 @@ def _soft(scene, world) -> None:
     scene.eevee.taa_render_samples = 32
     world.use_nodes = True
     bg = world.node_tree.nodes["Background"]
-    bg.inputs[0].default_value = (0.16, 0.16, 0.18, 1)
+    bg.inputs[0].default_value = (*SOFT_BG, 1)
     bg.inputs[1].default_value = 1.0
     scene.view_settings.view_transform = "AgX"
     scene.view_settings.look = "AgX - Medium High Contrast"

@@ -21,7 +21,7 @@ def _srgb(c) -> np.ndarray:
     return np.array([int(c[i:i + 2], 16) for i in (0, 2, 4)], float)
 
 
-def paint_eye(path: str, iris: str, size: int = 256) -> str:
+def paint_eye(path: str, iris: str, size: int = 256, ir: float = 0.74) -> str:
     """Front-projected eyeball texture: sclera, a big graded iris with a dark
     rim and streaks, the pupil, and two catch lights."""
     from PIL import Image
@@ -36,7 +36,6 @@ def paint_eye(path: str, iris: str, size: int = 256) -> str:
     edge = np.array([214, 196, 200.0])
     t = np.clip((r - 0.55) / 0.45, 0, 1)[..., None]
     img[:] = sclera * (1 - t) + edge * t
-    ir = 0.74
     col = _srgb(iris)
     dark = col * 0.35
     light = np.minimum(col * 1.45 + 30, 255)
@@ -52,7 +51,8 @@ def paint_eye(path: str, iris: str, size: int = 256) -> str:
     img = np.where(m, iris_col, img)
     pupil = (r < ir * 0.38)[..., None]
     img = np.where(pupil, np.array([12, 8, 10.0]), img)
-    for cx, cy, rr, a in ((-0.2, 0.22, 0.13, 1.0), (0.2, -0.2, 0.06, 0.8)):
+    k = ir / 0.74  # catch lights sit on the iris whatever its size
+    for cx, cy, rr, a in ((-0.2 * k, 0.22 * k, 0.13 * k, 1.0), (0.2 * k, -0.2 * k, 0.06 * k, 0.8)):
         d = np.hypot(u - cx, v - cy)
         s = np.clip(1 - (d - rr * 0.7) / (rr * 0.3), 0, 1)[..., None] * a
         img = img * (1 - s) + 255 * s
