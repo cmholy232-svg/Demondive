@@ -84,6 +84,9 @@ def setup(mode: str, size=(520, 900)) -> None:
     scene = bpy.context.scene
     scene.render.resolution_x, scene.render.resolution_y = size
     scene.render.film_transparent = False
+    if hasattr(scene.render.image_settings, "media_type"):
+        scene.render.image_settings.media_type = "IMAGE"
+    scene.render.image_settings.file_format = "PNG"
     world = scene.world or bpy.data.worlds.new("PreviewWorld")
     scene.world = world
     world.color = (0.09, 0.08, 0.1)
