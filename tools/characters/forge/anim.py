@@ -9,7 +9,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "vroid"))
 import retarget  # noqa: E402
 
 
-def copy_clips(glb: str, rig, align: bool = False, align_skip=()) -> list:
+def copy_clips(glb: str, rig, align: bool = False, align_skip=(), only=None) -> list:
     before = set(bpy.data.objects)
     acts_before = set(bpy.data.actions)
     bpy.ops.import_scene.gltf(filepath=glb)
@@ -27,6 +27,8 @@ def copy_clips(glb: str, rig, align: bool = False, align_skip=()) -> list:
         start, end = int(round(act.frame_range[0])), int(round(act.frame_range[1]))
         name = act.name.split("|")[-1]
         act.name = "_src_" + name
+        if only is not None and name not in only:
+            continue
         out = retarget.retarget(src, rig, name, (start, max(end, start + 1)), in_place=True, names=names, flip=False, align=align,
                                    align_skip=align_skip)
         made.append(out)

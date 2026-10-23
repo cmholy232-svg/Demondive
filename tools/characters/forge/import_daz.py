@@ -282,6 +282,9 @@ def main(recipe, shot=None):
     # Heeled feet keep their pointed rest angle instead of being flattened to
     # the clip skeleton's flat feet.
     made = anim.copy_clips(clips, rig, align=True, align_skip=set(R_.get("keep_rest", [])))
+    for extra in R_.get("extra_clips", []):  # e.g. the hero's dash and cast poses
+        made += anim.copy_clips(os.path.join(ROOT, extra["glb"]), rig, align=True,
+                                align_skip=set(R_.get("keep_rest", [])), only=set(extra["only"]))
     anim.damp(made, R_.get("damp", {}))
     tris = sum(len(p.vertices) - 2 for o in rig.children if o.type == "MESH" for p in o.data.polygons)
     print(f"[import_daz] {R_['id']}: {tris} triangles, {len(rig.data.bones)} bones")
