@@ -2,19 +2,19 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bmjtla3p2mrwf"
-path="res://.godot/imported/chr_belladonna_chr_belladonna_face.png-1e17a1504e3d4f5d454f4f37f4ad6b7f.ctex"
+uid="uid://de7t2j75b1b3r"
+path="res://.godot/imported/chr_pyrra_chr_pyrra_eye.png-17fd02857c3998e5d7d93c36a17df968.ctex"
 metadata={
 "vram_texture": false
 }
 generator_parameters={
-"md5": "0e74e946e365d868c6b40a06c3cb4302"
+"md5": "167f209b8c3e6c0b06682e6564842156"
 }
 
 [deps]
 
-source_file="res://art/export/belladonna/chr_belladonna_chr_belladonna_face.png"
-dest_files=["res://.godot/imported/chr_belladonna_chr_belladonna_face.png-1e17a1504e3d4f5d454f4f37f4ad6b7f.ctex"]
+source_file="res://art/export/pyrra/chr_pyrra_chr_pyrra_eye.png"
+dest_files=["res://.godot/imported/chr_pyrra_chr_pyrra_eye.png-17fd02857c3998e5d7d93c36a17df968.ctex"]
 
 [params]
 

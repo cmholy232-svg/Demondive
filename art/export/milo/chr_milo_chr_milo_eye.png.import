@@ -2,19 +2,19 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dcic01qccq5y3"
-path="res://.godot/imported/chr_pyrra_chr_pyrra_face.png-72f6ea52cee137d1362303d8dc07ddea.ctex"
+uid="uid://b3dd5fg4phh"
+path="res://.godot/imported/chr_milo_chr_milo_eye.png-414cd3bef7385d574df1b62233cb9f2b.ctex"
 metadata={
 "vram_texture": false
 }
 generator_parameters={
-"md5": "cf0ff7fb5177013e12bfa456242c1069"
+"md5": "52cd5fc63133b2543227e2da9d89cceb"
 }
 
 [deps]
 
-source_file="res://art/export/pyrra/chr_pyrra_chr_pyrra_face.png"
-dest_files=["res://.godot/imported/chr_pyrra_chr_pyrra_face.png-72f6ea52cee137d1362303d8dc07ddea.ctex"]
+source_file="res://art/export/milo/chr_milo_chr_milo_eye.png"
+dest_files=["res://.godot/imported/chr_milo_chr_milo_eye.png-414cd3bef7385d574df1b62233cb9f2b.ctex"]
 
 [params]
 

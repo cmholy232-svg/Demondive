@@ -2,19 +2,19 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://hwg6m0k2o1m1"
-path="res://.godot/imported/chr_bartender_chr_bartender_face.png-48ea98654881f1ff882a25fc4378c4c1.ctex"
+uid="uid://c0duwuw1h6nti"
+path="res://.godot/imported/chr_belladonna_chr_belladonna_eye.png-a20e9b9dee9bd6ab0af0ca6e640c91db.ctex"
 metadata={
 "vram_texture": false
 }
 generator_parameters={
-"md5": "1a626a5b1d82b99527ca78494e9aea60"
+"md5": "d318bf1285fd12f624cbff633086142a"
 }
 
 [deps]
 
-source_file="res://art/export/bartender/chr_bartender_chr_bartender_face.png"
-dest_files=["res://.godot/imported/chr_bartender_chr_bartender_face.png-48ea98654881f1ff882a25fc4378c4c1.ctex"]
+source_file="res://art/export/belladonna/chr_belladonna_chr_belladonna_eye.png"
+dest_files=["res://.godot/imported/chr_belladonna_chr_belladonna_eye.png-a20e9b9dee9bd6ab0af0ca6e640c91db.ctex"]
 
 [params]
 

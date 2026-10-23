@@ -2,19 +2,19 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://baxtew8uydf1r"
-path="res://.godot/imported/chr_milo_chr_milo_face.png-00b63a28484ae0a44348f51197fa779d.ctex"
+uid="uid://cic0v85bw84w3"
+path="res://.godot/imported/chr_bartender_chr_bartender_eye.png-3d299fee0389acf6b355455c9450df6b.ctex"
 metadata={
 "vram_texture": false
 }
 generator_parameters={
-"md5": "76fc12f7069feea669ba2cc000232be2"
+"md5": "95885bc17aca6a7c72ccbf653c96c372"
 }
 
 [deps]
 
-source_file="res://art/export/milo/chr_milo_chr_milo_face.png"
-dest_files=["res://.godot/imported/chr_milo_chr_milo_face.png-00b63a28484ae0a44348f51197fa779d.ctex"]
+source_file="res://art/export/bartender/chr_bartender_chr_bartender_eye.png"
+dest_files=["res://.godot/imported/chr_bartender_chr_bartender_eye.png-3d299fee0389acf6b355455c9450df6b.ctex"]
 
 [params]
 
