@@ -29,7 +29,7 @@ static func make(index: int, rng: RandomNumberGenerator) -> LevelPlan:
 	var plan := LevelPlan.new()
 	plan.level = index
 	plan.config = levels()[str(index)] as Dictionary
-	var pool: Dictionary = plan._load_pool()
+	var pool: Dictionary = plan.load_pool()
 	var used: Dictionary = {}
 	for slot: Variant in plan.config["slots"]:
 		var kind := StringName(str(slot))
@@ -38,7 +38,7 @@ static func make(index: int, rng: RandomNumberGenerator) -> LevelPlan:
 	return plan
 
 
-func _load_pool() -> Dictionary:
+func load_pool() -> Dictionary:
 	var dir: String = "res://data/rooms/%s" % config["dir"]
 	var pool: Dictionary = {}
 	for file: String in DirAccess.get_files_at(dir):

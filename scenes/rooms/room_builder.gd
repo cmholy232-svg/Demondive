@@ -154,11 +154,19 @@ func _vertical_range(data: RoomData, x: int, y: int) -> Vector2:
 	return Vector2(float(top - y) * T, float(bottom - y) * T)
 
 
-## Invisible walls and ceiling just outside the map so nothing leaves the room.
+## Invisible walls and ceiling just outside the map so nothing leaves the
+## room, with gaps where a box room's gates are open.
 func _build_bounds(data: RoomData, parent: Node2D) -> void:
 	var size: Vector2 = data.size_px()
-	_add_body(parent, Rect2(-T, -T * 4.0, T, size.y + T * 8.0), PhysicsLayers.WORLD, false)
-	_add_body(parent, Rect2(size.x, -T * 4.0, T, size.y + T * 8.0), PhysicsLayers.WORLD, false)
+	for side: String in ["W", "E"]:
+		var x: float = -T if side == "W" else size.x
+		var wall := Rect2(x, -T * 4.0, T, size.y + T * 8.0)
+		if data.open_gates.has(side):
+			var gap: Rect2 = data.gate_rect(side)
+			_add_body(parent, Rect2(x, wall.position.y, T, gap.position.y - wall.position.y), PhysicsLayers.WORLD, false)
+			_add_body(parent, Rect2(x, gap.end.y, T, wall.end.y - gap.end.y), PhysicsLayers.WORLD, false)
+		else:
+			_add_body(parent, wall, PhysicsLayers.WORLD, false)
 	_add_body(parent, Rect2(-T, -T * 5.0, size.x + T * 2.0, T), PhysicsLayers.WORLD, false)
 
 

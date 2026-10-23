@@ -2,6 +2,7 @@ class_name Room
 extends Node2D
 ## One room of a run, built from a RoomData file: geometry, enemy waves,
 ## pickups, a caged boon-giver, and exit doors that open once it's clear.
+## A box room's open gates are barred by laser gates until it's clear.
 
 signal cleared
 signal exit_chosen(reward: StringName)
@@ -28,6 +29,12 @@ var miniboss_kind: StringName = &"bartender"
 var boss_kind: StringName = &"belladonna"
 ## Lords still to come in a boss rush (empty otherwise).
 var rush_queue: Array[StringName] = []
+## A box room Milo already cleared: no fight, no pickups, gates open.
+var revisit: bool = false
+## side -> the StaticBody2D barring that gate while the room is locked.
+var gate_bars: Dictionary = {}
+## side -> what waits beyond that gate (a reward or room kind), for its sign.
+var gate_hints: Dictionary = {}
 var _wave_timer: float = -1.0
 var _started: bool = false
 
@@ -39,6 +46,9 @@ func setup(room_data: RoomData, rewards: Array[StringName]) -> void:
 
 func _ready() -> void:
 	builder.build(data, self)
+	if not revisit:
+		for side: String in data.open_gates:
+			_bar_gate(side)
 	for i: int in data.exits.size():
 		var door := ExitDoor.new()
 		door.position = data.exits[i]
@@ -46,6 +56,8 @@ func _ready() -> void:
 		door.chosen.connect(_on_door_chosen)
 		add_child(door)
 		exits.append(door)
+	if revisit:
+		return
 	_place_cage()
 	for at: Vector2 in data.temptations:
 		Pickup.spawn(self, at + Vector2(0.0, -40.0), Pickup.Kind.PIZZA, 0.15)
@@ -60,6 +72,11 @@ func _ready() -> void:
 ## Called by the run once Milo is in place.
 func start() -> void:
 	_started = true
+	if revisit:
+		is_clear = true
+		for door: ExitDoor in exits:
+			door.open = true
+		return
 	if data.kind == &"boss" or data.kind == &"miniboss":
 		_spawn_boss()
 	elif data.wave_count() > 0:
@@ -172,6 +189,9 @@ func _set_clear() -> void:
 	is_clear = true
 	for door: ExitDoor in exits:
 		door.open = true
+	for side: String in gate_bars:
+		(gate_bars[side] as Node).queue_free()
+	gate_bars.clear()
 	if data.kind != &"hub":
 		Audio.play_sfx(&"room_clear", -2.0)
 	cleared.emit()
@@ -179,3 +199,21 @@ func _set_clear() -> void:
 
 func _on_door_chosen(door: ExitDoor) -> void:
 	exit_chosen.emit(door.reward)
+
+
+## A solid bar across a gate's opening; S gates are barred at the floor surface.
+func _bar_gate(side: String) -> void:
+	var rect: Rect2 = data.gate_rect(side)
+	if side == "S":
+		rect.size.y = RoomData.TILE * 0.5
+	var body := StaticBody2D.new()
+	body.collision_layer = PhysicsLayers.WORLD
+	body.collision_mask = 0
+	body.position = rect.get_center()
+	var shape := CollisionShape2D.new()
+	var box := RectangleShape2D.new()
+	box.size = rect.size
+	shape.shape = box
+	body.add_child(shape)
+	add_child(body)
+	gate_bars[side] = body

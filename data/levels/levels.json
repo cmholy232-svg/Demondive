@@ -25,6 +25,23 @@
 			"explore": "neon_explore",
 			"miniboss": "neon_miniboss",
 			"boss": "neon_boss"
+		},
+		"map": {
+			"side_rooms": [
+				2,
+				3
+			],
+			"side_kinds": [
+				"combat",
+				"combat",
+				"recovery"
+			],
+			"turns": {
+				"E": 4,
+				"N": 2,
+				"S": 2,
+				"W": 1
+			}
 		}
 	},
 	"2": {

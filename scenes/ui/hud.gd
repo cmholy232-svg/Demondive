@@ -2,7 +2,7 @@ class_name Hud
 extends CanvasLayer
 ## Six fixed slots at the screen edges; nothing over the middle of the fight.
 ##   top-left: Health and Demon Energy   top-centre: boss bar
-##   top-right: shards and room          bottom-left: Special
+##   top-right: shards, room and map     bottom-left: Special
 ##   bottom-right: boons                 bottom-centre: prompts and callouts
 
 const MARGIN: float = 22.0
@@ -25,6 +25,7 @@ var _prompt: Label
 var _callout: Label
 var _callout_timer: float = 0.0
 var _enemies_left: Label
+var _map: Minimap
 
 
 func _ready() -> void:
@@ -116,6 +117,10 @@ func _build_top_right() -> void:
 	_enemies_left = UiStyle.label("", 15, UiStyle.EMBER)
 	_enemies_left.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	box.add_child(_enemies_left)
+	_map = Minimap.new()
+	_map.visible = false
+	_map.size_flags_horizontal = Control.SIZE_SHRINK_END
+	box.add_child(_map)
 
 
 func _build_special() -> void:
@@ -191,6 +196,10 @@ func _refresh_boons() -> void:
 
 func set_room_label(text: String) -> void:
 	_room.text = text
+
+
+func show_map(map: LevelMap, at: Vector2i) -> void:
+	_map.show_map(map, at)
 
 
 func set_enemies_left(count: int) -> void:

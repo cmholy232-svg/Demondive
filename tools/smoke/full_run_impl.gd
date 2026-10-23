@@ -34,12 +34,17 @@ func go(tree: SceneTree) -> void:
 		if run.room == null or not is_instance_valid(run.room):
 			continue
 		var label: String = "L%d %s" % [Game.level, run.room.data.id]
+		if run.cell != null:
+			label += " %s gates=%s" % [run.cell.at, ",".join(run.room.data.open_gates)]
 		print(label, "  clear=", run.room.is_clear, " rule=", RoomRules.current, " boons=", Game.boons.size(), " shards=", Game.run_shards)
 		if label == last and not run.room.is_clear:
 			print("  STUCK in ", label)
 		last = label
 		if run.room.is_clear and run.room.exits.size() > 0:
 			run.room.exits[0].chosen.emit(run.room.exits[0])
+			rooms += 1
+		elif run.room.is_clear and run.map != null:
+			run.debug.advance()
 			rooms += 1
 	print("done level=", Game.level, " rooms=", rooms, " results visible=", run.results.visible)
 	tree.quit()

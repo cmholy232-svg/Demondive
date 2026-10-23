@@ -1,7 +1,8 @@
 class_name MonsterModels
 extends RefCounted
-## Rigged, animated monsters from Quaternius' Ultimate Monsters pack (CC0,
-## art/monsters/) standing in for the primitive creatures. Each faces +x with
+## Rigged, animated monsters from Quaternius' Ultimate Monsters pack and the
+## Cyberpunk Game Kit's security bots (CC0, art/monsters/) standing in for
+## the primitive creatures. Each faces +x with
 ## feet at the origin under a "Body" node, like CreatureModels, and carries
 ## its AnimationPlayer as the "animator" meta for CharacterModels.animate.
 
@@ -14,6 +15,9 @@ const MONSTERS: Dictionary = {
 	&"lobber": ["mon_wizard", 1.1],
 	&"diver": ["mon_dragon", 1.0],
 	&"golem": ["mon_yeti", 1.1],
+	&"turret": ["mon_turret", 1.0],
+	&"drone": ["mon_drone", 1.0],
+	&"bouncer": ["mon_orc", 1.05],
 }
 
 static var _scenes: Dictionary = {}

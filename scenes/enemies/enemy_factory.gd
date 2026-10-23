@@ -49,6 +49,12 @@ static func _archetype(kind: StringName) -> Enemy:
 			return Lobber.new()
 		&"diver":
 			return Diver.new()
+		&"turret":
+			return Turret.new()
+		&"drone":
+			return Drone.new()
+		&"bouncer":
+			return Bouncer.new()
 		&"bartender":
 			return Bartender.new()
 		&"belladonna":
