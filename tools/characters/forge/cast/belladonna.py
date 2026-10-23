@@ -7,18 +7,19 @@ import math
 
 from mathutils import Vector
 
-from .. import build, garments as G, hair, materials as M
+from .. import build, garments as G, materials as M, stylized_hair as SH
 from . import lady
 
 CLIPS = "female"
-COLORS = {"skin": "#80543a", "hair": "#140b16", "hair_streak": "#b0258a", "gown": "#1a0f1c", "gown_inside": "#4a1240",
+COLORS = {"skin": "#8a5a3e", "hair": "#140b16", "hair_tip": "#3a1240", "hair_streak": "#c42a9a", "gown": "#1a0f1c", "gown_inside": "#4a1240",
           "gold": "#e2a63a", "stocking": "#2c1a1e", "glow_gem": "#ff3fb0"}
 
 
 def dress(ch) -> None:
     p = ch.p
     mat = {k: M.make(k, v, rough=0.35 if k == "gold" else 0.65, metal=0.85 if k == "gold" else 0.0,
-                     emission=2.0 if k.startswith("glow") else 0.0) for k, v in COLORS.items() if k != "skin"}
+                     emission=2.0 if k.startswith("glow") else 0.0)
+           for k, v in COLORS.items() if not k.startswith(("skin", "hair"))}
     k = 0.2
     front_r = lambda c: c.y < -0.02 and c.x >= 0 and c.z > 1.0
     front_l = lambda c: c.y < -0.02 and c.x < 0 and c.z > 1.0
@@ -65,12 +66,19 @@ def dress(ch) -> None:
         z = sz + 0.045 - 0.05 * max(0.0, ax - 0.12) / 0.3
         pts.append(Vector((x, y, z)))
     lady.fur_boa(ch, pts, 0.07, fur)
-    st = dict(hair.STYLES["long_wavy"])
-    st.update({"count": 40, "width": 0.1, "wave": 0.03, "wave_len": 0.09, "volume": 0.024, "length_back": 0.62,
-               "length_side": 0.52, "seed": 21})
-    for i, o in enumerate(hair.build(ch.head, ch.head_center, st, body=p, scale=ch.hp["scale"])):
-        back = o.name.startswith("lock") and o.data.vertices[0].co.y > ch.head_center.y + 0.02
-        ch.add(o, lady.head_weights(ch), mat["hair_streak"] if back and i % 4 == 1 else mat["hair"])
+    st = dict(SH.STYLES["long_wavy"], count=38, width=0.056, wave=0.038, wave_len=0.15, volume=0.022, length=0.74,
+              curl=0.03, seed=21)
+    o = Vector(ch.head_origin)
+
+    def streak(c):
+        # Magenta bands only in the back half, between the locks' roots and tips.
+        d = c - o
+        if d.y < 0.02:
+            return 0.0
+        a = math.atan2(d.x, d.y)
+        return max(0.0, min(1.0, (math.sin(a * 7 + 0.6) - 0.55) * 4)) * max(0.0, min(1.0, (o.z + 0.05 - c.z) / 0.1))
+    hair = ch.build_hair_sculpt(st, COLORS["hair"], COLORS["hair_tip"], streak=(COLORS["hair_streak"], streak), faces=26000)
+    ch.add(hair, lady.head_weights(ch))
 
 
 def keep_skin(ch):
@@ -80,10 +88,10 @@ def keep_skin(ch):
 
 def make(out_dir: str, clip_source: str):
     build.reset()
-    ch = build.Character("belladonna", "female", out_dir, COLORS["skin"], body_over={"bust": 1.9},
-                         head_over={"scale": 1.08})
-    ch.build_body(faces=14000)
-    ch.build_head(iris="#a54ae6", brow="#140a12", style={"lips": (96, 24, 52), "lash_wing": 0.007, "smirk": 0.0016})
+    ch = build.Character("belladonna", "female", out_dir, COLORS["skin"])
+    ch.build_sculpt(iris="#a54ae6", brow="#140a12",
+                    tint={"lip": "#6e1a3e", "blush": "#a04a50", "shadow": "#5a1a5a", "liner": "#0c060c"},
+                    body_over={"bust": (0.076, 0.07, 0.072)}, head_over={"eye_tilt": 10.0, "lip_full": 1.3})
     dress(ch)
     rig = build.finish(ch, trim_keep=keep_skin(ch), clip_source=clip_source)
     return ch, rig

@@ -39,6 +39,17 @@ def stockings(ch, top_z, mat, trim=None):
             ch.add(t, "skin", trim)
 
 
+def _measure(ch, z_lo: float, z_hi: float) -> tuple:
+    """Half width, front and back depth of the sculpted body between two
+    heights (the widest, so a skirt clears the hips and thighs above it)."""
+    import numpy as np
+    if not hasattr(ch, "_body_co"):
+        ch._body_co = np.array([v.co[:] for v in ch.body.data.vertices])
+    co = ch._body_co
+    band = co[(co[:, 2] < z_hi + 0.012) & (co[:, 2] > min(z_lo, z_hi) - 0.012) & (np.abs(co[:, 0]) < 0.3)]
+    return float(np.abs(band[:, 0]).max()), float(max(-band[:, 1].min(), 0.02)), float(max(band[:, 1].max(), 0.02))
+
+
 def skirt(ch, top_z, hem_z, mat, inner=None, flare=0.25, slits=(), slit_top=0.6, slit_width=0.5, trim=None,
           back_drop=0.0, segments=36):
     """A flared skirt lofted around the hips. Slits are (angle_deg, width_rad) sectors cut below slit_top;
@@ -49,9 +60,12 @@ def skirt(ch, top_z, hem_z, mat, inner=None, flare=0.25, slits=(), slit_top=0.6,
     for i in range(n):
         t = i / (n - 1)
         z = top_z + (hem_z - top_z) * t
-        w, f, b = B.torso_at(p, min(z, top_z)) if z > p["hip_z"] else B.torso_at(p, p["hip_z"] + 0.02)
-        if z < p["hip_z"]:
-            w = max(w, p["leg_x"] + p["thigh"]) * 1.02
+        if hasattr(ch, "skin_field"):
+            w, f, b = _measure(ch, max(z, p["knee_z"] + 0.1), top_z)
+        else:
+            w, f, b = B.torso_at(p, min(z, top_z)) if z > p["hip_z"] else B.torso_at(p, p["hip_z"] + 0.02)
+            if z < p["hip_z"]:
+                w = max(w, p["leg_x"] + p["thigh"]) * 1.02
         grow = flare * t ** 1.4
         rings.append(((0, 0.01 + back_drop * t, z), w + 0.01 + grow, f + 0.012 + grow * 0.8, b + 0.015 + grow * 0.9, 2.0))
     obj = L.loft("skirt", rings, segments=segments, steps=2, front=(0, -1, 0), cap_start=False, cap_end=False,
@@ -177,6 +191,9 @@ def earrings(ch, mat, size=0.012, drop=0.02):
     c, s = ch.head_center, ch.hp["scale"]
     for sx in (1, -1):
         top = c + Vector((sx * 0.072 * s, 0.012, -0.045 * s))
+        if hasattr(ch, "head_origin"):  # sculpted head: hang from the lobe
+            e = ch.hp["ear"]
+            top = Vector(ch.head_origin) + Vector((sx * (e[0] + 0.004), e[1] - 0.002, e[2] - 0.026)) * s
         pts = [top, top + Vector((sx * 0.002, -0.004, -drop * 0.5)), top + Vector((0, 0, -drop))]
         ch.add(L.loft(f"earring_{sx}", [(tuple(p), size * (0.4 + 0.6 * math.sin(math.pi * i / 2) + 0.2), 0.002, 0.002, 4.0)
                                          for i, p in enumerate(pts)], segments=8, steps=2, front=(sx, 0, 0)),

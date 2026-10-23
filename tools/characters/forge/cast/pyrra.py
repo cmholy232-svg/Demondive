@@ -4,18 +4,19 @@ high slits, gold collar, bracers and a spiked flame crown.
 Reference: Alpha 8 portrait chr-pyrra-portrait-v01."""
 from mathutils import Vector
 
-from .. import build, garments as G, hair, materials as M
+from .. import build, garments as G, materials as M, stylized_hair as SH
 from . import lady
 
 CLIPS = "female"
-COLORS = {"skin": "#7a4c32", "hair": "#160d12", "corset": "#221014", "gown": "#c0200e", "gown_inside": "#4a0a06",
+COLORS = {"skin": "#8a5638", "hair": "#1a0e12", "hair_tip": "#6a140c", "corset": "#221014", "gown": "#c0200e", "gown_inside": "#4a0a06",
           "gold": "#e2a63a", "stocking": "#3c0a08", "glow_crown": "#ff8a2a"}
 
 
 def dress(ch) -> None:
     p = ch.p
     mat = {k: M.make(k, v, rough=0.35 if k == "gold" else 0.7, metal=0.85 if k == "gold" else 0.0,
-                     emission=1.5 if k.startswith("glow") else 0.0) for k, v in COLORS.items() if k != "skin"}
+                     emission=1.5 if k.startswith("glow") else 0.0)
+           for k, v in COLORS.items() if not k.startswith(("skin", "hair"))}
     # Strapless corset: top dips between the breasts, hem over the hips.
     front = lambda c: c.y < -0.03
     corset = G.shell(ch.body, "corset", [((0, 0, 1.27), (0, 0.25, 1)), ((0, 0, 0.93), (0, 0, -1)),
@@ -39,10 +40,8 @@ def dress(ch) -> None:
     for i, sag in enumerate((0.05, 0.09)):
         a, b = Vector((0.15, -0.085, 0.95)), Vector((-0.15, -0.085, 0.95))
         lady.chain(ch, f"hip_chain{i}", lady.droop(a, b, sag) , mat["gold"], binding="J_Bip_C_Hips")
-    st = dict(hair.STYLES["long_wavy"])
-    st.update({"length_back": 0.6, "length_side": 0.5, "seed": 11})
-    for o in hair.build(ch.head, ch.head_center, st, body=p, scale=ch.hp["scale"]):
-        ch.add(o, lady.head_weights(ch), mat["hair"])
+    st = dict(SH.STYLES["long_wavy"], seed=11)
+    ch.add(ch.build_hair_sculpt(st, COLORS["hair"], COLORS["hair_tip"], faces=26000), lady.head_weights(ch))
 
 
 def keep_skin(ch):
@@ -51,9 +50,9 @@ def keep_skin(ch):
 
 def make(out_dir: str, clip_source: str):
     build.reset()
-    ch = build.Character("pyrra", "female", out_dir, COLORS["skin"], body_over={"bust": 1.5}, head_over={"scale": 1.08})
-    ch.build_body(faces=14000)
-    ch.build_head(iris="#ff7a1a", brow="#140a0c", style={"lips": (110, 30, 26)})
+    ch = build.Character("pyrra", "female", out_dir, COLORS["skin"])
+    ch.build_sculpt(iris="#ff7a1a", brow="#140a0c",
+                    tint={"lip": "#8e2a2c", "blush": "#a8503e", "shadow": "#4a1610", "liner": "#0e0606"})
     dress(ch)
     rig = build.finish(ch, trim_keep=keep_skin(ch), clip_source=clip_source)
     return ch, rig

@@ -7,7 +7,7 @@ import os
 
 from mathutils import Vector
 
-from .. import body as B, build, garments as G, hair, loft as L, materials as M
+from .. import body as B, build, garments as G, loft as L, materials as M, stylized_hair as SH
 
 CLIPS = "male"
 COLORS = {"skin": "#a8714a", "jacket": "#4a4426", "jacket_lining": "#7e1d16", "jacket_patch": "#8e1c14",
@@ -73,7 +73,7 @@ def _chain(ch, name, pts, r, mat, binding="skin"):
 def dress(ch) -> None:
     p, lm = ch.p, ch.lm
     mat = {k: M.make(k, v, rough=0.35 if k == "metal" else 0.75, metal=0.9 if k == "metal" else 0.0)
-           for k, v in COLORS.items() if k != "skin"}
+           for k, v in COLORS.items() if k not in ("skin", "hair")}
     mat["jacket_inside"] = M.make("jacket_inside", "#2e2a17")
     body = ch.body
     wx = p["wrist_x"]
@@ -130,9 +130,8 @@ def dress(ch) -> None:
                     offset=0.003, thickness=0.003, smooth=2, faces=450, only_faces=lambda c, sx=sx: c.x * sx > wx - 0.06)
         ch.add(g, "skin", mat["glove"])
         _shoe(ch, sx)
-    # Hair.
-    for o in hair.build(ch.head, ch.head_center, hair.STYLES["messy"], scale=ch.hp["scale"]):
-        ch.add(o, "J_Bip_C_Head", mat["hair"])
+    # Hair: one flat colour so cosmetics can recolour it by name.
+    ch.add(ch.build_hair_sculpt(SH.STYLES["messy"], COLORS["hair"]), "J_Bip_C_Head")
 
 
 def keep_skin(ch):
@@ -142,9 +141,10 @@ def keep_skin(ch):
 
 def make(out_dir: str, clip_source: str):
     build.reset()
-    ch = build.Character("milo", "male", out_dir, COLORS["skin"], head_over={"scale": 1.08})
-    ch.build_body(faces=12000, feet=False)
-    ch.build_head(iris="#6e3a12", brow="#120c0e", style={"stubble": 0.55})
+    ch = build.Character("milo", "male", out_dir, COLORS["skin"])
+    ch.build_sculpt(iris="#8a4a18", brow="#120c0e",
+                    tint={"lip": "#9a5a4a", "blush": "#b86a50", "shadow": "#8a5a44", "liner": "#3a2418", "amount": 0.7},
+                    lashes=(0.003, 0.0), brows=(0.35, 0.0078))
     dress(ch)
     rig = build.finish(ch, trim_keep=keep_skin(ch), clip_source=clip_source)
     return ch, rig

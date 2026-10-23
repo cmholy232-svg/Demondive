@@ -6,11 +6,11 @@ import math
 
 from mathutils import Vector
 
-from .. import body as B, build, garments as G, hair, loft as L, materials as M
+from .. import body as B, build, garments as G, loft as L, materials as M, stylized_hair as SH
 from . import lady
 
 CLIPS = "male"
-COLORS = {"skin": "#8a5a3e", "hair": "#120c10", "hair_streak": "#a3141c", "shirt": "#18141a", "shirt_inside": "#2a2228",
+COLORS = {"skin": "#8a5a3e", "hair": "#120c10", "hair_tip": "#26100f", "hair_streak": "#a3141c", "shirt": "#18141a", "shirt_inside": "#2a2228",
           "vest": "#5e0f14", "vest_inside": "#2a0608", "trousers": "#121014", "shoe": "#0c0a0c", "glove": "#0e0c0e",
           "gold": "#e2a63a", "horn": "#8e8078"}
 
@@ -43,7 +43,7 @@ def _shoe(ch, sx, mat, sole_mat):
 def dress(ch) -> None:
     p, lm = ch.p, ch.lm
     mat = {k: M.make(k, v, rough=0.35 if k == "gold" else 0.6, metal=0.85 if k == "gold" else 0.0)
-           for k, v in COLORS.items() if k != "skin"}
+           for k, v in COLORS.items() if not k.startswith(("skin", "hair"))}
     wx = p["wrist_x"]
     # Shirt: long sleeves, collar open to the sternum.
     fr = lambda c: c.y < -0.02 and c.x >= 0 and c.z > 1.15
@@ -80,11 +80,17 @@ def dress(ch) -> None:
                mat["gold"], r=0.0025, binding="J_Bip_C_Spine")
     lady.earrings(ch, mat["gold"], size=0.009, drop=0.02)
     _horns(ch, mat["horn"])
-    st = dict(hair.STYLES["messy"])
-    st.update({"count": 44, "length_front": 0.085, "length_side": 0.08, "length_back": 0.09, "seed": 31})
-    for i, o in enumerate(hair.build(ch.head, ch.head_center, st, scale=ch.hp["scale"])):
-        back = o.name.startswith("lock") and o.data.vertices[0].co.y > ch.head_center.y
-        ch.add(o, "J_Bip_C_Head", mat["hair_streak"] if back and i % 4 == 1 else mat["hair"])
+    st = dict(SH.STYLES["messy"], count=44, length=0.15)
+    o = Vector(ch.head_origin)
+
+    def streak(c):
+        # Red streaks through the back of the hair only.
+        d = c - o
+        if d.y < 0.03:
+            return 0.0
+        return max(0.0, min(1.0, (math.sin(math.atan2(d.x, d.y) * 6 + 0.4) - 0.6) * 4))
+    hair = ch.build_hair_sculpt(st, COLORS["hair"], COLORS["hair_tip"], streak=(COLORS["hair_streak"], streak))
+    ch.add(hair, "J_Bip_C_Head")
 
 
 def keep_skin(ch):
@@ -94,9 +100,10 @@ def keep_skin(ch):
 def make(out_dir: str, clip_source: str):
     build.reset()
     ch = build.Character("bartender", "male", out_dir, COLORS["skin"],
-                         body_over={"height": 1.86, "shoulder": (0.185, 0.0, 1.44)}, head_over={"scale": 1.06})
-    ch.build_body(faces=12000, feet=False)
-    ch.build_head(iris="#e0281e", brow="#120a0c", style={"stubble": 0.25, "smirk": 0.0022, "brow_angle": -0.004})
+                         body_over={"height": 1.86, "shoulder": (0.185, 0.0, 1.44)})
+    ch.build_sculpt(iris="#e0281e", brow="#120a0c",
+                    tint={"lip": "#6a3a30", "blush": "#8a4a3a", "shadow": "#4a2420", "liner": "#1a0c0c", "amount": 0.75},
+                    lashes=(0.003, 0.0), brows=(0.3, 0.008))
     dress(ch)
     rig = build.finish(ch, trim_keep=keep_skin(ch), clip_source=clip_source)
     return ch, rig
