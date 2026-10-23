@@ -10,3 +10,4 @@ These must appear in the game's credits screen before release.
 | Particle Pack | Kenney | CC0 | Bolt and hit sprites (art/fx) |
 | VRoid sample models | pixiv | VRoid terms, commercial use allowed | Heads, hair and bases (art/export) |
 | Animations | Mixamo (Adobe) | Mixamo terms, royalty-free in games | Character animations |
+| Human Base Meshes (stylized female) | Blender Studio | CC0 | Base body for sculpted characters (tools/characters/forge/basebody/hbm) |
