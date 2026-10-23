@@ -201,6 +201,7 @@ func _take() -> void:
 	var had_special: StringName = Game.special
 	Game.add_boon(id)
 	Audio.play_boon(id, -2.0)
+	ArcaneHarmony.reveal(id, get_tree())
 	Audio.play_sfx(&"ui_confirm", -2.0)
 	if had_special != &"" and had_special != id and Game.stacks(id) == 1:
 		_ask_equip(id, had_special)

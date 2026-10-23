@@ -21,7 +21,6 @@ func _ready() -> void:
 	milo.dashed.connect(_on_dashed)
 	milo.wavelanded.connect(_on_wavelanded)
 	milo.landed.connect(_on_landed)
-	caster.cast.connect(_on_cast)
 
 
 func _process(delta: float) -> void:
@@ -79,6 +78,3 @@ func _on_landed(impact_speed: float) -> void:
 	if impact_speed >= HARD_LANDING_SPEED:
 		GameCamera.impact_in(get_tree(), GameCamera.Tier.STEP, Vector2.DOWN)
 
-
-func _on_cast(_direction: Vector2) -> void:
-	Audio.play_sfx(&"arcane_cast", -10.0)

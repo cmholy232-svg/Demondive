@@ -27,7 +27,10 @@ static func enemy_hit(enemy: Enemy, hit: Hit, killed: bool) -> void:
 static func _kill(enemy: Enemy, tree: SceneTree, hit: Hit) -> void:
 	var tier: GameCamera.Tier = GameCamera.Tier.BOSS if enemy.is_boss else GameCamera.Tier.HEAVY
 	GameCamera.impact_in(tree, tier, hit.direction)
-	Audio.play_sfx(&"target_break", -2.0)
+	if enemy.is_boss:
+		Audio.play_sfx(&"boss_phase", 0.0)
+		Audio.duck_music(-9.0, 0.72)
+	Audio.play_sfx(&"enemy_die", -2.0)
 	Game.fx(&"death", enemy.center(), Color(1.0, 0.45, 0.35), enemy.size.y / 90.0)
 
 
