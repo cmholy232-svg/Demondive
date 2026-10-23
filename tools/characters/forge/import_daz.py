@@ -112,7 +112,43 @@ def _bake(o, R_):
         bpy.ops.object.modifier_apply(modifier="d")
     for p in me.polygons:
         p.use_smooth = True
+    push = R_.get("inflate", {}).get(o.name)
+    if push:  # lift skin-tight pieces a few mm off the skin so it can't poke through
+        me.update()
+        for v in me.vertices:
+            v.co += v.normal * push
     return new
+
+
+def _tuck(body, cover, gap: float, reach: float = 0.012) -> int:
+    """Pushes skin that pokes out of a small covering piece (pasties, patches)
+    back under it, so linear skinning can't show it through; returns how many
+    verts moved."""
+    from mathutils.bvhtree import BVHTree
+    tree = BVHTree.FromObject(cover, bpy.context.evaluated_depsgraph_get())
+    moved = set()
+    for _ in range(4):  # a pushed vert can land nearest another, still-open face
+        for v in body.data.vertices:
+            p, n, _, d = tree.find_nearest(v.co, reach)
+            if p is None or (v.co - p).dot(n) <= -gap * 0.99:
+                continue
+            v.co = p - n * gap
+            moved.add(v.index)
+    return len(moved)
+
+
+def _scale_head(objs, rig, k: float) -> None:
+    """Grows everything the head bone carries by k about the head joint,
+    tapering through the neck blend (stylised, readable heads)."""
+    c = rig.matrix_world @ rig.data.bones["J_Bip_C_Head"].head_local
+    for o in objs:
+        g = o.vertex_groups.get("J_Bip_C_Head")
+        if g is None:
+            continue
+        for v in o.data.vertices:
+            w = next((x.weight for x in v.groups if x.group == g.index), 0.0)
+            if w > 0:
+                v.co = c + (v.co - c) * (1 + (k - 1) * w)
 
 
 def _landmarks(arm, B):
@@ -200,6 +236,8 @@ def main(recipe, shot=None):
     lm, fingers = _landmarks(arm, R_["bones"])
     body = _bake(bpy.data.objects[R_["body"]], R_)
     parts = {n: _bake(bpy.data.objects[n], R_) for n in R_.get("parts", {})}
+    for n, gap in R_.get("cover", {}).items():
+        print(f"[import_daz] tucked {_tuck(body, parts[n], gap)} skin verts under {n}")
     for o in list(bpy.data.objects):
         if o not in (body, arm, *parts.values()):
             bpy.data.objects.remove(o)
@@ -231,6 +269,8 @@ def main(recipe, shot=None):
         else:
             o.vertex_groups.clear()
             R.rigid(rig, [o], how)
+    if R_.get("head_scale"):
+        _scale_head([body, *parts.values()], rig, R_["head_scale"])
     # Face +Y like the game's other characters (glTF -Z).
     turn = Matrix.Rotation(math.pi, 4, "Z")
     # Turn the data, not the objects: the meshes are parented to the rig, so
