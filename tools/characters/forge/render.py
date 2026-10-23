@@ -111,8 +111,10 @@ def setup(mode: str, size=(520, 900)) -> None:
 
 
 def sheet(objs, out: str, angles=(0, 35, 90, 180), mode: str = "clay", size=(520, 900), frame=None,
-          margin: float = 1.08, focus=None) -> str:
-    """Renders one image per yaw angle (0 = front) and tiles them into out."""
+          margin: float = 1.08, focus=None, light_follow: bool = False) -> str:
+    """Renders one image per yaw angle (0 = front) and tiles them into out.
+    With light_follow the soft studio lights turn with the camera, so the
+    back view is lit like the front."""
     from PIL import Image
     scene = bpy.context.scene
     setup(mode, size)
@@ -128,8 +130,13 @@ def sheet(objs, out: str, angles=(0, 35, 90, 180), mode: str = "clay", size=(520
     cam.data.ortho_scale = max(height, width / aspect) if size[1] >= size[0] else max(width, height * aspect)
     tiles = []
     tmp = tempfile.mkdtemp()
+    lights = [o for o in scene.objects if o.name.startswith("Soft") and o.type == "LIGHT"]
+    base = {o.name: o.rotation_euler.z for o in lights}
     for i, yaw in enumerate(angles):
         a = math.radians(yaw)
+        if light_follow:
+            for o in lights:
+                o.rotation_euler.z = base[o.name] + a
         d = Vector((math.sin(a), -math.cos(a), 0.0))
         cam.location = center + d * 6.0
         cam.rotation_euler = (math.radians(90), 0, a)
@@ -137,6 +144,8 @@ def sheet(objs, out: str, angles=(0, 35, 90, 180), mode: str = "clay", size=(520
         scene.render.filepath = path
         bpy.ops.render.render(write_still=True)
         tiles.append(Image.open(path).convert("RGB"))
+    for o in lights:
+        o.rotation_euler.z = base[o.name]
     w, h = tiles[0].size
     canvas = Image.new("RGB", (w * len(tiles), h))
     for i, t in enumerate(tiles):
