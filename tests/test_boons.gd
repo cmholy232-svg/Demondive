@@ -69,7 +69,7 @@ func test_flora_crit_and_thorn_marks_burst_on_the_third_hit() -> void:
 	var last: Hit = b.bolt_hit(target)
 	check(before - target.health > last.damage, "the third hit bursts for extra damage")
 	check(not target.status.has_mark(&"thorn"), "the burst spends the marks")
-	check_equal(BoonHooks.flora_threshold(3), 2, "from 3 stacks, marks burst sooner")
+	check_equal(BoonHooks.flora_threshold(4), 2, "from Lv 4, marks burst sooner")
 	b.done()
 
 

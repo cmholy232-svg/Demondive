@@ -80,14 +80,16 @@ func fire(direction: Vector2) -> ArcaneBolt:
 	return bolt
 
 
-## Somnia: each cast is repeated by one delayed echo per stack (up to 3).
+## Somnia: each cast is repeated by a delayed echo, two from Lv 2 and three
+## from Lv 4; from Lv 7 echoes hit as hard as the cast.
 func _queue_echoes(direction: Vector2, stats: BoltStats) -> void:
-	var echoes: int = mini(3, Game.stacks(&"somnia"))
+	var rank: int = BoonCatalog.rank(&"somnia")
+	var echoes: int = mini(3, rank)
 	if echoes <= 0:
 		return
 	var origin: Vector2 = global_position
 	var echo_stats: BoltStats = stats.duplicate_stats()
-	echo_stats.damage *= ECHO_SHARE
+	echo_stats.damage *= 1.0 if rank >= 4 else ECHO_SHARE
 	echo_stats.color = BoonCatalog.color(&"somnia")
 	for i: int in echoes:
 		get_tree().create_timer(ECHO_DELAY * (i + 1), false, true).timeout.connect(func() -> void:

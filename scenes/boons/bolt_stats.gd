@@ -16,6 +16,14 @@ var burn_seconds: float = 0.0
 ## Explosion on hitting a burning enemy (Pyrra 2+).
 var blast_damage: float = 0.0
 var blast_radius: float = 0.0
+## Seconds of burn the blast leaves on what it hits (Pyrra Lv 4).
+var blast_burn: float = 0.0
+## Extra damage share per enemy the bolt has already passed through (Maris Lv 7).
+var pierce_growth: float = 0.0
+## Extra damage share per ricochet (Isolde Lv 2).
+var bounce_growth: float = 0.0
+## Ricochets off an enemy also fire a split bolt at another (Isolde Lv 7).
+var refract: bool = false
 var stun_seconds: float = 0.0
 var crit_chance: float = 0.05
 var crit_multiplier: float = 1.75

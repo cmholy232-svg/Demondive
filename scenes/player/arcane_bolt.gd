@@ -14,6 +14,8 @@ var _spent: bool = false
 var _already_hit: Array[Object] = []
 var _bounces_left: int = 0
 var _last_position: Vector2 = Vector2.ZERO
+## Damage multiplier built up by passing through enemies and ricochets.
+var _growth: float = 1.0
 
 @onready var shape: CollisionShape2D = $Shape
 
@@ -93,19 +95,21 @@ func _on_area_entered(area: Area2D) -> void:
 		return
 	var was_burning: bool = hurtbox != null and hurtbox.enemy.is_burning()
 	var hit: Hit = stats.make_hit(velocity, Game.rng)
-	hit.damage = damage if hurtbox == null else hit.damage
+	hit.damage = damage if hurtbox == null else hit.damage * _growth
 	if hurtbox != null:
-		BoonHooks.modify_hit(hurtbox.enemy, hit)
+		BoonHooks.modify_hit(hurtbox.enemy, hit, stats)
 	area.call("take_hit", hit)
 	if hurtbox != null:
 		BoonHooks.after_hit(hurtbox.enemy, hit, stats, get_parent())
 	if was_burning and stats.blast_damage > 0.0:
-		ArcaneBlast.detonate(get_parent(), global_position, stats.blast_radius, stats.blast_damage, BoonCatalog.color(&"pyrra"))
+		ArcaneBlast.detonate(get_parent(), global_position, stats.blast_radius, stats.blast_damage, BoonCatalog.color(&"pyrra"), stats.blast_burn)
 	if _pierce_left > 0:
 		_pierce_left -= 1
+		_growth += stats.pierce_growth
 		return
 	if _bounces_left > 0 and hurtbox != null:
 		_bounces_left -= 1
+		_growth += stats.bounce_growth
 		_ricochet_to_enemy(hurtbox.enemy)
 		return
 	_spent = true
@@ -121,10 +125,33 @@ func _ricochet_to_enemy(from: Enemy) -> void:
 	else:
 		velocity = (next[0].center() - global_position).normalized() * speed
 	life = maxf(life, 0.6)
+	if stats.refract:
+		_refract(from, next)
 
 
-func _on_body_entered(_body: Node2D) -> void:
-	if _spent:
+## Isolde Lv 7: a ricochet off an enemy also splits a bolt at another one.
+func _refract(from: Enemy, taken: Array[Enemy]) -> void:
+	var skip: Array = [from]
+	skip.append_array(taken)
+	var other: Array[Enemy] = BoonHooks.nearest(get_tree(), global_position, 1, 700.0, skip)
+	if other.is_empty():
+		return
+	var split: BoltStats = stats.duplicate_stats()
+	split.bounces = 0
+	split.pierce = 0
+	split.refract = false
+	var bolt: ArcaneBolt = (load(scene_file_path) as PackedScene).instantiate() as ArcaneBolt
+	bolt.setup_stats((other[0].center() - global_position).normalized(), split)
+	bolt._growth = _growth
+	bolt._already_hit.append(from._hurtbox)
+	bolt.global_position = global_position
+	get_parent().add_child.call_deferred(bolt)
+
+
+## Walls and floors end the bolt (or bounce it). Enemy bodies don't: their
+## hurtbox takes the hit, so pierce and ricochets carry on through them.
+func _on_body_entered(body: Node2D) -> void:
+	if _spent or body is Enemy:
 		return
 	if _bounces_left > 0:
 		_bounces_left -= 1

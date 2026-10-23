@@ -22,12 +22,17 @@ var mirror_left: float = 0.0
 var halo_charges: int = 0
 var _cooldown: float = 0.0
 var _caster_hooked: bool = false
+## Seraphine's fragments, Gaia's stone shards and Vespera's riposte.
+var companions: BoonCompanions
 
 const MIRROR_RADIUS: float = 110.0
 
 
 func _ready() -> void:
 	add_to_group(&"specials")
+	companions = BoonCompanions.new()
+	companions.specials = self
+	add_child(companions)
 
 
 func _physics_process(delta: float) -> void:
@@ -108,7 +113,7 @@ func _tick_lasting(delta: float) -> void:
 			var shot := node as EnemyShot
 			if shot != null and not shot.reflected and shot.global_position.distance_to(origin()) < MIRROR_RADIUS:
 				shot.reflect(shot.global_position - origin())
-				shot.damage *= 1.0 + 0.2 * Game.stacks(&"vespera")
+				shot.damage *= mirror_power()
 
 
 ## Luna's orb and Isolde's clone copy every cast Milo makes.
@@ -129,6 +134,11 @@ func _on_cast(direction: Vector2) -> void:
 			c.spawn_at(echo_origin + Vector2(0.0, -40.0 * i), direction, crystal)
 
 
+## Vespera: reflected shots gain 20% per stack, and double from Lv 4.
+func mirror_power() -> float:
+	return (1.0 + 0.2 * Game.stacks(&"vespera")) * (2.0 if BoonCatalog.rank(&"vespera") >= 3 else 1.0)
+
+
 func moon_orb_position() -> Vector2:
 	return origin() + Vector2(-milo.facing * 60.0, -70.0)
 
@@ -139,16 +149,27 @@ func _flame_nova(power: int) -> void:
 	GameCamera.impact_in(get_tree(), GameCamera.Tier.HEAVY, Vector2.ZERO)
 
 
-## Maris - Ground Wave: a damaging wave forward that shoves enemies down the lane.
+## Maris - Ground Wave: a damaging wave forward that shoves enemies down the
+## lane. Lv 4 Second Wave: it rolls back toward Milo for another hit.
 func _ground_wave(power: int) -> void:
 	var facing: int = milo.facing
-	var lane := Rect2(milo.global_position.x + (0.0 if facing > 0 else -720.0), milo.global_position.y - 150.0, 720.0, 160.0)
+	var at: Vector2 = milo.global_position
+	wave_hit(at, facing, power)
+	if BoonCatalog.rank(&"maris") >= 3:
+		get_tree().create_timer(0.45, false, true).timeout.connect(wave_hit.bind(at + Vector2(facing * 720.0, 0.0), -facing, power))
+
+
+func wave_hit(at: Vector2, facing: int, power: int) -> int:
+	var lane := Rect2(at.x + (0.0 if facing > 0 else -720.0), at.y - 150.0, 720.0, 160.0)
+	var struck: int = 0
 	for enemy: Enemy in enemies():
 		if lane.has_point(enemy.global_position + Vector2(0.0, -10.0)):
 			var hit := Hit.make(30.0 + power * 8.0, Vector2(facing, -0.2), 900.0 + power * 120.0)
 			hit.source = &"special"
 			enemy.take_hit(hit)
-	Game.fx(&"wave", milo.global_position, BoonCatalog.color(&"maris"), float(facing))
+			struck += 1
+	Game.fx(&"wave", at, BoonCatalog.color(&"maris"), float(facing))
+	return struck
 
 
 ## Gaia - Stone Barrier: absorbs hits, then bursts into shards.
@@ -193,14 +214,15 @@ func _crosswind_burst(power: int) -> void:
 
 
 ## Belladonna - Devour: eat a weakened enemy in front of Milo, executing it
-## and restoring a little Health.
+## and restoring a little Health. Lv 4 Gorge: bigger appetite, double healing.
 func _devour(power: int) -> void:
+	var gorge: bool = BoonCatalog.rank(&"belladonna") >= 3
 	var best: Enemy = null
 	for enemy: Enemy in enemies():
 		var ahead: float = (enemy.global_position.x - milo.global_position.x) * milo.facing
 		if ahead < -20.0 or ahead > 220.0 or absf(enemy.global_position.y - milo.global_position.y) > 160.0:
 			continue
-		if enemy.is_boss or (enemy.health > 60.0 and enemy.health_ratio() > 0.35):
+		if enemy.is_boss or (enemy.health > (120.0 if gorge else 60.0) and enemy.health_ratio() > (0.5 if gorge else 0.35)):
 			continue
 		best = enemy
 		break
@@ -210,7 +232,7 @@ func _devour(power: int) -> void:
 	var hit := Hit.make(best.health + 1.0, Vector2(milo.facing, 0.0))
 	hit.source = &"special"
 	best.take_hit(hit)
-	Game.heal(8.0 + power * 3.5)
+	Game.heal((8.0 + power * 3.5) * (2.0 if gorge else 1.0))
 	Game.fx(&"devour", best.center(), BoonCatalog.color(&"belladonna"), 1.2)
 
 
