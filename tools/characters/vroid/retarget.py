@@ -52,8 +52,12 @@ def _world_rest(arm) -> dict:
 
 
 def retarget(src, target, name: str, frames=None, in_place: bool = True, loop: bool = True,
-             speed: float = 1.0, step: int = 1, names: dict = None, flip: bool = True):
-    """Bakes src's current action onto target as a new action called name."""
+             speed: float = 1.0, step: int = 1, names: dict = None, flip: bool = True,
+             hips: str = "J_Bip_C_Hips", align: bool = False):
+    """Bakes src's current action onto target as a new action called name.
+    hips names the target's hip bone. With align, each mapped target bone is
+    first turned to point the way its source bone points at rest, so a rig
+    resting in an A-pose plays T-pose clips correctly."""
     scene = bpy.context.scene
     action = src.animation_data.action
     start, end = (int(action.frame_range[0]), int(action.frame_range[1])) if frames is None else frames
@@ -69,9 +73,32 @@ def retarget(src, target, name: str, frames=None, in_place: bool = True, loop: b
     tgt_rest = _world_rest(target)
     w_t = target.matrix_world
     w_t_inv = w_t.inverted()
-    src_hips = next(s for t, s in mapping.items() if t == "J_Bip_C_Hips")
+    if align:
+        # Rest directions from joint positions (bone to its first mapped
+        # descendant), since imported glTF bones can point anywhere.
+        def child(t):
+            todo = list(target.data.bones[t].children)
+            while todo:
+                c = todo.pop(0)
+                if c.name in mapping:
+                    return c.name
+                todo += list(c.children)
+            return None
+        fixed = {}
+        for t, s in mapping.items():
+            c = child(t)
+            if c is None:
+                continue
+            d_t = tgt_rest[c].translation - tgt_rest[t].translation
+            d_s = src_rest[mapping[c]].translation - src_rest[s].translation
+            if d_t.length < 1e-5 or d_s.length < 1e-5:
+                continue
+            corr = d_t.rotation_difference(d_s)
+            fixed[t] = Matrix.LocRotScale(tgt_rest[t].translation, corr @ tgt_rest[t].to_quaternion(), Vector((1, 1, 1)))
+        tgt_rest.update(fixed)
+    src_hips = next(s for t, s in mapping.items() if t == hips)
     leg_src = src_rest[src_hips].translation.z - min(m.translation.z for m in src_rest.values())
-    leg_tgt = tgt_rest["J_Bip_C_Hips"].translation.z - min(m.translation.z for m in tgt_rest.values())
+    leg_tgt = tgt_rest[hips].translation.z - min(m.translation.z for m in tgt_rest.values())
     ratio = leg_tgt / max(1e-6, leg_src)
     order = sorted(target.data.bones, key=lambda b: len(b.parent_recursive))
     samples = []
@@ -105,7 +132,7 @@ def retarget(src, target, name: str, frames=None, in_place: bool = True, loop: b
             rot_world = delta @ tgt_rest[b.name].to_quaternion()
             rot_arm = w_t_inv.to_quaternion() @ rot_world
             loc = base.translation
-            if b.name == "J_Bip_C_Hips":
+            if b.name == hips:
                 move = hips_moves[i] - drift * (i / max(1, count - 1))
                 if in_place:
                     move = Vector((0.0, 0.0, move.z))
@@ -126,7 +153,7 @@ def retarget(src, target, name: str, frames=None, in_place: bool = True, loop: b
             pb.rotation_mode = "QUATERNION"
             pb.rotation_quaternion = q
             pb.keyframe_insert("rotation_quaternion", frame=frame)
-            if b.name == "J_Bip_C_Hips":
+            if b.name == hips:
                 pb.location = basis.translation
                 pb.keyframe_insert("location", frame=frame)
     target.matrix_world = saved
