@@ -12,6 +12,8 @@ signal landed(impact_speed: float)
 signal dropped_through
 signal hurt(amount: float)
 signal perfect_dodged
+## The dash is usable again: its cooldown ran out on the ground, or a waveland reset it.
+signal dash_ready
 
 ## Milo's placeholder is 128 px tall; see docs/design.md (art pipeline) for the final size.
 const HEIGHT: float = 128.0
@@ -38,6 +40,8 @@ var dash_cooldown_timer: float = 0.0
 var dash_direction: Vector2 = Vector2.RIGHT
 var wave_slide_timer: float = 0.0
 var invulnerable_timer: float = 0.0
+## The dash's own i-frames, kept apart so a waveland can end them at touchdown.
+var dash_invulnerable_timer: float = 0.0
 var drop_timer: float = 0.0
 var standing_on_one_way: bool = false
 ## True from the moment input opposes velocity on the ground until full speed the other way.
@@ -60,6 +64,7 @@ var safe_position: Vector2 = Vector2.INF
 var _safe_timer: float = 0.0
 ## Dash speed for a Special's pounce (0 = the normal dash).
 var _dash_speed_override: float = 0.0
+var _dash_was_ready: bool = true
 
 
 func _ready() -> void:
@@ -89,7 +94,7 @@ func is_dashing() -> bool:
 
 
 func is_invulnerable() -> bool:
-	return invulnerable_timer > 0.0
+	return invulnerable_timer > 0.0 or dash_invulnerable_timer > 0.0
 
 
 func is_wave_sliding() -> bool:
@@ -126,6 +131,7 @@ func take_damage(amount: float, source_x: float) -> bool:
 	var recovery: float = BoonEffects.hurt_recovery()
 	hurt_timer = 0.18 * recovery
 	dash_timer = 0.0
+	dash_invulnerable_timer = 0.0
 	var away: float = signf(global_position.x - source_x) if global_position.x != source_x else float(-facing)
 	velocity = Vector2(HURT_KNOCKBACK.x * away, HURT_KNOCKBACK.y) * recovery
 	hurt.emit(taken)
@@ -145,22 +151,33 @@ func step(input: MiloInput, delta: float) -> void:
 		_start_dash(input)
 	if is_dashing():
 		_dash_step(delta)
-		return
-	_run(input, delta, was_on_floor)
-	_jump(input, delta, was_on_floor)
-	_fall(input, delta)
-	velocity += push * delta
-	push = Vector2.ZERO
-	var fall_speed: float = velocity.y
-	_move()
-	if not was_on_floor and is_on_floor():
-		landed.emit(fall_speed)
+	else:
+		_run(input, delta, was_on_floor)
+		_jump(input, delta, was_on_floor)
+		_fall(input, delta)
+		velocity += push * delta
+		push = Vector2.ZERO
+		var fall_speed: float = velocity.y
+		_correct_corner(delta)
+		_move()
+		if not was_on_floor and is_on_floor():
+			landed.emit(fall_speed)
+	_announce_dash_ready()
+
+
+## Emits dash_ready on the tick the dash comes back, so presentation can show it.
+func _announce_dash_ready() -> void:
+	var ready: bool = not is_dashing() and dash_cooldown_timer <= 0.0 and (dash_charges_left > 0 or is_on_floor())
+	if ready and not _dash_was_ready:
+		dash_ready.emit()
+	_dash_was_ready = ready
 
 
 func _tick_timers(delta: float) -> void:
 	dash_cooldown_timer = maxf(0.0, dash_cooldown_timer - delta)
 	wave_slide_timer = maxf(0.0, wave_slide_timer - delta)
 	invulnerable_timer = maxf(0.0, invulnerable_timer - delta)
+	dash_invulnerable_timer = maxf(0.0, dash_invulnerable_timer - delta)
 	hurt_timer = maxf(0.0, hurt_timer - delta)
 	perfect_dodge_cooldown = maxf(0.0, perfect_dodge_cooldown - delta)
 	since_dash = 0.0 if is_dashing() else since_dash + delta
@@ -185,7 +202,7 @@ func _start_dash(input: MiloInput) -> void:
 	dash_timer = tuning.dash_duration_seconds
 	dash_cooldown_timer = tuning.dash_cooldown_seconds
 	dash_charges_left -= 1
-	invulnerable_timer = maxf(invulnerable_timer, tuning.dash_invulnerable_seconds)
+	dash_invulnerable_timer = tuning.dash_invulnerable_seconds
 	jump_buffer_timer = 0.0
 	dashed.emit(dash_direction)
 
@@ -203,18 +220,34 @@ func pounce(direction: Vector2, speed: float, seconds: float) -> void:
 
 func _dash_step(delta: float) -> void:
 	dash_timer = maxf(0.0, dash_timer - delta)
-	velocity = dash_direction * (_dash_speed_override if _dash_speed_override > 0.0 else tuning.dash_speed)
+	var pouncing: bool = _dash_speed_override > 0.0
+	velocity = dash_direction * (_dash_speed_override if pouncing else tuning.dash_speed)
 	if dash_timer <= 0.0:
 		_dash_speed_override = 0.0
 	_move()
 	if is_on_floor() and dash_direction.y >= tuning.waveland_min_down:
 		dash_timer = 0.0
+		if absf(dash_direction.x) < tuning.waveland_min_side:
+			# Straight down onto the floor is just a landing: no slide, no reset.
+			velocity = Vector2.ZERO
+			dash_invulnerable_timer = 0.0
+			return
 		wave_slide_timer = tuning.waveland_duration_seconds
 		velocity = Vector2(dash_direction.x * tuning.waveland_speed, 0.0)
 		# A clean wavedash or waveland is the one way to skip the dash cooldown.
+		# Its i-frames end at touchdown so chained wavedashes can't stay invulnerable.
 		dash_cooldown_timer = 0.0
 		dash_charges_left = tuning.dash_charges
+		dash_invulnerable_timer = 0.0
 		wavelanded.emit(absf(dash_direction.x) > 0.35)
+		_dash_was_ready = true
+		dash_ready.emit()
+		return
+	if dash_timer <= 0.0 and not pouncing:
+		# Hand back control at about run speed instead of coasting at dash speed.
+		velocity.x *= tuning.dash_end_speed_ratio
+		if velocity.y < 0.0:
+			velocity.y *= tuning.dash_end_rise_ratio
 
 
 func _run(input: MiloInput, delta: float, on_floor: bool) -> void:
@@ -282,7 +315,29 @@ func _fall(input: MiloInput, delta: float) -> void:
 	var fast_falling: bool = input.move.y > 0 and velocity.y > 30.0
 	var extra: float = tuning.fast_fall_gravity if fast_falling else 0.0
 	var cap: float = tuning.fast_fall_speed_cap if input.move.y > 0 else tuning.fall_speed_cap
-	velocity.y = minf(velocity.y + (tuning.gravity * RoomRules.gravity_scale() + extra) * delta, cap)
+	var gravity: float = tuning.gravity
+	if input.jump_held and absf(velocity.y) < tuning.apex_hang_speed:
+		gravity *= tuning.apex_hang_gravity_scale
+	elif velocity.y > 0.0:
+		gravity *= tuning.fall_gravity_multiplier
+	velocity.y = minf(velocity.y + (gravity * RoomRules.gravity_scale() + extra) * delta, cap)
+
+
+## Rising into the very edge of a ceiling nudges Milo around it instead of
+## killing the jump.
+func _correct_corner(delta: float) -> void:
+	if tuning.corner_correction_px <= 0.0 or velocity.y >= 0.0:
+		return
+	var rise := Vector2(0.0, velocity.y * delta)
+	if not test_move(global_transform, rise):
+		return
+	var first: float = float(facing) if velocity.x == 0.0 else signf(velocity.x)
+	for offset: int in range(1, int(tuning.corner_correction_px) + 1):
+		for side: float in [first, -first]:
+			var shift := Vector2(side * offset, 0.0)
+			if not test_move(global_transform, shift) and not test_move(global_transform.translated(shift), rise):
+				global_position += shift
+				return
 
 
 func _move() -> void:
@@ -331,6 +386,7 @@ func hazard_respawn(damage: float) -> void:
 	velocity = Vector2.ZERO
 	hurt_timer = 0.25
 	dash_timer = 0.0
+	dash_invulnerable_timer = 0.0
 	air_jumps_left = tuning.air_jumps
 	reset_physics_interpolation()
 	Game.fx(&"spark", from + Vector2(0.0, -40.0), Color(1.0, 0.45, 0.15), 1.2)

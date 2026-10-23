@@ -47,7 +47,7 @@ func test_held_jump_goes_higher_than_tapped_jump() -> void:
 	rig.place(Vector2(OPEN_FLOOR_X, FLOOR_Y - 1.0))
 	var tapped_peak: float = _jump_peak(rig, 1)
 	check(tapped_peak < held_peak * 0.75, "held %.0f px vs tapped %.0f px" % [held_peak, tapped_peak])
-	check(held_peak > 205.0 and held_peak < 245.0, "full jump about 225 px (got %.0f)" % held_peak)
+	check(held_peak > 275.0 and held_peak < 320.0, "full jump about 295 px (got %.0f)" % held_peak)
 	rig.free_room()
 
 
