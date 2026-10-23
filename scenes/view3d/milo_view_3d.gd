@@ -20,6 +20,8 @@ var _yaw: float = -PI * 0.5
 var _cast_timer: float = 0.0
 var _trail: CPUParticles3D
 var _burst: CPUParticles3D
+## A small cyan flash when the dash comes back, so the cooldown reads without a HUD.
+var _ready_flash: CPUParticles3D
 
 
 ## [mesh, surface, original colour, material name] for every toon surface.
@@ -46,7 +48,11 @@ func bind(target: Milo) -> void:
 		_cast_timer = CAST_POSE_SECONDS
 		if _cast_arm != null:
 			_cast_arm.kick())
+	_ready_flash = _make_particles(Color(0.45, 0.95, 1.0), 16, 0.25, true)
+	_ready_flash.initial_velocity_min = 1.5
+	_ready_flash.spread = 180.0
 	milo.wavelanded.connect(func(_is_wavedash: bool) -> void: _burst.restart())
+	milo.dash_ready.connect(func() -> void: _ready_flash.restart())
 	milo.landed.connect(func(speed: float) -> void:
 		if speed > 600.0:
 			_burst.restart())
@@ -137,6 +143,7 @@ func _process(delta: float) -> void:
 	_trail.emitting = milo.is_dashing() or milo.is_wave_sliding()
 	_trail.position = Vector3(0.0, 0.6, 0.0)
 	_burst.position = Vector3.ZERO
+	_ready_flash.position = Vector3(0.0, 0.8, 0.0)
 	_play(_pick_animation())
 	_update_cast_layer()
 	# Lean into dashes so they read as a burst, not a slide.
