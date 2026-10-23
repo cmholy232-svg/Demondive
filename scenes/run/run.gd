@@ -94,6 +94,7 @@ func _enter_room(index: int) -> void:
 	room.boss_spawned.connect(func(boss: Boss) -> void:
 		hud.show_boss(boss)
 		camera.focus = boss
+		boss.phase_reached.connect(_on_boss_phase.bind(boss))
 		boss.died.connect(func(_e: Enemy) -> void: _on_boss_defeated(boss)))
 	add_child(room)
 	move_child(room, 0)
@@ -146,11 +147,17 @@ func _play_room_beat(data: RoomData, index: int) -> void:
 
 func _play_room_music(data: RoomData) -> void:
 	if data.kind == &"miniboss":
-		Audio.play_music(plan.music("miniboss"))
+		Audio.play_music(plan.music("miniboss"), "miniboss")
 	elif data.kind == &"boss":
-		Audio.play_music(plan.music("boss"))
+		Audio.play_music(plan.music("boss"), "boss")
 	else:
-		Audio.play_music(plan.music("explore"))
+		Audio.play_music(plan.music("explore"), "explore")
+
+
+## A level with a "final" track (The Hollow) switches to it for the boss's last phase.
+func _on_boss_phase(index: int, boss: Boss) -> void:
+	if room.data.kind == &"boss" and index >= boss.milestones.size() and plan.music("final") != &"":
+		Audio.play_music(plan.music("final"), "final")
 
 
 func _on_room_cleared() -> void:
@@ -208,7 +215,11 @@ func _on_boss_defeated(boss: Boss) -> void:
 		if minion != null and minion != boss and not minion.dead:
 			minion.die()
 	Save.record_max("best_level", Game.level)
-	Audio.play_music(plan.music("explore"))
+	# A beaten Demon Lord gets a moment of silence; a miniboss hands back to the level's theme.
+	if room.data.kind == &"boss":
+		Audio.stop_music()
+	else:
+		Audio.play_music(plan.music("explore"), "explore")
 	await get_tree().create_timer(1.2).timeout
 	if room.data.kind == &"boss":
 		var boon := StringName(str(plan.config.get("boss_boon", "")))
@@ -264,7 +275,7 @@ func _on_milo_died() -> void:
 func _end(won: bool) -> void:
 	RoomRules.clear()
 	Game.end_run(won)
-	Audio.play_music(&"victory" if won else &"hub")
+	Audio.play_music(&"victory" if won else &"hub", "victory" if won else "hub")
 	results.show_results(won)
 	await results.closed
 	finished.emit(won)

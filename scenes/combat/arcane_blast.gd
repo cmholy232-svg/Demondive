@@ -21,5 +21,6 @@ static func detonate(parent: Node, at: Vector2, radius: float, damage: float, co
 		enemy.take_hit(hit)
 		hits += 1
 	Game.fx(&"blast", at, color, radius / 100.0)
+	Audio.play_sfx(&"arcane_blast", -6.0, 0.08)
 	GameCamera.impact_in(parent.get_tree(), GameCamera.Tier.HIT, Vector2.ZERO)
 	return hits

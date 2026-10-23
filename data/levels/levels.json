@@ -317,7 +317,8 @@
 		"music": {
 			"explore": "self_below_explore",
 			"miniboss": "self_below_rush",
-			"boss": "self_below_boss"
+			"boss": "self_below_mirror",
+			"final": "self_below_boss"
 		},
 		"roster": {
 			"imp": "hollow_imp",

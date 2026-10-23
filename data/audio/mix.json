@@ -1,0 +1,41 @@
+{
+	"_note": "Presentation only. Ported from Alpha 8.2 music.ts and audio-mix.ts. Fades in seconds, ducks in dB.",
+	"music_fade": {
+		"title": 0.9,
+		"hub": 1.25,
+		"explore": 0.9,
+		"miniboss": 0.45,
+		"boss": 0.8,
+		"final": 0.7,
+		"victory": 1.8,
+		"silence": 1.5
+	},
+	"resume_music": ["hub", "explore"],
+	"paused_duck_db": -6.0,
+	"paused_lowpass_hz": 3200.0,
+	"sfx": {
+		"milo_jump": {"gap": 0.055},
+		"milo_double_jump": {"gap": 0.075, "duck": -1.0},
+		"milo_land": {"gap": 0.055},
+		"milo_dash": {"gap": 0.07, "duck": -1.0},
+		"milo_waveland": {"gap": 0.1, "duck": -2.0},
+		"perfect_dodge": {"gap": 0.15, "duck": -5.0},
+		"arcane_cast": {"gap": 0.035},
+		"arcane_harmonic": {"gap": 0.0},
+		"arcane_blast": {"gap": 0.06, "voices": 3},
+		"arcane_hit": {"gap": 0.035, "voices": 4},
+		"special": {"gap": 0.12, "duck": -5.0},
+		"milo_hurt": {"gap": 0.11, "duck": -6.0, "voices": 1},
+		"milo_die": {"gap": 0.4, "duck": -9.0},
+		"pickup_shard": {"gap": 0.08, "duck": -2.0},
+		"pickup_heal": {"gap": 0.08, "duck": -2.0},
+		"enemy_shoot": {"gap": 0.065, "voices": 3},
+		"enemy_die": {"gap": 0.045, "duck": -2.0, "voices": 3},
+		"target_break": {"gap": 0.045, "duck": -2.0},
+		"boss_windup": {"gap": 0.2},
+		"boss_phase": {"gap": 0.28, "duck": -7.0},
+		"room_clear": {"gap": 0.3, "duck": -4.0},
+		"ui_move": {"gap": 0.045},
+		"ui_confirm": {"gap": 0.075, "duck": -1.0}
+	}
+}

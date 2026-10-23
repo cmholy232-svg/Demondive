@@ -76,7 +76,7 @@ func fire(direction: Vector2) -> ArcaneBolt:
 		_spawn_bolt(direction.rotated(angle), stats)
 	_queue_echoes(direction, stats)
 	cast.emit(direction)
-	Audio.play_sfx(&"arcane_cast", -8.0, 0.1)
+	ArcaneHarmony.cast()
 	return bolt
 
 
