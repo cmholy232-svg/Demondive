@@ -18,7 +18,7 @@ import numpy as np
 from mathutils import Matrix, Vector
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
-from forge import anim, build, daz_textures, materials as M, rig as R  # noqa: E402
+from forge import anim, build, daz_textures, daz_weights, materials as M, rig as R  # noqa: E402
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", ".."))
 TMP = tempfile.mkdtemp()
@@ -89,6 +89,9 @@ def _bake(o, R_):
     dg = bpy.context.evaluated_depsgraph_get()
     me = bpy.data.meshes.new_from_object(o.evaluated_get(dg), preserve_all_data_layers=False, depsgraph=dg)
     me.transform(o.matrix_world)
+    k = R_.get("part_scale", {}).get(o.name)
+    if k:  # clothes that missed the rig's object scale when they were fitted
+        me.transform(Matrix.Scale(k, 4))
     new = bpy.data.objects.new(o.name + "_game", me)
     bpy.context.scene.collection.objects.link(new)
     drop = set(R_.get("drop_materials", []))
@@ -198,16 +201,36 @@ def main(recipe, shot=None):
     body = _bake(bpy.data.objects[R_["body"]], R_)
     parts = {n: _bake(bpy.data.objects[n], R_) for n in R_.get("parts", {})}
     for o in list(bpy.data.objects):
-        if o not in (body, *parts.values()):
+        if o not in (body, arm, *parts.values()):
             bpy.data.objects.remove(o)
     rig = _build_rig(lm, fingers)
-    R.bind_body(rig, body)
-    _fill_unweighted(rig, body)
+    bones = {b.name for b in rig.data.bones}
+    if R_.get("weights", "daz") == "daz":
+        # The figure's own painted weights, folded onto our bones.
+        for o in (body, *parts.values()):
+            lost = daz_weights.rebind(o, arm, bones, rig if R_.get("torso_blend", True) else None)
+            print(f"[import_daz] {o.name}: {lost} verts without Daz weights")
+        R.attach(rig, body)
+        _fill_unweighted(rig, body)
+    else:
+        R.bind_body(rig, body)
+        _fill_unweighted(rig, body)
+    bpy.data.objects.remove(arm)
     for n, how in R_.get("parts", {}).items():
-        if how == "skin":
-            R.transfer(rig, body, [parts[n]])
+        o = parts[n]
+        # "body": copy the skin's weights (tight skirts must follow the thighs,
+        # not their own hip-heavy Daz weights).
+        if how == "body" or (how == "skin" and (R_.get("weights", "daz") != "daz" or not o.vertex_groups)):
+            o.vertex_groups.clear()
+            R.transfer(rig, body, [o])
+            if how == "body":  # blur the seam where the two legs meet
+                daz_weights.smooth_groups(o, R_.get("smooth", 12))
+        elif how == "skin":
+            R.attach(rig, o)
+            _fill_unweighted(rig, o)
         else:
-            R.rigid(rig, [parts[n]], how)
+            o.vertex_groups.clear()
+            R.rigid(rig, [o], how)
     # Face +Y like the game's other characters (glTF -Z).
     turn = Matrix.Rotation(math.pi, 4, "Z")
     # Turn the data, not the objects: the meshes are parented to the rig, so
@@ -216,7 +239,10 @@ def main(recipe, shot=None):
         o.data.transform(turn)
     rig.data.transform(turn)
     clips = os.path.join(ROOT, "art", "source", "forge", f"clips_{R_.get('clips', 'female')}.glb")
-    anim.copy_clips(clips, rig, align=True)
+    # Heeled feet keep their pointed rest angle instead of being flattened to
+    # the clip skeleton's flat feet.
+    made = anim.copy_clips(clips, rig, align=True, align_skip=set(R_.get("keep_rest", [])))
+    anim.damp(made, R_.get("damp", {}))
     tris = sum(len(p.vertices) - 2 for o in rig.children if o.type == "MESH" for p in o.data.polygons)
     print(f"[import_daz] {R_['id']}: {tris} triangles, {len(rig.data.bones)} bones")
     out = os.path.join(ROOT, "art", "export", R_["id"], f"chr_{R_['id']}.glb")

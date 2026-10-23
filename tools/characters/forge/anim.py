@@ -9,7 +9,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "vroid"))
 import retarget  # noqa: E402
 
 
-def copy_clips(glb: str, rig, align: bool = False) -> list:
+def copy_clips(glb: str, rig, align: bool = False, align_skip=()) -> list:
     before = set(bpy.data.objects)
     acts_before = set(bpy.data.actions)
     bpy.ops.import_scene.gltf(filepath=glb)
@@ -27,7 +27,8 @@ def copy_clips(glb: str, rig, align: bool = False) -> list:
         start, end = int(round(act.frame_range[0])), int(round(act.frame_range[1]))
         name = act.name.split("|")[-1]
         act.name = "_src_" + name
-        out = retarget.retarget(src, rig, name, (start, max(end, start + 1)), in_place=True, names=names, flip=False, align=align)
+        out = retarget.retarget(src, rig, name, (start, max(end, start + 1)), in_place=True, names=names, flip=False, align=align,
+                                   align_skip=align_skip)
         made.append(out)
     for o in new:
         bpy.data.objects.remove(o, do_unlink=True)
@@ -35,3 +36,38 @@ def copy_clips(glb: str, rig, align: bool = False) -> list:
         bpy.data.actions.remove(a)
     scene.frame_set(1)
     return made
+
+
+def _fcurves(act) -> list:
+    if hasattr(act, "fcurves") and len(act.fcurves):
+        return list(act.fcurves)
+    out = []
+    for layer in getattr(act, "layers", []):
+        for strip in layer.strips:
+            for bag in strip.channelbags:
+                out += list(bag.fcurves)
+    return out
+
+
+def damp(actions, amounts: dict) -> None:
+    """Scales chosen bones' clip rotations toward rest (0 = frozen, 1 = as
+    authored). Clip shoulders shrug far more than a heavy-chested figure's
+    collarbones should."""
+    from mathutils import Quaternion
+    for act in actions:
+        curves = {}
+        for fc in _fcurves(act):
+            for bone, k in amounts.items():
+                if fc.data_path == f'pose.bones["{bone}"].rotation_quaternion':
+                    curves.setdefault(bone, {})[fc.array_index] = fc
+        for bone, comps in curves.items():
+            if len(comps) != 4:
+                continue
+            k = amounts[bone]
+            for i in range(len(comps[0].keyframe_points)):
+                q = Quaternion([comps[c].keyframe_points[i].co[1] for c in range(4)])
+                q = Quaternion().slerp(q, k)
+                for c in range(4):
+                    comps[c].keyframe_points[i].co[1] = q[c]
+            for fc in comps.values():
+                fc.update()

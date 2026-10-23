@@ -53,11 +53,12 @@ def _world_rest(arm) -> dict:
 
 def retarget(src, target, name: str, frames=None, in_place: bool = True, loop: bool = True,
              speed: float = 1.0, step: int = 1, names: dict = None, flip: bool = True,
-             hips: str = "J_Bip_C_Hips", align: bool = False):
+             hips: str = "J_Bip_C_Hips", align: bool = False, align_skip=()):
     """Bakes src's current action onto target as a new action called name.
     hips names the target's hip bone. With align, each mapped target bone is
     first turned to point the way its source bone points at rest, so a rig
-    resting in an A-pose plays T-pose clips correctly."""
+    resting in an A-pose plays T-pose clips correctly. Bones in align_skip
+    keep their own rest direction (feet in heels must stay pointed)."""
     scene = bpy.context.scene
     action = src.animation_data.action
     start, end = (int(action.frame_range[0]), int(action.frame_range[1])) if frames is None else frames
@@ -87,7 +88,7 @@ def retarget(src, target, name: str, frames=None, in_place: bool = True, loop: b
         fixed = {}
         for t, s in mapping.items():
             c = child(t)
-            if c is None:
+            if c is None or t in align_skip:
                 continue
             d_t = tgt_rest[c].translation - tgt_rest[t].translation
             d_s = src_rest[mapping[c]].translation - src_rest[s].translation
