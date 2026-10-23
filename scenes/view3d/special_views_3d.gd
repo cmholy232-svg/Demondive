@@ -12,6 +12,8 @@ var _crystal: Node3D
 var _mirror: MeshInstance3D
 var _bubble: MeshInstance3D
 var _halos: Array[MeshInstance3D] = []
+## Seraphine's orbiting fragments (the boon's Arcane modifier).
+var _fragments: Array[MeshInstance3D] = []
 var _time: float = 0.0
 
 
@@ -28,6 +30,9 @@ func bind(milo: Milo) -> void:
 	for i: int in 8:
 		var halo: MeshInstance3D = Kit3D.cylinder(self, Vector3.ZERO, 0.16, 0.16, 0.03, Kit3D.neon(BoonCatalog.color(&"seraphine"), 3.0), 16)
 		_halos.append(halo)
+	for i: int in 4:
+		var shard: MeshInstance3D = Kit3D.cone(self, Vector3.ZERO, 0.07, 0.22, Kit3D.neon(BoonCatalog.color(&"seraphine"), 4.0))
+		_fragments.append(shard)
 
 
 func _glass(color: Color, alpha: float) -> StandardMaterial3D:
@@ -64,3 +69,12 @@ func _process(delta: float) -> void:
 		halo.visible = i < sp.halo_charges
 		var angle: float = _time * 2.2 + TAU * i / maxf(1.0, float(sp.halo_charges))
 		halo.position = chest + Vector3(cos(angle) * HALO_RADIUS, sin(angle * 2.0) * 0.1 + 0.2, sin(angle) * HALO_RADIUS)
+	var spots: Array[Vector2] = []
+	if sp.companions != null:
+		spots = sp.companions.fragment_positions()
+	for i: int in _fragments.size():
+		var shard: MeshInstance3D = _fragments[i]
+		shard.visible = i < spots.size()
+		if shard.visible:
+			shard.position = Kit3D.to_3d(spots[i]) + Vector3(0.0, 0.0, 0.25)
+			shard.rotation = Vector3(0.0, _time * 4.0, PI)
