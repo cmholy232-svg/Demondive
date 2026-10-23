@@ -48,7 +48,9 @@ func _ready() -> void:
 
 
 ## Rolls up to three boons from those Milo has unlocked. A forced boon (a
-## Demon Lord's own) always takes the first slot.
+## Demon Lord's own) always takes the first slot. Once Milo holds boons, one
+## slot always offers a level-up of one he holds, so builds can reach Lv 4
+## and Lv 7; boons one stack from a new level are twice as likely there.
 static func roll(rng: RandomNumberGenerator, forced: StringName = &"") -> Array[StringName]:
 	var pool: Array[StringName] = []
 	for id: StringName in Save.unlocked_boons():
@@ -57,9 +59,26 @@ static func roll(rng: RandomNumberGenerator, forced: StringName = &"") -> Array[
 	var picks: Array[StringName] = []
 	if forced != &"":
 		picks.append(forced)
-	while picks.size() < 3 and not pool.is_empty():
+	var held: StringName = _pick_held(rng, pool)
+	if held != &"":
+		pool.erase(held)
+	while picks.size() < (2 if held != &"" else 3) and not pool.is_empty():
 		picks.append(pool.pop_at(rng.randi_range(0, pool.size() - 1)))
+	if held != &"":
+		picks.insert(mini(1, picks.size()), held)
 	return picks
+
+
+static func _pick_held(rng: RandomNumberGenerator, pool: Array[StringName]) -> StringName:
+	var choices: Array[StringName] = []
+	for id: StringName in pool:
+		var n: int = Game.stacks(id)
+		if n <= 0:
+			continue
+		choices.append(id)
+		if BoonCatalog.rank_at(id, n + 1) > BoonCatalog.rank_at(id, n):
+			choices.append(id)
+	return &"" if choices.is_empty() else choices[rng.randi_range(0, choices.size() - 1)]
 
 
 func offer(options: Array[StringName], forced: StringName = &"") -> void:
@@ -124,11 +143,42 @@ func _make_card(id: StringName) -> PanelContainer:
 		more.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		more.custom_minimum_size = Vector2(300.0, 0.0)
 		col.add_child(more)
+	_add_next_rank(col, id, stacks)
+	_add_synergy(col, id)
 	var special: Label = UiStyle.label(Strings.text("boon.special_line") % BoonCatalog.text(id, "special_name"), 15, UiStyle.ENERGY)
 	special.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	special.custom_minimum_size = Vector2(300.0, 0.0)
 	col.add_child(special)
 	return card
+
+
+## The next level behaviour, in gold when taking this card unlocks it.
+func _add_next_rank(col: VBoxContainer, id: StringName, stacks: int) -> void:
+	var rank: int = BoonCatalog.rank_at(id, stacks) + 1
+	if rank < 2 or rank > BoonCatalog.thresholds(id).size():
+		return
+	var unlocks: bool = BoonCatalog.rank_at(id, stacks + 1) >= rank
+	var text: String = Strings.text("boon.rank_line") % [BoonCallouts.level_for(id, rank), BoonCatalog.text(id, "rank%d_name" % rank), BoonCatalog.text(id, "rank%d" % rank)]
+	var line: Label = UiStyle.label(text, 15, UiStyle.GOLD if unlocks else UiStyle.MUTED)
+	line.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	line.custom_minimum_size = Vector2(300.0, 0.0)
+	col.add_child(line)
+
+
+## The pair synergy this boon belongs to, lit when Milo holds the partner.
+func _add_synergy(col: VBoxContainer, id: StringName) -> void:
+	var synergy: StringName = Synergies.for_boon(id)
+	if synergy == &"":
+		return
+	var partner: StringName = Synergies.partner(synergy, id)
+	var paired: bool = Game.stacks(partner) > 0
+	var text: String = Strings.text("boon.pair") % [BoonCatalog.text(partner, "name"), Synergies.text(synergy, "name")]
+	if paired:
+		text += "  ·  " + Synergies.text(synergy, "desc")
+	var line: Label = UiStyle.label(text, 14, Synergies.color(synergy) if paired else UiStyle.MUTED)
+	line.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	line.custom_minimum_size = Vector2(300.0, 0.0)
+	col.add_child(line)
 
 
 func _highlight() -> void:
