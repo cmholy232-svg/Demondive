@@ -50,6 +50,34 @@ def _lights(scene) -> None:
         scene.collection.objects.link(obj)
 
 
+LIGHT_YAW = 0.0  # degrees; previews of models facing +Y turn the studio lights round
+
+
+def _soft(scene, world) -> None:
+    """Studio look for sculpt previews: soft key, cool fill, warm rim."""
+    scene.render.engine = "BLENDER_EEVEE"
+    scene.eevee.taa_render_samples = 32
+    world.use_nodes = True
+    bg = world.node_tree.nodes["Background"]
+    bg.inputs[0].default_value = (0.16, 0.16, 0.18, 1)
+    bg.inputs[1].default_value = 1.0
+    scene.view_settings.view_transform = "AgX"
+    scene.view_settings.look = "AgX - Medium High Contrast"
+    if "SoftKey" in bpy.data.objects:
+        return
+    for name, energy, rot, color, angle in (
+            ("SoftKey", 3.5, (math.radians(55), 0, math.radians(-30)), (1.0, 0.96, 0.92), 25),
+            ("SoftRim", 3.0, (math.radians(-65), 0, math.radians(150)), (1.0, 0.8, 0.7), 10),
+            ("SoftFill", 1.0, (math.radians(75), 0, math.radians(70)), (0.75, 0.82, 1.0), 40)):
+        light = bpy.data.lights.new(name, "SUN")
+        light.energy = energy
+        light.color = color
+        light.angle = math.radians(angle)
+        obj = bpy.data.objects.new(name, light)
+        obj.rotation_euler = (rot[0], rot[1], rot[2] + math.radians(LIGHT_YAW))
+        scene.collection.objects.link(obj)
+
+
 def setup(mode: str, size=(520, 900)) -> None:
     scene = bpy.context.scene
     scene.render.resolution_x, scene.render.resolution_y = size
@@ -68,6 +96,8 @@ def setup(mode: str, size=(520, 900)) -> None:
         shading.show_specular_highlight = False
         shading.background_type = "WORLD"
         scene.display.render_aa = "8"
+    elif mode == "soft":
+        _soft(scene, world)
     else:
         scene.render.engine = "BLENDER_EEVEE"
         scene.eevee.taa_render_samples = 16

@@ -61,6 +61,94 @@ class Character:
         for s in (1, -1):
             self.add(H.ear(f"ear_{'l' if s > 0 else 'r'}", self.hp, c, s), "J_Bip_C_Head", self.skin)
 
+    def build_sculpt(self, iris: str, brow: str, tint: dict, body_over: dict = None, head_over: dict = None,
+                     voxel: float = 0.0012, faces: int = 24000, lashes=(0.0055, 0.006), brows=(1.0, 0.0058)) -> None:
+        """Stylized sculpt: one smooth skin (head included) from blended
+        shapes, painted 3D eyes, lashes, brows and vertex-colour make-up."""
+        from . import sdf, stylized_body as SB, stylized_face as SF, stylized_head as SH
+        female = self.kind != "male"
+        s = dict(SB.FEMALE if female else SB.MALE, **(body_over or {}))
+        hp = dict(SH.FEMALE if female else SH.MALE, **(head_over or {}))
+        hp["scale"] = s["head_scale"]  # recipe helpers (crowns, earrings) read it
+        self.sculpt, self.hp = s, hp
+        self.skin_field = SB.field(self.p, s, hp)
+        voxel = float(os.environ.get("FORGE_VOXEL", voxel))  # coarser for quick look-dev runs
+        verts, tris = self.skin_field.mesh(voxel)
+        body = sdf.to_object("body", verts, tris)
+        origin = SB.head_origin(self.p, s)
+        sc = s["head_scale"]
+        self.head_origin, self.head_scale = origin, sc
+        self.head_center = Vector(origin) + Vector((0, 0.015, -0.01)) * sc
+        # Keep the face's detail when decimating. With the group inverted, a small
+        # weight shifts faces toward the head (weight 1 would freeze it outright).
+        g = body.vertex_groups.new(name="detail")
+        o = Vector(origin)
+        g.add([v.index for v in body.data.vertices if (v.co - o).length < 0.14 * sc], 0.08, "REPLACE")
+        dec = body.modifiers.new("reduce", "DECIMATE")
+        dec.ratio = min(1.0, faces / len(tris))
+        dec.vertex_group, dec.invert_vertex_group, dec.vertex_group_factor = "detail", True, 1.0
+        # No symmetry: matching mirror pairs on a marching-cubes mesh leaves flipped specks.
+        bpy.context.view_layer.objects.active = body
+        bpy.ops.object.modifier_apply(modifier="reduce")
+        body.vertex_groups.remove(body.vertex_groups["detail"])
+        for poly in body.data.polygons:
+            poly.use_smooth = True
+        SF.tint(body, hp, origin, self.skin_color, scale=sc, **tint)
+        vc = self.skin.node_tree.nodes.new("ShaderNodeVertexColor")
+        vc.layer_name = "Col"
+        self.skin.node_tree.links.new(vc.outputs["Color"], self.skin.node_tree.nodes["Principled BSDF"].inputs["Base Color"])
+        M.paint_all(body, self.skin)
+        self.body = body
+        eye = M.make("eye", "#ffffff", texture=SF.paint_eye(os.path.join(SOURCE, f"chr_{self.id}_eye.png"), iris),
+                     rough=0.1)
+        lash = M.make("eye_lash", "#160c10", rough=0.6)
+        brow_mat = M.make("eye_brow", brow, rough=0.8)
+        parts = (SF.eyeballs(hp, origin, eye, sc) + SF.lashes(hp, origin, lash, sc, *lashes)
+                 + SF.brows(hp, origin, body, brow_mat, sc, *brows))
+        for obj in parts:
+            for mod in list(obj.modifiers):
+                bpy.context.view_layer.objects.active = obj
+                bpy.ops.object.modifier_apply(modifier=mod.name)
+            self.add(obj, "J_Bip_C_Head")
+
+    def build_hair_sculpt(self, style: dict, root: str, tip: str = None, mat_name: str = "hair", voxel: float = 0.002,
+                          faces: int = 16000, streak=None):
+        """Sculpted hair mass from stylized_hair, coloured root to tip.
+        streak: optional (colour, fn(world co) -> 0..1) painted over it."""
+        import numpy as np
+        from . import sdf, stylized_face as SF, stylized_hair as SH
+        st = dict(style, head=self.hp)
+        verts, tris = SH.field(self.skin_field, np.asarray(self.head_origin), self.head_scale, st).mesh(voxel)
+        obj = sdf.to_object("hair", verts, tris)
+        dec = obj.modifiers.new("reduce", "DECIMATE")
+        dec.ratio = min(1.0, faces / len(tris))
+        bpy.context.view_layer.objects.active = obj
+        bpy.ops.object.modifier_apply(modifier="reduce")
+        for poly in obj.data.polygons:
+            poly.use_smooth = True
+        if tip is None:  # one flat colour (stays recolourable by material name)
+            M.paint_all(obj, M.make(mat_name, root, rough=0.45))
+            return obj
+        co = np.array([v.co[:] for v in obj.data.vertices])
+        top = self.head_origin[2] + 0.1 * self.head_scale
+        t = np.clip((top - co[:, 2]) / max(top - co[:, 2].min(), 1e-6), 0, 1)
+        t = t * t * (3 - 2 * t)
+        a, b = SF._srgb(root) / 255, SF._srgb(tip) / 255
+        col = a * (1 - t[:, None]) + b * t[:, None]
+        if streak is not None:
+            sc, fn = streak
+            m = np.array([fn(Vector(c)) for c in co])[:, None]
+            col = col * (1 - m) + (SF._srgb(sc) / 255) * m
+        lin = np.where(col <= 0.04045, col / 12.92, ((col + 0.055) / 1.055) ** 2.4)
+        attr = obj.data.color_attributes.new("Col", "FLOAT_COLOR", "POINT")
+        attr.data.foreach_set("color", np.concatenate([lin, np.ones((len(lin), 1))], 1).astype(np.float32).ravel())
+        mat = M.make(mat_name, "#ffffff", rough=0.45)
+        vc = mat.node_tree.nodes.new("ShaderNodeVertexColor")
+        vc.layer_name = "Col"
+        mat.node_tree.links.new(vc.outputs["Color"], mat.node_tree.nodes["Principled BSDF"].inputs["Base Color"])
+        M.paint_all(obj, mat)
+        return obj
+
     def m(self, x_sign: int, v: Vector) -> Vector:
         return Vector((v.x * x_sign, v.y, v.z))
 
@@ -106,6 +194,9 @@ def finish(ch: Character, trim_keep=None, clip_source: str = None, faces_budget:
         from . import garments
         rot = Matrix.Rotation(math.pi, 4, "Z")
         garments.trim_hidden(ch.body, lambda co: trim_keep(rot @ co))
+    if os.environ.get("FORGE_COUNTS"):
+        for o in sorted(rig.children, key=lambda o: -len(o.data.polygons) if o.type == "MESH" else 0)[:8]:
+            print(f"[forge]   {o.name}: {len(o.data.polygons)} faces")
     _join(rig, ch)
     if clip_source:
         from . import anim

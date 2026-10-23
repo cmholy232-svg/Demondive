@@ -1,7 +1,7 @@
 """Builds one forge character (tools/characters/forge/cast/<id>.py) into
 art/export/<id>/chr_<id>.glb, with clips from art/source/forge.
 
-    ~/bvenv/bin/python tools/characters/forge_build.py <id> [preview.png] [--no-export]
+    ~/bvenv/bin/python tools/characters/forge_build.py <id> [preview.png] [--no-export] [--soft]
 """
 import importlib
 import os
@@ -27,7 +27,7 @@ def main() -> None:
     if "--no-export" not in sys.argv:
         build.export(rig, glb)
     if shot:
-        preview.shoot(rig, shot)
+        preview.shoot(rig, shot, mode="soft" if "--soft" in sys.argv else "toon")
     if "--blend" in sys.argv:
         import bpy
         bpy.ops.wm.save_as_mainfile(filepath=os.path.splitext(shot or glb)[0] + ".blend")

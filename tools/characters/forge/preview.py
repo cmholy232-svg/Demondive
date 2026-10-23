@@ -94,18 +94,24 @@ def pose(rig, clip: str, frame: float) -> None:
     bpy.context.scene.frame_set(int(frame))
 
 
-def shoot(rig, path: str, clip: str = "idle", frame: float = 20, angles=(-25, 0, 90, 180, 210)) -> str:
+def shoot(rig, path: str, clip: str = "idle", frame: float = 20, angles=(-25, 0, 90, 180, 210),
+          mode: str = "toon") -> str:
+    """mode "toon" approximates the game shader; "soft" is a studio render
+    of the materials as authored (sculpt reviews)."""
     objs = [o for o in rig.children if o.type == "MESH"]
-    for mat in {m for o in objs for m in o.data.materials if m and m.use_nodes}:
-        if mat.node_tree.nodes.get("Principled BSDF"):
-            _toon(mat)
-    _outline(objs)
+    render.LIGHT_YAW = 180.0
+    if mode == "toon":
+        for mat in {m for o in objs for m in o.data.materials if m and m.use_nodes}:
+            if mat.node_tree.nodes.get("Principled BSDF"):
+                _toon(mat)
+        _outline(objs)
     pose(rig, clip, frame)
     # Character faces +Y here, so yaw 180 is its front.
-    render.sheet(objs, path, angles=[a + 180 for a in angles], mode="toon", size=(560, 900))
+    render.sheet(objs, path, angles=[a + 180 for a in angles], mode=mode, size=(560, 900))
     head = rig.pose.bones["J_Bip_C_Head"]
     c = rig.matrix_world @ head.head
     focus = (c + Vector((-0.2, -0.2, -0.12)), c + Vector((0.2, 0.2, 0.3)))
     close = path.replace(".png", "_face.png")
-    render.sheet(objs, close, angles=[a + 180 for a in (-20, 0, 30)], mode="toon", size=(600, 600), focus=focus, margin=1.0)
+    render.sheet(objs, close, angles=[a + 180 for a in (-20, 0, 30)], mode=mode, size=(600, 600), focus=focus,
+                 margin=1.0)
     return path
