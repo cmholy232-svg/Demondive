@@ -77,6 +77,7 @@ static func build(root: Node3D, room: Room) -> void:
 	for rect: Rect2 in room.builder.lava:
 		_lava(root, rect)
 	_set_dressing(root, room, size)
+	CyberProps3D.build(root, room, WALL_Z)
 
 
 static func _solid(root: Node3D, rect: Rect2, data: RoomData) -> void:

@@ -213,8 +213,11 @@ func gate_spawn(side: String) -> Vector2:
 			return Vector2((width - 1.6) * TILE, (at + 1) * TILE)
 		"N":
 			return Vector2((at + GATE_SPAN * 0.5) * TILE, TILE * 2.0 + 120.0)
-	# S: at the lip of the floor shaft, launched upward by the run.
-	return Vector2((at + GATE_SPAN * 0.5) * TILE, _shaft_top(at - 1) * TILE)
+	# S: on the floor beside the shaft, on the side with more room, so the
+	# hop up out of it lands on solid ground instead of dropping back in.
+	var toward_left: bool = (at + GATE_SPAN * 0.5) > width * 0.5
+	var x: float = at * TILE - 48.0 if toward_left else (at + GATE_SPAN) * TILE + 48.0
+	return Vector2(x, _shaft_top(at - 1) * TILE)
 
 
 ## The opening a gate leaves in the map, in pixels.

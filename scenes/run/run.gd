@@ -10,7 +10,7 @@ signal finished(won: bool)
 const MILO_SCENE: PackedScene = preload("res://scenes/player/milo.tscn")
 const ROOM_FADE: float = 0.25
 ## Upward speed when Milo comes up through a floor shaft into the box above.
-const POP_SPEED: float = -1250.0
+const POP_SPEED: float = -900.0
 
 var plan: LevelPlan
 ## The level's grid of box rooms, or null on levels played as a line.
@@ -119,16 +119,17 @@ func _enter_cell(target: LevelMap.Cell, came_in: String) -> void:
 	target.visited = true
 	var data: RoomData = RoomData.load_box(target.room.path, target.doors)
 	pending_reward = &"" if target.cleared else target.reward
-	var rewards: Array[StringName] = [&"level_end"] if target.kind == &"boss" else []
+	var rewards: Array[StringName] = []
+	if target.kind == &"boss":
+		rewards.append(&"level_end")
 	await _open_room(data, rewards, target.cleared)
 	RoomRules.clear()
 	var velocity: Vector2 = Vector2(milo.velocity.x, maxf(milo.velocity.y, 0.0))
 	if came_in == "":
 		_place_milo(data.player_start if data.player_start != Vector2.ZERO else data.gate_spawn("W"), Vector2.ZERO)
 	elif came_in == "S":
-		# Popped up out of the floor shaft, drifting onto the floor beside it.
-		var drift: float = -1.0 if data.gate_spawn("S").x > data.size_px().x * 0.5 else 1.0
-		_place_milo(data.gate_spawn("S"), Vector2(drift * 380.0, POP_SPEED))
+		# Hops up out of the floor shaft onto the floor beside it.
+		_place_milo(data.gate_spawn("S"), Vector2(0.0, POP_SPEED))
 	else:
 		_place_milo(data.gate_spawn(came_in), velocity if came_in != "N" else Vector2.ZERO)
 	hud.set_room_label(Strings.text("level.%d.name" % Game.level))
