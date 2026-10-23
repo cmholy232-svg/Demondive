@@ -3,12 +3,18 @@ measured from the bottom-left (x right, y up; y=0 is the top of the floor),
 then written as the text maps the game reads (data/rooms/<level>/*.txt).
 
 Also checks every room: the map is rectangular, Milo can reach the exit
-with the base movement kit, and nothing spawns inside a wall."""
+with the base movement kit, and nothing spawns inside a wall.
+
+Box rooms (levels laid out as a grid of rooms) declare gates instead of an
+exit: one on each side, so the run can link the box to neighbours above,
+below, left or right. The check then proves every gate reaches every other."""
 import pathlib
 
 JUMP_UP = 3          # tiles a single jump clears comfortably
 DOUBLE_UP = 6        # tiles with the double jump
 REACH = 6            # tiles of horizontal travel during a jump
+GATE_SPAN = 4        # gates are 4 tiles wide (top/bottom) or tall (sides)
+SIDES = "WENS"
 
 
 class Room:
@@ -16,6 +22,7 @@ class Room:
         self.name, self.kind, self.w, self.h, self.floor = name, kind, width, height, floor
         self.meta = meta
         self.rides = []   # (from_tiles, to_tiles): standing spots a moving platform links
+        self.gates = {}   # side -> feet height (W/E) or left column (N/S)
         self.grid = [[" "] * width for _ in range(height)]
         for x in range(width):
             self.grid[0][x] = "#"
@@ -79,6 +86,64 @@ class Room:
             self.set(xx, high + 1, ":")
         here = [(xx, y + 1) for xx in range(x, x + w)]
         self.rides.append((here, [(xx, yy + 1) for xx in range(x, x + w) for yy in range(low, high + 1)]))
+
+    # --- Box gates -------------------------------------------------------------
+    def gate(self, side, at):
+        """W/E: a doorway in the side wall with Milo's feet at height `at`;
+        N/S: a 4-wide shaft through the ceiling or floor starting at column `at`.
+        Sealed with wall in the map; the game opens the ones the level links."""
+        self.gates[side] = at
+        if side in "WE" and at > 0:
+            self.block(1 if side == "W" else self.w - 4, at - 1, 3, 1)
+
+    def gates_all(self, w_at, e_at, n_at, s_at):
+        self.gate("W", w_at); self.gate("E", e_at); self.gate("N", n_at); self.gate("S", s_at)
+
+    def top_air(self):
+        return self.h - self.floor - 2
+
+    def gate_spots(self, side):
+        """(where Milo appears coming in, where he can leave from)."""
+        at = self.gates[side]
+        if side in "WE":
+            spot = [(1 if side == "W" else self.w - 2, at)]
+            return spot, spot
+        if side == "S":
+            spot = [p for p in ((at - 1, self.surface(at - 1)), (at + GATE_SPAN, self.surface(at + GATE_SPAN)))
+                    if self.standable(*p)]
+            return spot, spot
+        top = self.top_air()
+        land = []
+        for xx in (at + 1, at + 2):
+            for yy in range(top, -1, -1):
+                if self.standable(xx, yy):
+                    land.append((xx, yy))
+                    break
+        leave = [(xx, yy) for xx in range(at - 1, at + GATE_SPAN + 1)
+                 for yy in range(top - DOUBLE_UP, top + 1) if self.standable(xx, yy)]
+        return land, leave
+
+    def gate_clear(self, side):
+        """The tiles just inside a gate must be open air."""
+        at = self.gates[side]
+        if side in "WE":
+            x = 1 if side == "W" else self.w - 2
+            cells = [(x, yy) for yy in range(at, at + GATE_SPAN)]
+        elif side == "N":
+            cells = [(xx, yy) for xx in range(at, at + GATE_SPAN) for yy in range(self.top_air() - 2, self.top_air() + 1)]
+        else:
+            base = self.surface(at)
+            if any(self.surface(xx) != base for xx in range(at, at + GATE_SPAN)):
+                return False
+            cells = [(xx, yy) for xx in range(at, at + GATE_SPAN) for yy in range(base, base + 3)]
+        return all(self.get(x, y) == " " for x, y in cells)
+
+    def surface(self, x):
+        """Feet height on the ground stack in column x (blocks on the floor raise it)."""
+        y = 0
+        while self.solid_at(x, y):
+            y += 1
+        return y
 
     def put(self, c, x, y=0):
         self.set(x, y, c)
@@ -145,7 +210,13 @@ class Room:
     def text(self):
         head = [f"name: {self.name}", f"type: {self.kind}"]
         head += [f"{k}: {v}" for k, v in self.meta.items()]
+        if self.gates:
+            head.append("gates: " + " ".join(f"{side}{self._gate_value(side)}" for side in SIDES if side in self.gates))
         return "\n".join(head) + "\n---\n" + "\n".join("".join(r) for r in self.grid) + "\n"
+
+    def _gate_value(self, side):
+        # The game reads map rows for side gates and columns for top/bottom ones.
+        return self._row(self.gates[side]) if side in "WE" else self.gates[side]
 
     # --- Validation ---------------------------------------------------------
     def find(self, c):
@@ -163,14 +234,18 @@ class Room:
         return here_free and below in "#-=MV|:&" and self.get(x, y) not in "^~"
 
     def reachable_exit(self):
-        start = next(self.find("P"))
         exits = set(self.find("E"))
-        seen = {start}
-        todo = [start]
+        return bool(self.reach([next(self.find("P"))], exits) & exits)
+
+    def reach(self, starts, extra=frozenset()):
+        """Every standing spot Milo can get to from starts with the base kit.
+        extra: spots that count as reached even though nobody stands there."""
+        seen = set(starts)
+        todo = list(starts)
         while todo:
             x, y = todo.pop()
-            if (x, y) in exits:
-                return True
+            if (x, y) in extra:
+                continue
             for here, there in self.rides:
                 if (x, y) in here:
                     for spot in there:
@@ -182,7 +257,7 @@ class Room:
                     nx, ny = x + dx, y + dy
                     if abs(dx) > REACH + max(0, -dy) // 2:
                         continue
-                    if (nx, ny) in seen or not self.standable(nx, ny) and (nx, ny) not in exits:
+                    if (nx, ny) in seen or not self.standable(nx, ny) and (nx, ny) not in extra:
                         continue
                     if dy > JUMP_UP and abs(dx) > REACH - 1:
                         continue
@@ -190,7 +265,33 @@ class Room:
                         continue
                     seen.add((nx, ny))
                     todo.append((nx, ny))
-        return False
+        return seen
+
+    def gate_problems(self):
+        problems = []
+        spots = {}
+        for side in SIDES:
+            if side not in self.gates:
+                problems.append(f"missing gate {side}")
+                continue
+            if not self.gate_clear(side):
+                problems.append(f"gate {side} is blocked")
+            spots[side] = self.gate_spots(side)
+            if not spots[side][0] or not spots[side][1]:
+                problems.append(f"gate {side} has nowhere to stand")
+        if problems:
+            return problems
+        for a in SIDES:
+            reached = self.reach(spots[a][0])
+            for b in SIDES:
+                if a != b and not reached & set(spots[b][1]):
+                    problems.append(f"{a} can't reach {b}")
+        if any(True for _ in self.find("P")):
+            reached = self.reach([next(self.find("P"))])
+            for b in SIDES:
+                if not reached & set(spots[b][1]):
+                    problems.append(f"start can't reach {b}")
+        return problems
 
     def _clear_column(self, x, y, nx, ny):
         # Ceilings are ignored: rooms are open enough that distance limits decide.
@@ -201,6 +302,13 @@ class Room:
         widths = {len(r) for r in self.grid}
         if len(widths) != 1:
             problems.append("rows differ in width")
+        if self.gates:
+            if sum(1 for _ in self.find("P")) > 1:
+                problems.append("at most one P")
+            problems += self.gate_problems()
+            if self.kind == "boss" and not list(self.find("E")):
+                problems.append("boss box needs the way down (E)")
+            return problems
         if sum(1 for _ in self.find("P")) != 1:
             problems.append("needs exactly one P")
         if not list(self.find("E")):

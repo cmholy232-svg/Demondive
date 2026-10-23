@@ -11,9 +11,9 @@ const OUTLINE_M: float = 0.012
 
 ## Gameplay pose prefix -> animation names to try, in order.
 const POSE_ANIMATIONS: Dictionary = {
-	"idle": ["idle", "Idle", "Flying_Idle"], "move": ["walk", "run", "Walk", "Fast_Flying", "Flying_Idle"],
+	"idle": ["idle", "Idle", "Flying_Idle"], "move": ["walk", "run", "Walk", "Fast_Flying", "Flying_Idle", "Run"],
 	"windup": ["windup", "cast_up", "Duck", "Yes", "idle", "Idle", "Flying_Idle"],
-	"attack": ["attack", "cast_forward", "dash", "Punch", "Bite_Front", "Headbutt"],
+	"attack": ["attack", "cast_forward", "dash", "Punch", "Bite_Front", "Headbutt", "Shoot", "Attack"],
 	"hurt": ["hurt", "fall", "HitReact", "HitRecieve", "idle", "Idle", "Flying_Idle"],
 }
 ## Material recolours by material name ("*" for every material).

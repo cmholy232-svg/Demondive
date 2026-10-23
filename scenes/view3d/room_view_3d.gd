@@ -22,6 +22,9 @@ var _fx: FxViews3D
 var _specials: SpecialViews3D
 var _time: float = 0.0
 var _env_root: Node3D
+var _room: Room
+## side -> laser bars shown while the room's gate is barred.
+var _gate_bars: Dictionary = {}
 var _biome: String = ""
 
 
@@ -91,6 +94,8 @@ func build_room(room: Room, biome: String) -> void:
 		var mesh := node as MeshInstance3D
 		if mesh.has_meta("spin") or mesh.has_meta("sweep") or mesh.has_meta("rise") or mesh.has_meta("drift") or mesh.has_meta("spin_z"):
 			_spinners.append(mesh)
+	_room = room
+	_gate_bars = GateViews3D.build(_room_root, room)
 	_actors.bind_room(room)
 	_fx.bind_room(room)
 	_sync_camera()
@@ -99,6 +104,9 @@ func build_room(room: Room, biome: String) -> void:
 func _process(delta: float) -> void:
 	_time += delta
 	_sync_camera()
+	if is_instance_valid(_room):
+		for side: String in _gate_bars:
+			(_gate_bars[side] as Node3D).visible = _room.gate_bars.has(side)
 	for platform: Variant in _movers:
 		var mover := platform as MovingPlatform
 		if is_instance_valid(mover):

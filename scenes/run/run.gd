@@ -1,14 +1,21 @@
 class_name Run
 extends Node2D
-## One dive: loads the level's rooms in order, moves Milo between them,
-## pays out door rewards, plays story beats, and ends in death or victory.
+## One dive: loads the level's rooms, moves Milo between them, pays out
+## rewards, plays story beats, and ends in death or victory. Levels with a
+## map are box rooms on a grid that Milo walks between through their gates
+## (LevelMap); the rest play their rooms in a line through exit doors.
 
 signal finished(won: bool)
 
 const MILO_SCENE: PackedScene = preload("res://scenes/player/milo.tscn")
 const ROOM_FADE: float = 0.25
+## Upward speed when Milo comes up through a floor shaft into the box above.
+const POP_SPEED: float = -1250.0
 
 var plan: LevelPlan
+## The level's grid of box rooms, or null on levels played as a line.
+var map: LevelMap
+var cell: LevelMap.Cell
 var room: Room
 var milo: Milo
 var camera: GameCamera
@@ -19,9 +26,11 @@ var boon_choice: BoonChoice
 var results: RunResults
 var specials: Specials
 var fade: ScreenFade
+var debug: RunDebug
 var pending_reward: StringName = &""
 var _index: int = -1
 var _ending: bool = false
+var _traveling: bool = false
 ## The Forever Motel replays one cleared room per level ("false awakening").
 var _woke_this_level: bool = false
 
@@ -53,9 +62,21 @@ func _ready() -> void:
 	add_child(results)
 	fade = ScreenFade.new()
 	add_child(fade)
+	debug = RunDebug.new()
+	debug.run = self
+	add_child(debug)
 	Game.milo_died.connect(_on_milo_died)
 	plan = LevelPlan.make(Game.level, Game.rng)
-	_enter_room(0)
+	_begin_level()
+
+
+func _begin_level() -> void:
+	map = LevelMap.make(plan, Game.rng) if LevelMap.wanted(plan.config) else null
+	cell = null
+	if map != null:
+		_enter_cell(map.start(), "")
+	else:
+		_enter_room(0)
 
 
 func _physics_process(_delta: float) -> void:
@@ -69,22 +90,82 @@ func _physics_process(_delta: float) -> void:
 			hud.set_prompt(Strings.text("prompt.door") % RunRewards.label(door.reward))
 	if not near_door:
 		hud.set_prompt("")
-	if milo.global_position.y > room.data.size_px().y + 400.0:
+	if map != null and room.is_clear and not _traveling:
+		var side: String = room.data.gate_left_by(milo.global_position)
+		if side != "":
+			_travel(side)
+			return
+	if milo.global_position.y > room.data.size_px().y + 400.0 and not _traveling:
 		_rescue_fall()
 
 
 func _enter_room(index: int) -> void:
 	_index = index
+	var data: RoomData = plan.rooms[index]
+	await _open_room(data, plan.door_rewards(index, data.exits.size(), Game.rng), false)
+	_roll_house_rule(data, index)
+	_place_milo(data.player_start, Vector2.ZERO)
+	hud.set_room_label(Strings.text("level.%d.name" % Game.level) + "  ·  " + Strings.text("hud.room") % [index + 1, plan.room_count()])
+	Game.enter_room()
+	Save.bump_stat("rooms")
+	await _arrive(data, index)
+
+
+## Map levels: enter a box through the gate on side came_in ("" = the level start).
+func _enter_cell(target: LevelMap.Cell, came_in: String) -> void:
+	cell = target
+	_index = maxi(0, target.step)
+	var first: bool = not target.visited
+	target.visited = true
+	var data: RoomData = RoomData.load_box(target.room.path, target.doors)
+	pending_reward = &"" if target.cleared else target.reward
+	var rewards: Array[StringName] = [&"level_end"] if target.kind == &"boss" else []
+	await _open_room(data, rewards, target.cleared)
+	RoomRules.clear()
+	var velocity: Vector2 = Vector2(milo.velocity.x, maxf(milo.velocity.y, 0.0))
+	if came_in == "":
+		_place_milo(data.player_start if data.player_start != Vector2.ZERO else data.gate_spawn("W"), Vector2.ZERO)
+	elif came_in == "S":
+		# Popped up out of the floor shaft, drifting onto the floor beside it.
+		var drift: float = -1.0 if data.gate_spawn("S").x > data.size_px().x * 0.5 else 1.0
+		_place_milo(data.gate_spawn("S"), Vector2(drift * 380.0, POP_SPEED))
+	else:
+		_place_milo(data.gate_spawn(came_in), velocity if came_in != "N" else Vector2.ZERO)
+	hud.set_room_label(Strings.text("level.%d.name" % Game.level))
+	hud.show_map(map, target.at)
+	if first:
+		Game.enter_room()
+		Save.bump_stat("rooms")
+		await _arrive(data, 0 if target.step == 0 else 1)
+	else:
+		await _arrive(data, -1)
+
+
+## Walks Milo out through a gate into the neighbouring box.
+func _travel(side: String) -> void:
+	var next: LevelMap.Cell = map.cell(cell.neighbour(side))
+	if next == null:
+		return
+	_traveling = true
+	Audio.play_sfx(&"door_open", -6.0)
+	await fade.fade_out(ROOM_FADE * 0.6)
+	await _enter_cell(next, LevelMap.OPPOSITE[side])
+	_traveling = false
+
+
+func _open_room(data: RoomData, rewards: Array[StringName], revisit: bool) -> void:
 	if room != null:
 		room.queue_free()
 		await room.tree_exited
 	_clear_leftovers()
 	camera.focus = null
-	var data: RoomData = plan.rooms[index]
-	_assign_cage(data)
-	_roll_house_rule(data, index)
+	if not revisit:
+		_assign_cage(data)
 	room = Room.new()
-	room.setup(data, plan.door_rewards(index, data.exits.size(), Game.rng))
+	room.revisit = revisit
+	if cell != null and map != null:
+		room.gate_hints = _gate_hints(cell)
+	room.setup(data, rewards)
 	room.roster = plan.config.get("roster", {}) as Dictionary
 	room.miniboss_kind = StringName(str(plan.config.get("miniboss", "bartender")))
 	room.boss_kind = StringName(str(plan.config.get("boss", "belladonna")))
@@ -97,18 +178,24 @@ func _enter_room(index: int) -> void:
 		boss.died.connect(func(_e: Enemy) -> void: _on_boss_defeated(boss)))
 	add_child(room)
 	move_child(room, 0)
-	milo.global_position = data.player_start
-	milo.safe_position = data.player_start
-	milo.velocity = Vector2.ZERO
-	camera.set_room_bounds(Rect2(Vector2.ZERO, data.size_px()))
-	camera.snap()
 	view.build_room(room, plan.config.get("dir", "neon_maw") as String)
-	hud.set_room_label(Strings.text("level.%d.name" % Game.level) + "  ·  " + Strings.text("hud.room") % [index + 1, plan.room_count()])
-	Game.enter_room()
-	Save.bump_stat("rooms")
+
+
+func _place_milo(at: Vector2, velocity: Vector2) -> void:
+	milo.global_position = at
+	milo.safe_position = at
+	milo.velocity = velocity
+	milo.reset_physics_interpolation()
+	camera.set_room_bounds(Rect2(Vector2.ZERO, room.data.size_px()))
+	camera.snap()
+
+
+## Music, fade-in and the story beat, then the fight starts. index -1: a revisit, no beat.
+func _arrive(data: RoomData, index: int) -> void:
 	_play_room_music(data)
 	fade.fade_in(ROOM_FADE)
-	await _play_room_beat(data, index)
+	if index >= 0:
+		await _play_room_beat(data, index)
 	if RoomRules.current != &"":
 		BossAnnouncer.say(get_tree(), Strings.text("rule.announce") % Strings.text("rule.%s" % RoomRules.current))
 	room.start()
@@ -154,6 +241,9 @@ func _play_room_music(data: RoomData) -> void:
 
 
 func _on_room_cleared() -> void:
+	if cell != null:
+		cell.cleared = true
+		hud.show_map(map, cell.at)
 	if pending_reward != &"" and (room.data.kind == &"combat" or room.data.kind == &"entry"):
 		RunRewards.pay(pending_reward, self)
 	elif room.data.kind == &"recovery":
@@ -244,7 +334,7 @@ func _finish_level() -> void:
 		_woke_this_level = false
 		_ending = false
 		await fade.fade_out(ROOM_FADE)
-		_enter_room(0)
+		_begin_level()
 		return
 	_end(true)
 
@@ -283,24 +373,15 @@ func _clear_leftovers() -> void:
 				node.queue_free()
 
 
-## Debug builds only, with the F3 panel open: F6 clears the room, F7 skips
-## to the next one, F8 jumps to the boss, F10 skips to the next level,
-## F5 makes Milo very hard to kill for the rest of the run.
-func _unhandled_input(event: InputEvent) -> void:
-	if not Debug.enabled or not Debug.overlay_visible or not event is InputEventKey or not event.is_pressed():
-		return
-	match (event as InputEventKey).physical_keycode:
-		KEY_F6:
-			for node: Node in get_tree().get_nodes_in_group(Enemy.GROUP):
-				(node as Enemy).take_hit(Hit.make(99999.0, Vector2.UP))
-		KEY_F7:
-			if room != null and room.exits.size() > 0 and _index + 1 < plan.room_count():
-				_on_exit_chosen(room.exits[0].reward)
-		KEY_F8:
-			_index = plan.room_count() - 2
-			_on_exit_chosen(&"boss")
-		KEY_F10:
-			if not _ending:
-				_finish_level()
-		KEY_F5:
-			Game.raise_max_health(99999.0)
+## What each gate of here leads to, for rooms Milo hasn't been in yet.
+func _gate_hints(here: LevelMap.Cell) -> Dictionary:
+	var hints: Dictionary = {}
+	for side: String in here.doors:
+		var next: LevelMap.Cell = map.cell(here.neighbour(side))
+		if next != null and not next.visited:
+			hints[side] = next.reward if next.kind == &"combat" else next.kind
+	return hints
+
+
+func is_traveling() -> bool:
+	return _traveling
