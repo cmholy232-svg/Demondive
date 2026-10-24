@@ -1,0 +1,130 @@
+{
+ "xsection": "pyrra_xsection.json",
+ "xs": 0.9,
+ "xs_posture": 1.0,
+ "posture_top": 3.6,
+ "relax": 0.0,
+ "girth": [
+  [
+   "leg",
+   2.0,
+   0.4,
+   0.78,
+   0.85
+  ],
+  [
+   "leg",
+   1.05,
+   0.45,
+   0.78,
+   0.85
+  ],
+  [
+   "leg",
+   2.75,
+   0.45,
+   0.9,
+   1.04
+  ],
+  [
+   "leg",
+   1.6,
+   0.3,
+   0.95,
+   1.0
+  ],
+  [
+   "torso",
+   4.0,
+   0.55,
+   0.78,
+   0.9
+  ],
+  [
+   "torso",
+   3.25,
+   0.35,
+   0.95,
+   1.08
+  ],
+  [
+   "torso",
+   4.7,
+   0.3,
+   1.0,
+   0.85
+  ]
+ ],
+ "bust": {
+  "x": 0.07,
+  "z": 1.115,
+  "rx": 0.085,
+  "rz_up": 0.12,
+  "rz_dn": 0.066,
+  "depth": 0.075,
+  "power": 1.25,
+  "splay": 0.35,
+  "lift": 0.1,
+  "plane": 0.0,
+  "smooth": 4
+ },
+ "glute": {
+  "x": 0.07,
+  "z": 0.83,
+  "rx": 0.095,
+  "rz_up": 0.13,
+  "rz_dn": 0.075,
+  "depth": 0.035,
+  "power": 1.4,
+  "splay": 0.2,
+  "lift": -0.1,
+  "plane": 0.0,
+  "smooth": 4,
+  "fold": 0.008,
+  "cleft": 0.012
+ },
+ "leg_len": 1.14,
+ "skin": "#c98a62",
+ "blush": "#c85a48",
+ "lip": "#a23a40",
+ "shadow": "#5a2a24",
+ "brow": "#3a2018",
+ "iris_col": "#ff7a1a",
+ "iris": 0.42,
+ "suit": "#141014",
+ "face": {
+  "head": 0.88,
+  "cranium_w": 0.95,
+  "cranium_d": 0.95,
+  "cranium_h": 0.93,
+  "occiput": 0.95,
+  "cheek_w": 0.88,
+  "jaw_w": 0.8,
+  "lower_face": 1.12,
+  "chin_w": 0.85,
+  "chin_fwd": 0.004,
+  "mouth_w": 1.4,
+  "lip_h": 1.05,
+  "lip_full": 0.002,
+  "eye_tilt": 0.005,
+  "nose_w": 0.72,
+  "neck_w": 0.9,
+  "ear": 0.7,
+  "eye": 1.0,
+  "lid_up": 0.007,
+  "lid_lo": 0.003,
+  "mouth_r": 0.055,
+  "nose_tip": 0.82,
+  "nose_up": 0.002,
+  "jowl": 0.86
+ },
+ "brow_h": 0.85,
+ "brow_w": 0.42,
+ "underwear": {
+  "top_x": 0.125,
+  "cut": 0.75,
+  "seat": 0.03
+ },
+ "lash_len": 0.0075,
+ "wing": 0.006
+}

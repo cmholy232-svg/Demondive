@@ -36,10 +36,21 @@ static func _read_pose(player: AnimationPlayer, name: String, skeleton: Skeleton
 	for track: int in animation.get_track_count():
 		if animation.track_get_type(track) != Animation.TYPE_ROTATION_3D or animation.track_get_key_count(track) == 0:
 			continue
-		var bone: int = skeleton.find_bone(str(animation.track_get_path(track)).get_slice(":", 1))
+		var bone_name: String = str(animation.track_get_path(track)).get_slice(":", 1)
+		if _is_lower_body(bone_name):
+			continue
+		var bone: int = skeleton.find_bone(bone_name)
 		if bone >= 0:
 			pose[bone] = animation.track_get_key_value(track, 0) as Quaternion
 	return pose
+
+
+## Legs and hips keep running or jumping under the cast.
+static func _is_lower_body(bone_name: String) -> bool:
+	for part: String in ["Root", "Hips", "UpperLeg", "LowerLeg", "Foot", "ToeBase"]:
+		if bone_name.ends_with(part):
+			return true
+	return false
 
 
 ## One shot: snap the arm back a little; it eases out to full reach again.

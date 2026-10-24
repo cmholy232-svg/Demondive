@@ -8,6 +8,10 @@ extends RefCounted
 const TOON_SHADER: Shader = preload("res://art/shaders/toon.gdshader")
 const OUTLINE_SHADER: Shader = preload("res://art/shaders/outline.gdshader")
 const OUTLINE_M: float = 0.012
+## Sculpted faces have small forms (nose, lips) a thick hull would swallow.
+const SOFT_OUTLINE_M: float = 0.005
+const SOFT_BAND: float = 0.32
+const SOFT_SHADE: Color = Color(0.78, 0.5, 0.56)
 
 ## Gameplay pose prefix -> animation names to try, in order.
 const POSE_ANIMATIONS: Dictionary = {
@@ -107,8 +111,20 @@ static func fit_height(model: Node3D, height_m: float) -> void:
 ## Cel shading with an outline for every surface; materials named "glow*" shine
 ## instead. Textured parts keep their texture; faces and eyes get no outline.
 ## Returns [mesh, surface, colour, material name] for each recolourable surface.
+## Sculpted (forge stylized) models carry skin make-up in vertex colours.
+static func is_sculpted(model: Node3D) -> bool:
+	for node: Node in model.find_children("*", "MeshInstance3D", true, false):
+		var instance := node as MeshInstance3D
+		for surface: int in instance.mesh.get_surface_count():
+			var source := instance.mesh.surface_get_material(surface) as BaseMaterial3D
+			if source != null and source.vertex_color_use_as_albedo:
+				return true
+	return false
+
+
 static func toonify(model: Node3D, tint: Dictionary = {}) -> Array:
 	var targets: Array = []
+	var sculpted: bool = is_sculpted(model)
 	for node: Node in model.find_children("*", "MeshInstance3D", true, false):
 		var instance := node as MeshInstance3D
 		for surface: int in instance.mesh.get_surface_count():
@@ -134,6 +150,12 @@ static func toonify(model: Node3D, tint: Dictionary = {}) -> Array:
 				toon.set_shader_parameter("use_texture", true)
 				if source.transparency != BaseMaterial3D.TRANSPARENCY_DISABLED:
 					toon.set_shader_parameter("alpha_cut", 0.5)
+			if source != null and source.vertex_color_use_as_albedo:
+				toon.set_shader_parameter("use_vertex_color", true)
+			if sculpted:
+				# Sculpted models read as soft clay, closer to a lit render than flat cel.
+				toon.set_shader_parameter("band_softness", SOFT_BAND)
+				toon.set_shader_parameter("shade_tint", SOFT_SHADE)
 			var lower: String = mat_name.to_lower()
 			var detail: bool = lower.begins_with("eye") or lower.begins_with("face")
 			if detail:
@@ -141,10 +163,12 @@ static func toonify(model: Node3D, tint: Dictionary = {}) -> Array:
 				toon.set_shader_parameter("shade_amount", 0.2)
 			elif lower.contains("_face_"):
 				toon.set_shader_parameter("shade_amount", 0.25)
-			if not detail:
+			# Sculpted skin goes without ink: the hull would show through the face.
+			if not detail and not (sculpted and lower == "skin"):
 				var outline := ShaderMaterial.new()
 				outline.shader = OUTLINE_SHADER
-				outline.set_shader_parameter("width", OUTLINE_M / maxf(0.01, model.scale.x))
+				var width: float = SOFT_OUTLINE_M if sculpted else OUTLINE_M
+				outline.set_shader_parameter("width", width / maxf(0.01, model.scale.x))
 				toon.next_pass = outline
 			instance.set_surface_override_material(surface, toon)
 			targets.append([instance, surface, color, mat_name])

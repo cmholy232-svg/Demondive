@@ -6,6 +6,8 @@ shader_type spatial;
 uniform vec4 albedo : source_color = vec4(1.0);
 uniform sampler2D albedo_texture : source_color, filter_linear_mipmap, repeat_enable;
 uniform bool use_texture = false;
+// Sculpted characters carry skin tint (blush, lips, lids) in vertex colours.
+uniform bool use_vertex_color = false;
 // Outfit recolours: keep the texture's light and shade, take albedo's colour.
 uniform bool luma_tint = false;
 uniform float alpha_cut : hint_range(0.0, 1.0) = 0.0;
@@ -26,6 +28,9 @@ void fragment() {
 		} else {
 			base *= tex;
 		}
+	}
+	if (use_vertex_color) {
+		base.rgb *= COLOR.rgb;
 	}
 	if (alpha_cut > 0.0 && base.a < alpha_cut) {
 		discard;
