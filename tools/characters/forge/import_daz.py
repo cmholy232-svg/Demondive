@@ -18,7 +18,7 @@ import numpy as np
 from mathutils import Matrix, Vector
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
-from forge import anim, build, daz_textures, daz_weights, materials as M, rig as R  # noqa: E402
+from forge import anim, build, daz_textures, daz_weights, hero_poses, materials as M, rig as R  # noqa: E402
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", ".."))
 TMP = tempfile.mkdtemp()
@@ -286,6 +286,12 @@ def main(recipe, shot=None):
         made += anim.copy_clips(os.path.join(ROOT, extra["glb"]), rig, align=True,
                                 align_skip=set(R_.get("keep_rest", [])), only=set(extra["only"]))
     anim.damp(made, R_.get("damp", {}))
+    if R_.get("hero_poses"):  # aim poses and a relaxed idle, made for this body
+        stock = next(a for a in made if a.name == "idle")
+        made += hero_poses.make(rig, stock)
+        calm = hero_poses.idle(rig, stock)
+        bpy.data.actions.remove(stock)
+        calm.name = "idle"
     tris = sum(len(p.vertices) - 2 for o in rig.children if o.type == "MESH" for p in o.data.polygons)
     print(f"[import_daz] {R_['id']}: {tris} triangles, {len(rig.data.bones)} bones")
     out = os.path.join(ROOT, "art", "export", R_["id"], f"chr_{R_['id']}.glb")
